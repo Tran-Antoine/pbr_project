@@ -1,3 +1,3 @@
 cmake --build build --config Release
-cd build/Release
-./nori %*
+cd build/Release/
+nori.exe %*
