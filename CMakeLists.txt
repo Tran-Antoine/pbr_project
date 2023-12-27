@@ -64,7 +64,9 @@ add_executable(nori
   include/nori/transform.h
   include/nori/vector.h
   include/nori/warp.h
-
+  
+  include/nori/octree.h
+  
   # Source code files
   src/bitmap.cpp
   src/block.cpp
@@ -74,7 +76,6 @@ add_executable(nori
   src/diffuse.cpp
   src/gui.cpp
   src/independent.cpp
-  src/main.cpp
   src/mesh.cpp
   src/obj.cpp
   src/object.cpp
@@ -88,7 +89,11 @@ add_executable(nori
   src/microfacet.cpp
   src/mirror.cpp
   src/dielectric.cpp
+
   src/normals.cpp
+  src/octree.cpp
+  src/octree_test.cpp
+
 )
 
 add_definitions(${NANOGUI_EXTRA_DEFS})
