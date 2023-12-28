@@ -23,13 +23,7 @@ static Octree<uint32_t>* Octree<uint32_t>::build(BoundingBox3f env, Mesh *sceneM
     std::vector<BoundingBox3f> sub_boxes(8);
 
     for(int i = 0; i < 8; i++) {
-        Point3f corner = env.getCorner(i);
-        Point3f center = env.getCenter();
-
-        Point3f min = Point3f(std::min(corner.x(), center.x()), std::min(corner.y(), center.y()), std::min(corner.z(), center.z()));
-        Point3f max = Point3f(std::max(corner.x(), center.x()), std::max(corner.y(), center.y()), std::max(corner.z(), center.z()));
-
-        sub_boxes[i] = BoundingBox3f(min, max);
+        sub_boxes[i] = cut(env, i);
     }
 
     for(auto triangle_index : indices) {
@@ -61,6 +55,17 @@ static Octree<uint32_t>* Octree<uint32_t>::build(BoundingBox3f env, Mesh *sceneM
     Node<uint32_t>* tree = new Node<uint32_t>(children, depth);
 
     return tree;
+}
+
+template <>
+static BoundingBox3f Octree<uint32_t>::cut(BoundingBox3f src, int piece_index) {
+    Point3f corner = src.getCorner(piece_index);
+    Point3f center = src.getCenter();
+
+    Point3f min = Point3f(std::min(corner.x(), center.x()), std::min(corner.y(), center.y()), std::min(corner.z(), center.z()));
+    Point3f max = Point3f(std::max(corner.x(), center.x()), std::max(corner.y(), center.y()), std::max(corner.z(), center.z()));
+
+    return BoundingBox3f(min, max);
 }
 
 NORI_NAMESPACE_END
