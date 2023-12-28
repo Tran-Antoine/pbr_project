@@ -14,7 +14,6 @@ static bool process_triangle(uint32_t index, std::vector<std::vector<uint32_t>>&
             if(sub_box_area.overlaps(triangle_area)) {
 
                 indices_list[sub_box_index].push_back(index);
-                return true;
             }
     }
     return false;
@@ -41,14 +40,14 @@ static Octree<uint32_t>* Octree<uint32_t>::build(BoundingBox3f env, Mesh *sceneM
         sub_boxes[i] = cut(env, i);
     }
 
-    if(depth == 0 && indices.size() == 0) {
+    if(depth == 0 && indices.size() == 0) { // meaning we need to go through all indices
         for(uint32_t triangle_index = 0; triangle_index < n_triangles; triangle_index++) {
-            if(process_triangle(triangle_index, indices_list, sub_boxes, sceneMesh)) continue;
+            process_triangle(triangle_index, indices_list, sub_boxes, sceneMesh);
         }
     }
     else {
         for(auto triangle_index : indices) {
-            if(process_triangle(triangle_index, indices_list, sub_boxes, sceneMesh)) continue;
+            process_triangle(triangle_index, indices_list, sub_boxes, sceneMesh);
         }
     }
 

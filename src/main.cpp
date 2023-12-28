@@ -68,6 +68,9 @@ static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block)
 }
 
 static void render(Scene *scene, const std::string &filename) {
+
+    std::cout << "Start rendering" << std::endl;
+
     const Camera *camera = scene->getCamera();
     Vector2i outputSize = camera->getOutputSize();
     scene->getIntegrator()->preprocess(scene);
