@@ -14,6 +14,7 @@ public:
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const {
         /* Find the surface that is visible in the requested direction */
         Intersection its;
+        
         if (!scene->rayIntersect(ray, its))
             return Color3f(0.0f);
 

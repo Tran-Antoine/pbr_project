@@ -5,6 +5,21 @@
 
 NORI_NAMESPACE_BEGIN
 
+static bool process_triangle(uint32_t index, std::vector<std::vector<uint32_t>>& indices_list, std::vector<BoundingBox3f>& sub_boxes, Mesh* sceneMesh) {
+    for(int sub_box_index = 0; sub_box_index < 8; sub_box_index++) {
+            
+            BoundingBox3f sub_box_area = sub_boxes[sub_box_index];
+            BoundingBox3f triangle_area = sceneMesh->getBoundingBox(index);
+
+            if(sub_box_area.overlaps(triangle_area)) {
+
+                indices_list[sub_box_index].push_back(index);
+                return true;
+            }
+    }
+    return false;
+}
+
 template <>
 static Octree<uint32_t>* Octree<uint32_t>::build(BoundingBox3f env, Mesh *sceneMesh, std::vector<uint32_t>& indices, int depth) {
 
@@ -12,7 +27,7 @@ static Octree<uint32_t>* Octree<uint32_t>::build(BoundingBox3f env, Mesh *sceneM
         return nullptr;
     }
 
-    uint32_t n_triangles = indices.size();
+    uint32_t n_triangles = depth == 0 ? sceneMesh->getTriangleCount() : indices.size();
 
     if(n_triangles <= 10) {
         Octree<uint32_t>* tree = new Leaf<uint32_t>(indices, depth);
@@ -26,24 +41,15 @@ static Octree<uint32_t>* Octree<uint32_t>::build(BoundingBox3f env, Mesh *sceneM
         sub_boxes[i] = cut(env, i);
     }
 
-    for(auto triangle_index : indices) {
-
-        for(int sub_box_index = 0; sub_box_index < 8; sub_box_index++) {
-            
-            BoundingBox3f sub_box_area = sub_boxes[sub_box_index];
-            BoundingBox3f triangle_area = sceneMesh->getBoundingBox(triangle_index);
-
-            if(sub_box_area.overlaps(triangle_area)) {
-
-                indices_list[sub_box_index].push_back(triangle_index);
-                break;
-            }
+    if(depth == 0 && indices.size() == 0) {
+        for(uint32_t triangle_index = 0; triangle_index < n_triangles; triangle_index++) {
+            if(process_triangle(triangle_index, indices_list, sub_boxes, sceneMesh)) continue;
         }
     }
-
-    int i = 0;
-    for(auto vec : indices_list) {
-        std::cout << "Region " + std::to_string(i++) + " has " + std::to_string(vec.size()) + " elements" << std::endl;
+    else {
+        for(auto triangle_index : indices) {
+            if(process_triangle(triangle_index, indices_list, sub_boxes, sceneMesh)) continue;
+        }
     }
 
     std::vector<Octree<uint32_t>*> children(8);

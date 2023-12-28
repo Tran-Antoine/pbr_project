@@ -29,29 +29,37 @@ void Accel::addMesh(Mesh *mesh) {
 }
 
 void Accel::build() {
-    /* Nothing to do here for now */
+    if(!m_mesh) {
+        throw NoriException("No mesh to build the data structure");
+    }
+    
+    tree = Octree<uint32_t>::build(m_bbox, m_mesh);
 }
 
 bool Accel::rayIntersect(const Ray3f &ray_, Intersection &its, bool shadowRay) const {
+    
     bool foundIntersection = false;  // Was an intersection found so far?
     uint32_t f = (uint32_t) -1;      // Triangle index of the closest intersection
 
     Ray3f ray(ray_); /// Make a copy of the ray (we will need to update its '.maxt' value)
 
     /* Brute force search through all triangles */
-    for (uint32_t idx = 0; idx < m_mesh->getTriangleCount(); ++idx) {
-        float u, v, t;
-        if (m_mesh->rayIntersect(idx, ray, u, v, t)) {
-            /* An intersection was found! Can terminate
-               immediately if this is a shadow ray query */
-            if (shadowRay)
-                return true;
-            ray.maxt = its.t = t;
-            its.uv = Point2f(u, v);
-            its.mesh = m_mesh;
-            f = idx;
-            foundIntersection = true;
-        }
+    if(tree == nullptr) {
+        throw NoriException("The acceleration structure was not initialized");
+    }
+
+    uint32_t index_found;
+    float u,v,t;
+
+    if(tree->ray_intersects(m_mesh, m_bbox, ray, index_found, u, v, t)) {
+
+        if (shadowRay)
+            return true;
+        ray.maxt = its.t = t;
+        its.uv = Point2f(u, v);
+        its.mesh = m_mesh;
+        f = index_found;
+        foundIntersection = true;
     }
 
     if (foundIntersection) {

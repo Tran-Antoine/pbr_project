@@ -94,7 +94,7 @@ add_executable(nori
   src/normals.cpp
   src/octree.cpp
 
-  src/octree_test.cpp
+  src/main.cpp
   src/strutil.cpp
 
 )

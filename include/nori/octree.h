@@ -1,3 +1,5 @@
+#pragma once
+
 #include <vector>
 #include <nori/bbox.h>
 #include <nori/mesh.h>
@@ -10,21 +12,19 @@ template <typename T>
 class Octree {
 
 public:
-    Octree(int depth) : depth(depth) {}
-    ~Octree() {}
+    inline Octree(int depth) : depth(depth) {}
+    inline ~Octree() {}
 
-    static Octree<uint32_t>* build(BoundingBox3f env, Mesh* sceneMesh, std::vector<uint32_t>& indices, int depth=0);
+    static Octree<uint32_t>* build(BoundingBox3f env, Mesh* sceneMesh, std::vector<uint32_t>& indices=std::vector<uint32_t>(), int depth=0);
     static BoundingBox3f cut(BoundingBox3f src, int piece_index);
 
-    virtual std::string pretty_print() {
+    inline virtual std::string pretty_print() {
         return "<pretty_print not implemented>";
     }
 
-    virtual bool find_intersection(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found) {
+    inline virtual bool ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t) {
         throw std::logic_error("Not implemented");
     }
-
-
 
 protected:
     int depth;
@@ -36,15 +36,15 @@ class Node : public Octree<T> {
 
 public:
 
-    Node(std::vector<Octree<T>*> children, int depth): Octree(depth), children(children) {}
+    inline Node(std::vector<Octree<T>*> children, int depth): Octree(depth), children(children) {}
 
-    ~Node() {
+    inline ~Node() {
         for(auto p : children) {
             delete p;
         }
     }
 
-    bool find_intersection(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found) override {
+    inline bool ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t) override {
         
         int childIndex = 0;
         bool found = false;
@@ -58,13 +58,14 @@ public:
             }
 
             // TODO: Intersection may not necessarily return the closest one
-            bool |= child->find_intersection(mesh, child_area, ray, index_found); 
+            // TODO: Add debug flag that stores positions?
+            found |= child->ray_intersects(mesh, child_area, ray, index_found, u, v, t); 
         }
 
         return found;
     }
 
-    std::string pretty_print() override {
+    inline std::string pretty_print() override {
         
         std::ostringstream oss;
         oss << repeat(2*(depth+1), "-") + "| Node:";
@@ -86,15 +87,13 @@ template <typename T>
 class Leaf : public Octree<T> {
 
 public:
-    Leaf(std::vector<T> elements, int depth) : Octree(depth), elements(elements) {}
+    inline Leaf(std::vector<T> elements, int depth) : Octree(depth), elements(elements) {}
 
-    bool find_intersection(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found) override {
-        for(T t : elements) {
-            uint32_t index = static_cast<uint32_t>(t);
-            
-            BoundingBox3f triangle_box = mesh->getBoundingBox(index);
+    inline bool ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t) override {
+        for(T elem : elements) {
+            uint32_t index = static_cast<uint32_t>(elem);
 
-            if(triangle_box.rayIntersect(ray)) {
+            if(mesh->rayIntersect(index, ray, u, v, t)) {
                 index_found = index;
                 return true;
             }
@@ -103,7 +102,7 @@ public:
         return false;
     }
 
-    std::string pretty_print() override {
+    inline std::string pretty_print() override {
 
         if(elements.size() == 0) {
             return repeat(2*(depth+1), "-") + "| <empty node>";
