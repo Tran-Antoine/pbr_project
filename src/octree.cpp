@@ -11,6 +11,8 @@ static bool process_triangle(uint32_t index, std::vector<std::vector<uint32_t>>&
             BoundingBox3f sub_box_area = sub_boxes[sub_box_index];
             BoundingBox3f triangle_area = sceneMesh->getBoundingBox(index);
 
+            // TODO: Consider only in one, the one with largest overlap?
+            // Still so many duplicates: what about a different storage structure? With a bitstring for each triangle representing an address
             if(sub_box_area.overlaps(triangle_area)) {
 
                 indices_list[sub_box_index].push_back(index);
@@ -28,7 +30,9 @@ static Octree<uint32_t>* Octree<uint32_t>::build(BoundingBox3f env, Mesh *sceneM
 
     uint32_t n_triangles = depth == 0 ? sceneMesh->getTriangleCount() : indices.size();
 
-    if(n_triangles <= 10) {
+    // for depth above 15 the trade-off just isn't worth it (and may crash)
+    // so far 8 seems to be a good threshold.
+    if(n_triangles <= 10 || depth >= 8) { 
         Octree<uint32_t>* tree = new Leaf<uint32_t>(indices, depth);
         return tree;
     }
