@@ -8,178 +8,83 @@
 
 NORI_NAMESPACE_BEGIN
 
-template <typename T>
+/**
+ * @brief Optimized data-structure for ray intersection through a large set of triangles.
+*/
 class Octree {
 
 public:
-    inline Octree(int depth) : depth(depth) {}
-    inline ~Octree() {}
+    
+    /// Deconstructs the Octree. The implementation of the superclass does nothing.
+    ~Octree();
 
-    static Octree<uint32_t>* build(BoundingBox3f env, Mesh* sceneMesh, std::vector<uint32_t>& indices=std::vector<uint32_t>(), int depth=0);
+    /// @brief Constructs an Octree storing uint32_t values from scene data
+    /// @param env the bounding box surrounding the whole scene
+    /// @param sceneMesh the mesh of the scene
+    /// @param indices which triangles are to be considered in the node
+    /// @param depth the depth of the node
+    /// @return an Octree (most likely a Node object)
+    static Octree* build(BoundingBox3f env, Mesh* sceneMesh, std::vector<uint32_t>& indices=std::vector<uint32_t>(), int depth=0);
+    
+    /// @brief Cuts a bounding box into 8 regions of equal volume and returns one of the regions
+    /// @param src the bounding box to cut
+    /// @param piece_index which region to return
+    /// @return a bounding box representing one eigth of the provided box
     static BoundingBox3f cut(BoundingBox3f src, int piece_index);
 
-    inline virtual std::string pretty_print() {
-        return "<pretty_print not implemented>";
-    }
+    /// @brief 
+    /// @return a string representation of the tree
+    virtual std::string pretty_print();
 
-    inline virtual bool ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t) {
-        throw std::logic_error("Not implemented");
-    }
-
-    inline virtual uint32_t size() {
-        return 0;
-    }
+    /// @brief Computes ray intersection.
+    /// @param mesh the mesh of the scene
+    /// @param area the bounding box surrounding the scene, needs to be the same as the one used to construct the octree
+    /// @param ray the ray to be tested for intersection
+    /// @param index_found upon success, contains the index of the triangle found to intersect with the ray
+    /// @param u upon success, contains the u vector of the triangle
+    /// @param v upon success, contains the v vector of the triangle
+    /// @param t upon success, contains the distance t from the ray origin to the intersection point
+    /// @return whether an intersection was found
+    virtual bool ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t);
+    
+    /// @brief 
+    /// @return the number of values stored in the tree 
+    virtual uint32_t size();
 
 protected:
+    
+    /// Constructs an Octree with a given depth.
+    Octree(int depth);
+
+    /// @brief The depth of the node. Root is depth=0
     int depth;
 };
 
 
-template <typename T>
-class Node : public Octree<T> {
+class Node : public Octree {
 
 public:
 
-    inline Node(std::vector<Octree<T>*> children, int depth): Octree(depth), children(children) {}
-
-    inline ~Node() {
-        for(auto p : children) {
-            delete p;
-        }
-    }
-
-    inline bool ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t) override {
-        
-        using Entry = std::pair<std::pair<float, BoundingBox3f>, Octree<T>*>;
-
-        std::vector<Entry> distances(8);
-
-        int child_index = 0;
-
-        for(Octree<T>* child : children) {
-            
-            BoundingBox3f child_area = cut(area, child_index);
-            float child_distance, out;
-
-            if(child_area.rayIntersect(ray, child_distance, out)) {
-                distances[child_index] = {{child_distance, child_area}, child};
-            } else {
-                distances[child_index] = {{std::numeric_limits<float>::infinity(), child_area}, nullptr};
-            }
-
-            child_index++;
-        }
-
-        std::sort(distances.begin(), distances.end(),
-              [](const Entry& a, const Entry& b) {
-                  return a.first.first < b.first.first;
-              });
-
-        for(Entry entry : distances) {
-            if(entry.second == nullptr) {
-                return false;
-            }
-
-            BoundingBox3f child_area = entry.first.second;
-
-            if(entry.second->ray_intersects(mesh, child_area, ray, index_found, u, v, t)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    inline std::string pretty_print() override {
-        
-        std::ostringstream oss;
-        oss << repeat(2*(depth+1), "-") + "| Node:";
-
-        std::vector<std::string> lines;
-
-        for(Octree<T>* c : children) {
-            oss << "\n" + c->pretty_print();    
-        }
-
-        return oss.str();
-    }
-
-    inline uint32_t size() override {
-        uint32_t total = 0;
-        for(auto child : children) {
-            total += child->size();
-        }
-        return total;
-    }
+    Node(std::vector<Octree*> children, int depth);
+    ~Node();
+    bool ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t) override;
+    std::string pretty_print() override;
+    uint32_t size() override;
 
 protected:
-    std::vector<Octree<T>*> children;
+    std::vector<Octree*> children;
 };
 
-template <typename T>
-class Leaf : public Octree<T> {
+class Leaf : public Octree {
 
 public:
-    inline Leaf(std::vector<T> elements, int depth) : Octree(depth), elements(elements) {}
-
-    inline bool ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t) override {
-                
-        if(elements.size() == 0) return false;
-
-        using Entry = std::pair<float, uint32_t>;
-
-        std::vector<Entry> triangles(elements.size());
-        
-        int element_index = 0;
-
-        for(T elem : elements) {
-            uint32_t index = static_cast<uint32_t>(elem);
-            
-            float min_distance;
-            float temp_u, temp_v; // unused
-
-
-            if(mesh->rayIntersect(index, ray, temp_u, temp_v, min_distance)) {
-                triangles[element_index] = {min_distance, index};
-            } else {
-                triangles[element_index] = {std::numeric_limits<float>::infinity(), index};
-            }
-
-            element_index++;
-        }
-
-        std::sort(triangles.begin(), triangles.end(),
-              [](const Entry& a, const Entry& b) {
-                  return a.first < b.first;
-              });
-
-        uint32_t closestIndex = triangles[0].second;
-        index_found = closestIndex;
-        
-        return mesh->rayIntersect(closestIndex, ray, u, v, t);
-    }
-
-    inline std::string pretty_print() override {
-
-        if(elements.size() == 0) {
-            return repeat(2*(depth+1), "-") + "| <empty node>";
-        }
-
-        std::ostringstream oss;
-        for(T e : elements) {
-            oss << e << " ";
-        }
-        
-        return repeat(2*(depth+1), "-") + "| " + oss.str();
-    }
-
-    inline uint32_t size() override {
-        return elements.size();
-    }
-
+    Leaf(std::vector<uint32_t> elements, int depth);
+    bool ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t) override;
+    std::string pretty_print() override;
+    uint32_t size() override;
 
 protected:
-    std::vector<T> elements;
+    std::vector<uint32_t> elements;
 };
 
 NORI_NAMESPACE_END

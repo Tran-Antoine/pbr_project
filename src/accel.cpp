@@ -33,7 +33,7 @@ void Accel::build() {
         throw NoriException("No mesh to build the data structure");
     }
     
-    tree = Octree<uint32_t>::build(m_bbox, m_mesh);
+    tree = Octree::build(m_bbox, m_mesh);
     std::cout << "Structure built with " << tree->size() << std::endl;
 }
 

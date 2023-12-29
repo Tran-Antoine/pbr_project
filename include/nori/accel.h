@@ -67,7 +67,7 @@ public:
     bool rayIntersect(const Ray3f &ray, Intersection &its, bool shadowRay) const;
 
 protected:
-    Octree<uint32_t>* tree = nullptr;
+    Octree* tree = nullptr;
 
 private:
     Mesh         *m_mesh = nullptr; ///< Mesh (only a single one for now)
