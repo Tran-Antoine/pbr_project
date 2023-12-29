@@ -23,8 +23,10 @@ public:
     /// @param sceneMesh the mesh of the scene
     /// @param indices which triangles are to be considered in the node
     /// @param depth the depth of the node
+    /// @param leaf_thresh for a triangle count below leaf_thresh, a leaf is created
+    /// @param max_depth for a depth above max_depth, a leaf is created
     /// @return an Octree (most likely a Node object)
-    static Octree* build(BoundingBox3f env, Mesh* sceneMesh, std::vector<uint32_t>& indices=std::vector<uint32_t>(), int depth=0);
+    static Octree* build(BoundingBox3f env, Mesh* sceneMesh, std::vector<uint32_t>& indices=std::vector<uint32_t>(), int depth=0, int leaf_thresh=10, int max_depth=8);
     
     /// @brief Cuts a bounding box into 8 regions of equal volume and returns one of the regions
     /// @param src the bounding box to cut

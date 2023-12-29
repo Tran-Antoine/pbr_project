@@ -35,9 +35,13 @@ static bool process_triangle(uint32_t index, std::vector<std::vector<uint32_t>>&
     return false;
 }
 
-Octree* Octree::build(BoundingBox3f env, Mesh *sceneMesh, std::vector<uint32_t>& indices, int depth) {
+Octree* Octree::build(BoundingBox3f env, Mesh *sceneMesh, std::vector<uint32_t>& indices, int depth, int leaf_thresh, int max_depth) {
 
     if(sceneMesh == nullptr || sceneMesh->getTriangleCount() == 0) {
+        return nullptr;
+    }
+
+    if(depth != 0 && indices.size() == 0) {
         return nullptr;
     }
 
@@ -45,7 +49,7 @@ Octree* Octree::build(BoundingBox3f env, Mesh *sceneMesh, std::vector<uint32_t>&
 
     // for depth above 15 the trade-off just isn't worth it (and may crash)
     // so far 8 seems to be a good threshold.
-    if(n_triangles <= 10 || depth >= 8) { 
+    if(n_triangles <= leaf_thresh || depth >= max_depth) { 
         Octree* tree = new Leaf(indices, depth);
         return tree;
     }
@@ -92,7 +96,7 @@ BoundingBox3f Octree::cut(BoundingBox3f src, int piece_index) {
 Node::Node(std::vector<Octree*> children, int depth): Octree(depth), children(children) {}
 Node::~Node() {
     for(auto p : children) {
-        delete p;
+        if(p) delete p;
     }
 }
 
@@ -105,16 +109,20 @@ bool Node::ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& 
     int child_index = 0;
 
     for(Octree* child : children) {
-        
-        BoundingBox3f child_area = cut(area, child_index);
-        float child_distance, out;
 
-        if(child_area.rayIntersect(ray, child_distance, out)) {
-            distances[child_index] = {{child_distance, child_area}, child};
+        if(child == nullptr) {
+            distances[child_index] = {{std::numeric_limits<float>::infinity(), BoundingBox3f()}, nullptr};
         } else {
-            distances[child_index] = {{std::numeric_limits<float>::infinity(), child_area}, nullptr};
-        }
+            BoundingBox3f child_area = cut(area, child_index);
+            float child_distance, out;
 
+            if(child_area.rayIntersect(ray, child_distance, out)) {
+                distances[child_index] = {{child_distance, child_area}, child};
+            } else {
+                distances[child_index] = {{std::numeric_limits<float>::infinity(), child_area}, nullptr};
+            }
+        }
+        
         child_index++;
     }
 
@@ -155,6 +163,7 @@ std::string Node::pretty_print() {
 uint32_t Node::size() {
     uint32_t total = 0;
     for(auto child : children) {
+        if(!child) continue;
         total += child->size();
     }
     return total;

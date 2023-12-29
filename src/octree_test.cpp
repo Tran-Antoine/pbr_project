@@ -150,7 +150,7 @@ void test(Scene* scene) {
     std::vector<uint32_t> indices(50);
     std::iota(indices.begin(), indices.end(), 0);
 
-    Octree<uint32_t>* tree = Octree<uint32_t>::build(scene->getBoundingBox(), mesh, indices);
+    Octree* tree = Octree::build(scene->getBoundingBox(), mesh, indices);
 
     std::cout << "Tree with first 50 triangles:\n" + tree->pretty_print() << std::endl;
 }
