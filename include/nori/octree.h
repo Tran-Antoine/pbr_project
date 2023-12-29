@@ -15,7 +15,7 @@ class Octree {
 
 public:
     
-    /// Deconstructs the Octree. The implementation of the superclass does nothing.
+    /// Deconstructs the Octree. The baseclass implementation does nothing.
     ~Octree();
 
     /// @brief Constructs an Octree storing uint32_t values from scene data
