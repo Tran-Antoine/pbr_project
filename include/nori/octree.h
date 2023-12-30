@@ -46,8 +46,9 @@ public:
     /// @param u upon success, contains the u vector of the triangle
     /// @param v upon success, contains the v vector of the triangle
     /// @param t upon success, contains the distance t from the ray origin to the intersection point
+    /// @param shadow whether only knowing that there is an intersection suffices
     /// @return whether an intersection was found
-    virtual bool ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t);
+    virtual bool ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t, bool shadow);
     
     /// @brief 
     /// @return the number of values stored in the tree 
@@ -69,7 +70,7 @@ public:
 
     Node(std::vector<Octree*> children, int depth);
     ~Node();
-    bool ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t) override;
+    bool ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t, bool shadow) override;
     std::string pretty_print() override;
     uint32_t size() override;
 
@@ -81,7 +82,7 @@ class Leaf : public Octree {
 
 public:
     Leaf(std::vector<uint32_t> elements, int depth);
-    bool ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t) override;
+    bool ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t, bool shadow) override;
     std::string pretty_print() override;
     uint32_t size() override;
 

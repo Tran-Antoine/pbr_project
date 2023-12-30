@@ -52,7 +52,7 @@ bool Accel::rayIntersect(const Ray3f &ray_, Intersection &its, bool shadowRay) c
     uint32_t index_found;
     float u,v,t;
 
-    if(tree->ray_intersects(m_mesh, m_bbox, ray, index_found, u, v, t)) {
+    if(tree->ray_intersects(m_mesh, m_bbox, ray, index_found, u, v, t, shadowRay)) {
 
         if (shadowRay)
             return true;

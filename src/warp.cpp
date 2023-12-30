@@ -149,8 +149,8 @@ float Warp::squareToCosineHemispherePdf(const Vector3f &v) {
     if(z < 0) return 0;
     if(abs(x*x + y*y + z*z - 1) > 1e-5) return 0;
 
-    float theta = 0;
-    return theta;
+    float cos_theta = z;
+    return cos_theta / M_PI;
 }
 
 Vector3f Warp::squareToBeckmann(const Point2f &sample, float alpha) {

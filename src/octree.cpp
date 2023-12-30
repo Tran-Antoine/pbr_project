@@ -13,7 +13,7 @@ std::string Octree::pretty_print() {
     return "<pretty_print not implemented>";
 }
 
-bool Octree::ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t) {
+bool Octree::ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t, bool shadow) {
     throw NoriException("Not implemented");
 }
 
@@ -100,7 +100,7 @@ Node::~Node() {
     }
 }
 
-bool Node::ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t) {
+bool Node::ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t, bool shadow) {
         
     using Entry = std::pair<std::pair<float, BoundingBox3f>, Octree*>;
 
@@ -126,19 +126,21 @@ bool Node::ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& 
         child_index++;
     }
 
-    std::sort(distances.begin(), distances.end(),
-            [](const Entry& a, const Entry& b) {
-                return a.first.first < b.first.first;
-            });
+    if(!shadow) {
+        std::sort(distances.begin(), distances.end(),
+                [](const Entry& a, const Entry& b) {
+                    return a.first.first < b.first.first;
+                });
+    }
 
     for(Entry entry : distances) {
         if(entry.second == nullptr) {
-            return false;
+            continue;
         }
 
         BoundingBox3f child_area = entry.first.second;
 
-        if(entry.second->ray_intersects(mesh, child_area, ray, index_found, u, v, t)) {
+        if(entry.second->ray_intersects(mesh, child_area, ray, index_found, u, v, t, shadow)) {
             return true;
         }
     }
@@ -171,7 +173,7 @@ uint32_t Node::size() {
 
 Leaf::Leaf(std::vector<uint32_t> elements, int depth) : Octree(depth), elements(elements) {}
 
-bool Leaf::ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t) {
+bool Leaf::ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& index_found, float& u, float& v, float& t, bool shadow) {
                 
     if(elements.size() == 0) return false;
 
@@ -188,7 +190,10 @@ bool Leaf::ray_intersects(Mesh* mesh, BoundingBox3f area, Ray3f& ray, uint32_t& 
 
 
         if(mesh->rayIntersect(index, ray, temp_u, temp_v, min_distance)) {
-            triangles[element_index] = {min_distance, index};
+            if(shadow) {
+                return true;
+            }
+            triangles[element_index] = {min_distance, index}; 
         } else {
             triangles[element_index] = {std::numeric_limits<float>::infinity(), index};
         }
