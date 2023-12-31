@@ -4,9 +4,9 @@
 
 NORI_NAMESPACE_BEGIN
 
-class SimpleIntegrator : public Integrator {
+class PointLight : public Integrator {
 public:
-    SimpleIntegrator(const PropertyList &props) {
+    PointLight(const PropertyList &props) {
         position = props.getPoint("position");
         color = props.getColor("energy");
     }
@@ -33,13 +33,13 @@ public:
     }
 
     std::string toString() const {
-        return "NormalIntegrator[]";
+        return "PointLightIntegrator[]";
     }
 protected:
     Point3f position;
     Color3f color;
 };
 
-NORI_REGISTER_CLASS(SimpleIntegrator, "simple");
+NORI_REGISTER_CLASS(PointLight, "simple");
 NORI_NAMESPACE_END
 
