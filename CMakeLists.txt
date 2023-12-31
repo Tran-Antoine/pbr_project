@@ -91,6 +91,7 @@ add_executable(nori
   src/mirror.cpp
   src/dielectric.cpp
 
+  src/simple.cpp
   src/normals.cpp
   src/octree.cpp
 

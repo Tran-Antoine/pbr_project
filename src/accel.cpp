@@ -34,7 +34,7 @@ void Accel::build() {
     }
     
     tree = Octree::build(m_bbox, m_mesh);
-    std::cout << "Structure built with " << tree->size() << std::endl;
+    std::cout << "Structure built with " << tree->size() << std::endl << " indices stored";
 }
 
 bool Accel::rayIntersect(const Ray3f &ray_, Intersection &its, bool shadowRay) const {

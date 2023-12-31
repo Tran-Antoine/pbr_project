@@ -1,5 +1,3 @@
-
-
 #include <nori/integrator.h>
 #include <nori/scene.h>
 
