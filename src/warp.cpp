@@ -60,7 +60,7 @@ float Warp::squareToTentPdf(const Point2f &p) {
     return 1;
 }
 
-static void squareToMeshPoint(const float sample0, const Point2f &sample1, const Mesh &mesh, Point3f &p, Vector3f &n, float &pdf) {
+static void cubeToMeshPoint(const float sample0, const Point2f &sample1, const Mesh &mesh, Point3f &p, Vector3f &n, float &pdf) {
 
     // TODO: dont init and fill every time
     DiscretePDF mesh_pdf(mesh.getTriangleCount());
@@ -72,7 +72,8 @@ static void squareToMeshPoint(const float sample0, const Point2f &sample1, const
         mesh_pdf.append(area);
         total_area += area;
     }
-
+    //
+    
     uint32_t chosen_index = mesh_pdf.sample(sample0);
 
     float eps1 = sample1.x();
@@ -90,8 +91,23 @@ static void squareToMeshPoint(const float sample0, const Point2f &sample1, const
 
     Point3f sampled_point = bary0 * p0 + bary1 * p1 + bary2 * p2;
 
-    // get normal?
+    // TODO: Move this section into the mesh source file
+    auto m_N = mesh.getVertexNormals();
 
+    Vector3f normal;
+    
+    if(m_N.size() > 0) {
+        normal = (bary0 * m_N.col(i0) +
+                    bary1 * m_N.col(i1) +
+                    bary2 * m_N.col(i2)).normalized();
+    } else {
+        normal = (p1-p0).cross(p2-p0).normalized();
+    }
+    //
+
+    p = sampled_point;
+    n = normal;
+    pdf = 1 / total_area;
 }
 
 

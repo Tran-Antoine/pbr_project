@@ -46,7 +46,7 @@ public:
     /// @param p upon success, will contain the sampled 3D position
     /// @param n upon success, will contain the surface normal of position p
     /// @param pdf upon success, will contain the density function of a point on the mesh chosen u.a.r, as a constant
-    static void squareToMeshPoint(const float sample0, const Point2f &sample1, const Mesh &mesh, Point3f &p, Vector3f &n, float &pdf);
+    static void cubeToMeshPoint(const float sample0, const Point2f &sample1, const Mesh &mesh, Point3f &p, Vector3f &n, float &pdf);
 
     /// Uniformly sample a vector on a 2D disk with radius 1, centered around the origin
     static Point2f squareToUniformDisk(const Point2f &sample);
