@@ -95,6 +95,7 @@ add_executable(nori
   src/normals.cpp
   src/ambient.cpp
   src/octree.cpp
+  src/area.cpp
 
   src/main.cpp
   src/strutil.cpp

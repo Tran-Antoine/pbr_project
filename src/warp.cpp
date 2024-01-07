@@ -19,8 +19,10 @@
 #include <nori/warp.h>
 #include <nori/vector.h>
 #include <nori/frame.h>
+#include <nori/mesh.h>
 #include <algorithm>
 #include <iomanip>
+#include <nori/dpdf.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -57,6 +59,41 @@ float Warp::squareToTentPdf(const Point2f &p) {
 
     return 1;
 }
+
+static void squareToMeshPoint(const float sample0, const Point2f &sample1, const Mesh &mesh, Point3f &p, Vector3f &n, float &pdf) {
+
+    // TODO: dont init and fill every time
+    DiscretePDF mesh_pdf(mesh.getTriangleCount());
+
+    float total_area = 0;
+
+    for(uint32_t i = 0; i < mesh.getTriangleCount(); i++) {
+        float area = mesh.surfaceArea(i);
+        mesh_pdf.append(area);
+        total_area += area;
+    }
+
+    uint32_t chosen_index = mesh_pdf.sample(sample0);
+
+    float eps1 = sample1.x();
+    float eps2 = sample1.y();
+
+    float bary0 = 1 - sqrt(1 - eps1);
+    float bary1  = eps2 * sqrt(1 - eps1);
+    float bary2 = 1 - bary0 - bary1;
+    
+    auto m_F = mesh.getIndices();
+    auto m_V = mesh.getVertexPositions();
+
+    uint32_t i0 = m_F(0, chosen_index), i1 = m_F(1, chosen_index), i2 = m_F(2, chosen_index);
+    const Point3f p0 = m_V.col(i0), p1 = m_V.col(i1), p2 = m_V.col(i2);
+
+    Point3f sampled_point = bary0 * p0 + bary1 * p1 + bary2 * p2;
+
+    // get normal?
+
+}
+
 
 Point2f Warp::squareToUniformDisk(const Point2f &sample) {
     

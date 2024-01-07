@@ -29,6 +29,7 @@ public:
     /// Dummy warping function: takes uniformly distributed points in a square and just returns them
     static Point2f squareToUniformSquare(const Point2f &sample);
 
+
     /// Probability density of \ref squareToUniformSquare()
     static float squareToUniformSquarePdf(const Point2f &p);
 
@@ -37,6 +38,15 @@ public:
 
     /// Probability density of \ref squareToTent()
     static float squareToTentPdf(const Point2f &p);
+
+    /// @brief Sample a point uniformly on a mesh.
+    /// @param sample0 a 1D uniformly distributed point between 0 and 1, used for triangle selection
+    /// @param sample1 a 2D uniformly distributed point with coordinates between 0 and 1, used for point selection
+    /// @param mesh the mesh of reference
+    /// @param p upon success, will contain the sampled 3D position
+    /// @param n upon success, will contain the surface normal of position p
+    /// @param pdf upon success, will contain the density function of a point on the mesh chosen u.a.r, as a constant
+    static void squareToMeshPoint(const float sample0, const Point2f &sample1, const Mesh &mesh, Point3f &p, Vector3f &n, float &pdf);
 
     /// Uniformly sample a vector on a 2D disk with radius 1, centered around the origin
     static Point2f squareToUniformDisk(const Point2f &sample);
