@@ -21,6 +21,8 @@
 #include <nori/object.h>
 #include <nori/frame.h>
 #include <nori/bbox.h>
+#include <nori/dpdf.h>
+
 
 NORI_NAMESPACE_BEGIN
 
@@ -163,6 +165,10 @@ public:
      * */
     EClassType getClassType() const { return EMesh; }
 
+    DiscretePDF* getTrianglePDF() const { return triangle_pdf; }
+
+    float getTotalArea() const { return total_area; }
+
 protected:
     /// Create an empty mesh
     Mesh();
@@ -176,6 +182,9 @@ protected:
     BSDF         *m_bsdf = nullptr;      ///< BSDF of the surface
     Emitter    *m_emitter = nullptr;     ///< Associated emitter, if any
     BoundingBox3f m_bbox;                ///< Bounding box of the mesh
+    DiscretePDF* triangle_pdf;
+    float total_area;
+
 };
 
 NORI_NAMESPACE_END

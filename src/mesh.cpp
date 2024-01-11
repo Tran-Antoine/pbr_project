@@ -30,6 +30,7 @@ Mesh::Mesh() { }
 Mesh::~Mesh() {
     delete m_bsdf;
     delete m_emitter;
+    delete triangle_pdf;
 }
 
 void Mesh::activate() {
@@ -38,6 +39,19 @@ void Mesh::activate() {
         m_bsdf = static_cast<BSDF *>(
             NoriObjectFactory::createInstance("diffuse", PropertyList()));
     }
+
+    DiscretePDF* mesh_pdf = new DiscretePDF(getTriangleCount());
+
+    float total_area = 0;
+
+    for(uint32_t i = 0; i < getTriangleCount(); i++) {
+        float area = surfaceArea(i);
+        mesh_pdf->append(area);
+        total_area += area;
+    }
+
+    this->total_area = total_area;
+    this->triangle_pdf = mesh_pdf;
 }
 
 float Mesh::surfaceArea(uint32_t index) const {

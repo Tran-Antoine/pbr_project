@@ -64,22 +64,13 @@ float Warp::squareToTentPdf(const Point2f &p) {
 
 void Warp::squareToMeshPoint(const Point2f &sample0, const Mesh &mesh, Point3f &p, Vector3f &n, float &pdf) {
 
-    // TODO: dont init and fill every time
-    DiscretePDF mesh_pdf(mesh.getTriangleCount());
+    DiscretePDF* mesh_pdf = mesh.getTrianglePDF();
 
-    float total_area = 0;
-
-    for(uint32_t i = 0; i < mesh.getTriangleCount(); i++) {
-        float area = mesh.surfaceArea(i);
-        mesh_pdf.append(area);
-        total_area += area;
-    }
-    //
     float eps1 = sample0.x();
     float eps2 = sample0.y();
     
     // crucial to use "reusue", otherwise triangle selection and barycentral coordinates are NOT independent
-    uint32_t chosen_index = mesh_pdf.sampleReuse(eps1);
+    uint32_t chosen_index = mesh_pdf->sampleReuse(eps1);
 
     float bary0 = 1 - sqrt(1 - eps1);
     float bary1  = eps2 * sqrt(1 - eps1);
@@ -109,11 +100,12 @@ void Warp::squareToMeshPoint(const Point2f &sample0, const Mesh &mesh, Point3f &
 
     p = sampled_point;
     n = normal;
-    pdf = 1 / total_area;
+    pdf = 1 / mesh.getTotalArea();
 }
 
 float Warp::squareToMeshPointPdf(const Vector3f &v, const Mesh &mesh) {
-    return 0; // TODO: Implement this
+    // TODO: add detection, maybe add a find_triangle(position) in the octree file?
+    return 1 / mesh.getTotalArea();
 }
 
 Point2f Warp::squareToUniformDisk(const Point2f &sample) {
