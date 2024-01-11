@@ -44,6 +44,12 @@
 
 #include <Eigen/Geometry>
 
+#include <nori/mesh.h>
+#include <nori/parser.h>
+#include <nori/scene.h>
+#include <filesystem/resolver.h>
+
+
 /* =======================================================================
  *   WARNING    WARNING    WARNING    WARNING    WARNING    WARNING
  * =======================================================================
@@ -85,12 +91,13 @@ enum WarpType : int {
     CosineHemisphere,
     Beckmann,
     MicrofacetBRDF,
+    UniformMesh,
     WarpTypeCount
 };
 
 static const std::string kWarpTypeNames[WarpTypeCount] = {
     "square", "tent", "disk", "uniform_sphere", "uniform_hemisphere",
-    "cosine_hemisphere", "beckmann", "microfacet_brdf"
+    "cosine_hemisphere", "beckmann", "microfacet_brdf", "uniform_mesh"
 };
 
 
@@ -103,15 +110,16 @@ struct WarpTest {
     BSDF *bsdf;
     BSDFQueryRecord bRec;
     int xres, yres, res;
+    nori::Mesh* mesh;
 
     // Observed and expected frequencies, initialized after calling run().
     std::unique_ptr<double[]> obsFrequencies, expFrequencies;
 
     WarpTest(WarpType warpType_, float parameterValue_, BSDF *bsdf_ = nullptr,
              BSDFQueryRecord bRec_ = BSDFQueryRecord(nori::Vector3f()),
-             int xres_ = kDefaultXres, int yres_ = kDefaultYres)
+             int xres_ = kDefaultXres, int yres_ = kDefaultYres, nori::Mesh* mesh = nullptr)
         : warpType(warpType_), parameterValue(parameterValue_), bsdf(bsdf_),
-          bRec(bRec_), xres(xres_), yres(yres_) {
+          bRec(bRec_), xres(xres_), yres(yres_), mesh(mesh) {
 
         if (warpType != Square && warpType != Disk && warpType != Tent)
             xres *= 2;
@@ -186,6 +194,8 @@ struct WarpTest {
                     br.wo = v;
                     br.measure = nori::ESolidAngle;
                     return bsdf->pdf(br);
+                } else if(warpType == UniformMesh) {
+                    return Warp::squareToMeshPointPdf(v, *mesh);
                 } else {
                     throw NoriException("Invalid warp type");
                 }
@@ -245,6 +255,18 @@ struct WarpTest {
                 result << Warp::squareToCosineHemisphere(sample); break;
             case Beckmann:
                 result << Warp::squareToBeckmann(sample, parameterValue); break;
+            case UniformMesh: {
+                if(!mesh) {
+                    throw NoriException("Mesh unspecified. Did you forget to add the xml path as argument?");
+                }
+                nori::Point3f point;
+                nori::Vector3f n; //unused
+                float pdf; //unused
+                Warp::squareToMeshPoint(sample, *mesh, point, n, pdf);
+                result << point;
+                break;
+            }
+                
             case MicrofacetBRDF: {
                 BSDFQueryRecord br(bRec);
                 float value = bsdf->sample(br, sample).getLuminance();
@@ -408,7 +430,7 @@ public:
 class WarpTestScreen : public Screen {
 public:
 
-    WarpTestScreen(): Screen(Vector2i(800, 600), "warptest: Sampling and Warping"), m_bRec(nori::Vector3f()) {
+    WarpTestScreen(nori::Mesh* mesh): Screen(Vector2i(800, 600), "warptest: Sampling and Warping"), m_bRec(nori::Vector3f()), mesh(mesh) {
         inc_ref();
         m_drawHistogram = false;
         initializeGUI();
@@ -439,7 +461,7 @@ public:
         /* Generate the point positions */
         nori::MatrixXf positions, values;
         try {
-            WarpTest tester(warpType, parameterValue, m_brdf.get(), m_bRec);
+            WarpTest tester(warpType, parameterValue, m_brdf.get(), m_bRec, 51, 51, mesh);
             tester.generatePoints(m_pointCount, pointType, positions, values);
         } catch (const NoriException &e) {
             m_warpTypeBox->set_selected_index(0);
@@ -486,7 +508,7 @@ public:
             positions.resize(3, m_lineCount);
             float coarseScale = 1.f / gridRes, fineScale = 1.f / fineGridRes;
 
-            WarpTest tester(warpType, parameterValue, m_brdf.get(), m_bRec);
+            WarpTest tester(warpType, parameterValue, m_brdf.get(), m_bRec, 51, 51, mesh);
             for (int i=0; i<=gridRes; ++i) {
                 for (int j=0; j<=fineGridRes; ++j) {
                     auto pt = tester.warpPoint(Point2f(j * fineScale, i * coarseScale));
@@ -667,7 +689,7 @@ public:
         WarpType warpType = (WarpType) m_warpTypeBox->selected_index();
         float parameterValue = mapParameter(warpType, m_parameterSlider->value());
 
-        WarpTest tester(warpType, parameterValue, m_brdf.get(), m_bRec);
+        WarpTest tester(warpType, parameterValue, m_brdf.get(), m_bRec, 51, 51, mesh);
         m_testResult = tester.run();
 
         float maxValue = 0, minValue = std::numeric_limits<float>::infinity();
@@ -728,7 +750,7 @@ public:
 
         new Label(m_window, "Warping method", "sans-bold");
         m_warpTypeBox = new ComboBox(m_window, { "Square", "Tent", "Disk", "Sphere", "Hemisphere (unif.)",
-                "Hemisphere (cos)", "Beckmann distr.", "Microfacet BRDF" });
+                "Hemisphere (cos)", "Beckmann distr.", "Microfacet BRDF", "Mesh (unif.)" });
         m_warpTypeBox->set_callback([&](int) { refresh(); });
 
         panel = new Widget(m_window);
@@ -943,6 +965,8 @@ private:
     BSDFQueryRecord m_bRec;
     std::pair<bool, std::string> m_testResult;
     nanogui::ref<RenderPass> m_renderPass;
+
+    nori::Mesh* mesh;
 };
 
 
@@ -966,10 +990,27 @@ std::tuple<WarpType, float, float> parse_arguments(int argc, char **argv) {
 
 
 int main(int argc, char **argv) {
-    if (argc <= 1) {
+    if (argc <= 2) {
         // GUI mode
+
+        nori::Mesh* ref_mesh = nullptr;
+
+        if(argc == 2) {
+
+            std::string scene_name = argv[1];
+            nori::getFileResolver()->prepend_parent(scene_name);
+
+            std::unique_ptr<nori::NoriObject> root(nori::loadFromXML(argv[1]));
+
+            /* When the XML root object is a scene, start rendering it .. */
+            if (root->getClassType() == nori::NoriObject::EScene) {
+                nori::Scene* scene = static_cast<nori::Scene*>(root.get());
+                ref_mesh = scene->getMeshes()[0];
+            }
+        }
+
         nanogui::init();
-        WarpTestScreen *screen = new WarpTestScreen();
+        WarpTestScreen *screen = new WarpTestScreen(ref_mesh);
         nanogui::mainloop();
         delete screen;
         nanogui::shutdown();

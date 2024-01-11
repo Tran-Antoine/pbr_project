@@ -16,6 +16,7 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <nori/common.h>
 #include <nori/warp.h>
 #include <nori/vector.h>
 #include <nori/frame.h>
@@ -23,6 +24,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <nori/dpdf.h>
+#include <Eigen/Geometry>
 
 NORI_NAMESPACE_BEGIN
 
@@ -60,7 +62,7 @@ float Warp::squareToTentPdf(const Point2f &p) {
     return 1;
 }
 
-static void cubeToMeshPoint(const float sample0, const Point2f &sample1, const Mesh &mesh, Point3f &p, Vector3f &n, float &pdf) {
+void Warp::squareToMeshPoint(const Point2f &sample0, const Mesh &mesh, Point3f &p, Vector3f &n, float &pdf) {
 
     // TODO: dont init and fill every time
     DiscretePDF mesh_pdf(mesh.getTriangleCount());
@@ -73,11 +75,11 @@ static void cubeToMeshPoint(const float sample0, const Point2f &sample1, const M
         total_area += area;
     }
     //
+    float eps1 = sample0.x();
+    float eps2 = sample0.y();
     
-    uint32_t chosen_index = mesh_pdf.sample(sample0);
-
-    float eps1 = sample1.x();
-    float eps2 = sample1.y();
+    // crucial to use "reusue", otherwise triangle selection and barycentral coordinates are NOT independent
+    uint32_t chosen_index = mesh_pdf.sampleReuse(eps1);
 
     float bary0 = 1 - sqrt(1 - eps1);
     float bary1  = eps2 * sqrt(1 - eps1);
@@ -110,9 +112,12 @@ static void cubeToMeshPoint(const float sample0, const Point2f &sample1, const M
     pdf = 1 / total_area;
 }
 
+float Warp::squareToMeshPointPdf(const Vector3f &v, const Mesh &mesh) {
+    return 0; // TODO: Implement this
+}
 
 Point2f Warp::squareToUniformDisk(const Point2f &sample) {
-    
+
     float new_x = sqrt(sample.x());
     float new_y = 2*M_PI*sample.y();
 

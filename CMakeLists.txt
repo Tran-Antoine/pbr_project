@@ -96,24 +96,19 @@ add_executable(nori
   src/ambient.cpp
   src/octree.cpp
   src/area.cpp
-
-  src/main.cpp
   src/strutil.cpp
 
+  #src/main.cpp
+  src/warptest.cpp
+
 )
+
+# The following lines build the warping test application
+
 
 add_definitions(${NANOGUI_EXTRA_DEFS})
 
-# The following lines build the warping test application
-add_executable(warptest
-  include/nori/warp.h
-  src/warp.cpp
-  src/warptest.cpp
-  src/microfacet.cpp
-  src/object.cpp
-  src/proplist.cpp
-  src/common.cpp
-)
+
 
 if (WIN32)
   target_link_libraries(nori tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS} zlibstatic)
@@ -121,7 +116,7 @@ else()
   target_link_libraries(nori tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS})
 endif()
 
-target_link_libraries(warptest tbb_static nanogui ${NANOGUI_EXTRA_LIBS})
+#target_link_libraries(warptest tbb_static nanogui ${NANOGUI_EXTRA_LIBS})
 
 # Force colored output for the ninja generator
 if (CMAKE_GENERATOR STREQUAL "Ninja")
@@ -134,7 +129,7 @@ if (CMAKE_GENERATOR STREQUAL "Ninja")
   endif()
 endif()
 
-target_compile_features(warptest PRIVATE cxx_std_17)
+#target_compile_features(warptest PRIVATE cxx_std_17)
 target_compile_features(nori PRIVATE cxx_std_17)
 
 # vim: set et ts=2 sw=2 ft=cmake nospell:
