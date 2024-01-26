@@ -25,7 +25,7 @@ public:
         for(auto mesh : scene->getMeshes()) {
             Emitter* emitter = mesh->getEmitter();
             if(emitter) {
-                radiance += emitter->computeRadiance(its.p, -ray.d, *sampler, scene);
+                radiance += emitter->computeRadiance(its.p, its.shFrame.n, -ray.d, *sampler, scene);
             }
         }
 

@@ -18,14 +18,14 @@ void MeshEmitter::setParent(NoriObject *parent) {
 }
 
 Color3f MeshEmitter::getEmittance(Point3f pos, Vector3f normal, Vector3f direction) {
-    return getPower() / (4 * M_PI) / mesh->getTotalArea() /*/ normal.dot(direction)*/;
+    return getPower() /*/ normal.dot(direction)*/;
 }
 
 Color3f MeshEmitter::getPower() {
     return color;
 }
 
-Color3f MeshEmitter::computeRadiance(Vector3f at, Vector3f dir_to_camera, Sampler& sampler, const Scene* scene)
+Color3f MeshEmitter::computeRadiance(Vector3f at, Vector3f at_normal, Vector3f dir_to_camera, Sampler& sampler, const Scene* scene)
 {
     // TODO: Add many "Sampler" implementations, one per warping scheme
 
@@ -46,19 +46,23 @@ Color3f MeshEmitter::computeRadiance(Vector3f at, Vector3f dir_to_camera, Sample
     if(!scene->rayIntersect(ray)) {
         return Color3f(0.0f);
     }
+    
+    Vector3f y_to_x = (at - surface_point).normalized();
 
-    Vector3f emitted_dir = (at - surface_point).normalized();
 
-    Color3f emitted = getEmittance(surface_point, n, emitted_dir);
+    float jacobian = abs(at_normal.dot(-y_to_x)) * abs(n.dot(y_to_x)) / (surface_point - at).squaredNorm();
+
+
+    Color3f emitted = getEmittance(surface_point, n, y_to_x);
     const BSDF* bsdf = mesh->getBSDF();
 
-    BSDFQueryRecord query(-emitted_dir, dir_to_camera, EMeasure::ESolidAngle);
+    BSDFQueryRecord query(-y_to_x, dir_to_camera, EMeasure::ESolidAngle);
 
     Color3f bsdf_term = bsdf->eval(query);
 
     //std::cout << c.x() << " " << c.y() << " " << c.z() << "\n";
 
-    return (emitted * bsdf_term) / pdf; // check: is this point wise multiplication? Hopefully yes
+    return jacobian * (emitted * bsdf_term) / pdf; // check: is this point wise multiplication? Hopefully yes
 }
 
 NORI_NAMESPACE_END
