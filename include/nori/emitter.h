@@ -19,6 +19,8 @@
 #pragma once
 
 #include <nori/object.h>
+#include <nori/sampler.h>
+#include <nori/scene.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -33,6 +35,14 @@ public:
      * provided by this instance
      * */
     EClassType getClassType() const { return EEmitter; }
+
+    virtual Color3f computeRadiance(Vector3f at, Vector3f dir, Sampler& sampler, const Scene* scene) = 0;
+
+    virtual Color3f getEmittance(Point3f pos, Vector3f normal, Vector3f direction) = 0;
+
+    virtual Color3f getPower() = 0;
 };
+
+
 
 NORI_NAMESPACE_END

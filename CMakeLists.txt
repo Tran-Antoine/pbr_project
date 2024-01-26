@@ -67,6 +67,7 @@ add_executable(nori
   
   include/nori/octree.h
   include/nori/strutil.h
+  include/nori/area.h
   
   # Source code files
   src/bitmap.cpp
@@ -97,9 +98,10 @@ add_executable(nori
   src/octree.cpp
   src/area.cpp
   src/strutil.cpp
+  src/whitted.cpp
 
   #src/main.cpp
-  src/warptest.cpp
+  src/main.cpp
 
 )
 
