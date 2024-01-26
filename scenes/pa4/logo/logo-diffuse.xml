@@ -1,5 +1,8 @@
 <scene>
-    <integrator type="whitted"/>
+    <integrator type="simple">
+        <point name="position" value="-20, 40, 20"/>
+        <color name="energy" value="3.76e4, 3.76e4, 3.76e4"/>
+    </integrator>
 
     <sampler type="independent">
         <!-- You might want to reduce this number during development -->
@@ -15,8 +18,8 @@
 
         <float name="fov" value="60"/>
 
-        <integer name="width" value="768"/>
-        <integer name="height" value="384"/>
+        <integer name="width" value="400"/>
+        <integer name="height" value="200"/>
     </camera>
 
     <mesh type="obj">

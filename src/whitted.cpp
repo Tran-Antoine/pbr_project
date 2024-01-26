@@ -15,7 +15,7 @@ public:
         Intersection its;
         
         if (!scene->rayIntersect(ray, its))
-            return Color3f(0.2f); // black background is a bit sad
+            return Color3f(0.7f); // black background is a bit sad
 
         // problem: accel doesnt support multiple meshes rn
 

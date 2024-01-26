@@ -18,7 +18,7 @@ void MeshEmitter::setParent(NoriObject *parent) {
 }
 
 Color3f MeshEmitter::getEmittance(Point3f pos, Vector3f normal, Vector3f direction) {
-    return getPower() / mesh->getTotalArea() / (4*M_PI) / normal.dot(direction);
+    return getPower() / (4 * M_PI) / mesh->getTotalArea() /*/ normal.dot(direction)*/;
 }
 
 Color3f MeshEmitter::getPower() {
@@ -56,6 +56,7 @@ Color3f MeshEmitter::computeRadiance(Vector3f at, Vector3f dir_to_camera, Sample
 
     Color3f bsdf_term = bsdf->eval(query);
 
+    //std::cout << c.x() << " " << c.y() << " " << c.z() << "\n";
 
     return (emitted * bsdf_term) / pdf; // check: is this point wise multiplication? Hopefully yes
 }
