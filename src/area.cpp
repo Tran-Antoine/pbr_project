@@ -42,12 +42,13 @@ Color3f MeshEmitter::computeRadiance(Point3f at, Vector3f at_normal, Vector3f di
     Warp::squareToMeshPoint(sample, *mesh, surface_point, n, pdf);
 
     Vector3f y_to_x = (at - surface_point).normalized();
+    Vector3f x_to_y = -y_to_x;
+    float distance = (surface_point - at).norm();
 
-    Ray3f ray = Ray3f(at, surface_point - at);
-    Intersection its;
-    if(scene->rayIntersect(ray, its)) {
-        if((its.p - surface_point).norm() > Epsilon)
-            return Color3f(0.0f);
+    Ray3f ray = Ray3f(at, x_to_y, Epsilon, (1 - Epsilon) * distance);
+
+    if(scene->rayIntersect(ray)) {
+        return Color3f(0.0f);
     }
 
     float jacobian = abs(at_normal.dot(-y_to_x)) * abs(n.dot(y_to_x)) / (surface_point - at).squaredNorm();
