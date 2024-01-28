@@ -23,7 +23,7 @@ public:
         Mesh* random_emitter = scene->pickMeshEmitter();
 
         if(random_emitter) {
-            radiance += random_emitter->getEmitter()->computeRadiance(its.p, its.shFrame.n, -ray.d, *sampler, scene);
+            radiance += random_emitter->getEmitter()->computeRadiance(its.mesh->getBSDF(), its.p, its.shFrame.n, -ray.d, *sampler, scene);
         }
 
         return radiance;

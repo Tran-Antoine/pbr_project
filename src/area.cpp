@@ -21,7 +21,7 @@ Color3f MeshEmitter::getEmittance(Point3f pos, Vector3f normal, Vector3f directi
     return color;
 }
 
-Color3f MeshEmitter::computeRadiance(Point3f at, Vector3f at_normal, Vector3f dir_to_camera, Sampler& sampler, const Scene* scene)
+Color3f MeshEmitter::computeRadiance(const BSDF* bsdf, Point3f at, Vector3f at_normal, Vector3f dir_to_camera, Sampler& sampler, const Scene* scene)
 {
     // TODO: Add many "Sampler" implementations, one per warping scheme
 
@@ -53,7 +53,6 @@ Color3f MeshEmitter::computeRadiance(Point3f at, Vector3f at_normal, Vector3f di
 
     Color3f emitted = getEmittance(surface_point, n, y_to_x);
 
-    const BSDF* bsdf = mesh->getBSDF();
     BSDFQueryRecord query(x_to_y, dir_to_camera, EMeasure::ESolidAngle);
     Color3f bsdf_term = bsdf->eval(query);
 

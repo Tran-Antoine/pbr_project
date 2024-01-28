@@ -1,12 +1,9 @@
 <scene>
-    <integrator type="simple">
-        <point name="position" value="-20, 40, 20"/>
-        <color name="energy" value="3.76e4, 3.76e4, 3.76e4"/>
-    </integrator>
+    <integrator type="whitted"></integrator>
 
     <sampler type="independent">
         <!-- You might want to reduce this number during development -->
-        <integer name="sampleCount" value="4096"/>
+        <integer name="sampleCount" value="128"/>
         <!-- <integer name="sampleCount" value="16"/> -->
     </sampler>
 

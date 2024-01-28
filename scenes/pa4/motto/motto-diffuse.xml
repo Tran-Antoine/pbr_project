@@ -23,7 +23,7 @@
 
     <mesh type="obj">
         <string name="filename" value="meshes/title.obj"/>
-        <bsdf type="diffuse">
+        <bsdf type="dielectric">
             <color name="albedo" value="0.5, 0.5, 0.5"/>
         </bsdf>
     </mesh>

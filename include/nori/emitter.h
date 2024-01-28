@@ -21,6 +21,7 @@
 #include <nori/object.h>
 #include <nori/sampler.h>
 #include <nori/scene.h>
+#include <nori/bsdf.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -36,7 +37,7 @@ public:
      * */
     EClassType getClassType() const { return EEmitter; }
 
-    virtual Color3f computeRadiance(Point3f at, Vector3f at_normal, Vector3f dir, Sampler& sampler, const Scene* scene) = 0;
+    virtual Color3f computeRadiance(const BSDF* bsdf, Point3f at, Vector3f at_normal, Vector3f dir, Sampler& sampler, const Scene* scene) = 0;
 
     virtual Color3f getEmittance(Point3f pos, Vector3f normal, Vector3f direction) = 0;
 };
