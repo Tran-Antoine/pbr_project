@@ -19,25 +19,19 @@ public:
         if (!scene->rayIntersect(ray, its))
             return Color3f(0.0f);
 
-        float intensity = 0;
 
-        for(int i = 0; i < sampler->getSampleCount(); i++) {
+        Vector3f w = Warp::squareToCosineHemisphere(sampler->next2D());
 
-            Vector3f w = Warp::squareToCosineHemisphere(sampler->next2D());
+        w = its.shFrame.toWorld(w);
 
-            w = its.shFrame.toWorld(w);
-
-            if(scene->rayIntersect(Ray3f(its.p, w))) {
-                continue;
-            }
-        
-            float cos_theta = its.shFrame.n.dot(w);
-
-            intensity += std::max(0.0f, cos_theta);
+        if(scene->rayIntersect(Ray3f(its.p, w))) {
+            return 0;
         }
+    
+        float cos_theta = its.shFrame.n.dot(w);
 
-        intensity /= (M_PI * sampler->getSampleCount());
-
+        float intensity = std::max(0.0f, cos_theta) / M_PI;
+    
         return Color3f(intensity);
     }
 
