@@ -22,6 +22,8 @@
 #include <nori/sampler.h>
 #include <nori/camera.h>
 #include <nori/emitter.h>
+#include <nori/dpdf.h>
+
 
 NORI_NAMESPACE_BEGIN
 
@@ -50,9 +52,28 @@ void Scene::activate() {
             NoriObjectFactory::createInstance("independent", PropertyList()));
     }
 
+    DiscretePDF* emitters_pdf = new DiscretePDF(m_mesh_emitters.size());
+
+    for(uint32_t i = 0; i < m_mesh_emitters.size(); i++) {
+        emitters_pdf->append(m_mesh_emitters[i]->getTotalArea());
+        cout << m_mesh_emitters[i]->getTotalArea() << endl;
+    }
+
+    emitters_pdf->normalize();
+
+    this->emitters_pdf = emitters_pdf;
+
     cout << endl;
     cout << "Configuration: " << toString() << endl;
     cout << endl;
+}
+
+Mesh* Scene::pickMeshEmitter() const {
+    if(m_mesh_emitters.size() == 0) {
+        return nullptr;
+    }
+    size_t index = emitters_pdf->sample(m_sampler->next1D());
+    return m_mesh_emitters[index];
 }
 
 void Scene::addChild(NoriObject *obj) {
@@ -61,6 +82,9 @@ void Scene::addChild(NoriObject *obj) {
                 Mesh *mesh = static_cast<Mesh *>(obj);
                 m_accel->addMesh(mesh);
                 m_meshes.push_back(mesh);
+                if(mesh->getEmitter()) {
+                    m_mesh_emitters.push_back(mesh);
+                }
             }
             break;
         

@@ -17,16 +17,14 @@ public:
         if (!scene->rayIntersect(ray, its))
             return Color3f(0.7f); // black background is a bit sad
 
-        // problem: accel doesnt support multiple meshes rn
-
         // for now we just do one sample
         Color3f radiance;
 
-        for(auto mesh : scene->getMeshes()) {
-            Emitter* emitter = mesh->getEmitter();
-            if(emitter) {
-                radiance += emitter->computeRadiance(its.p, its.shFrame.n, -ray.d, *sampler, scene);
-            }
+        // TODO : SHOULD NOT BE ONE PER MESH, BUT JUST ONE (one mesh gets selected at random depending on their area)
+        Mesh* random_emitter = scene->pickMeshEmitter();
+
+        if(random_emitter) {
+            radiance += random_emitter->getEmitter()->computeRadiance(its.p, its.shFrame.n, -ray.d, *sampler, scene);
         }
 
         return radiance;

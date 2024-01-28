@@ -50,6 +50,8 @@ void Mesh::activate() {
         total_area += area;
     }
 
+    mesh_pdf->normalize();
+
     this->total_area = total_area;
     this->triangle_pdf = mesh_pdf;
 }

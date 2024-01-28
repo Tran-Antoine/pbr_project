@@ -19,6 +19,7 @@
 #pragma once
 
 #include <nori/accel.h>
+#include <nori/dpdf.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -57,6 +58,8 @@ public:
 
     /// Return a reference to an array containing all meshes
     const std::vector<Mesh *> &getMeshes() const { return m_meshes; }
+
+    Mesh* pickMeshEmitter() const;
 
     /**
      * \brief Intersect a ray against all triangles stored in the scene
@@ -116,8 +119,13 @@ public:
     std::string toString() const;
 
     EClassType getClassType() const { return EScene; }
+
+protected:
+    DiscretePDF* emitters_pdf = nullptr;
 private:
     std::vector<Mesh *> m_meshes;
+    std::vector<Mesh *> m_mesh_emitters;
+
     Integrator *m_integrator = nullptr;
     Sampler *m_sampler = nullptr;
     Camera *m_camera = nullptr;
