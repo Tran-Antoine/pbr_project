@@ -42,15 +42,12 @@ void Mesh::activate() {
 
     DiscretePDF* mesh_pdf = new DiscretePDF(getTriangleCount());
 
-    float total_area = 0;
-
     for(uint32_t i = 0; i < getTriangleCount(); i++) {
         float area = surfaceArea(i);
         mesh_pdf->append(area);
-        total_area += area;
     }
 
-    mesh_pdf->normalize();
+    float total_area = mesh_pdf->normalize();
 
     this->total_area = total_area;
     this->triangle_pdf = mesh_pdf;

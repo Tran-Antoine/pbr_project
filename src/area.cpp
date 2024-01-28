@@ -25,7 +25,7 @@ Color3f MeshEmitter::getPower() {
     return color;
 }
 
-Color3f MeshEmitter::computeRadiance(Vector3f at, Vector3f at_normal, Vector3f dir_to_camera, Sampler& sampler, const Scene* scene)
+Color3f MeshEmitter::computeRadiance(Point3f at, Vector3f at_normal, Vector3f dir_to_camera, Sampler& sampler, const Scene* scene)
 {
     // TODO: Add many "Sampler" implementations, one per warping scheme
 
@@ -41,14 +41,14 @@ Color3f MeshEmitter::computeRadiance(Vector3f at, Vector3f at_normal, Vector3f d
     float pdf;
     Warp::squareToMeshPoint(sample, *mesh, surface_point, n, pdf);
 
-    Ray3f ray = Ray3f(at, surface_point);
-
-    if(!scene->rayIntersect(ray)) {
-        return Color3f(0.0f);
-    }
-    
     Vector3f y_to_x = (at - surface_point).normalized();
 
+    Ray3f ray = Ray3f(at, surface_point - at);
+    Intersection its;
+    if(scene->rayIntersect(ray, its)) {
+        if((its.p - surface_point).norm() > Epsilon)
+            return Color3f(0.0f);
+    }
 
     float jacobian = abs(at_normal.dot(-y_to_x)) * abs(n.dot(y_to_x)) / (surface_point - at).squaredNorm();
 
