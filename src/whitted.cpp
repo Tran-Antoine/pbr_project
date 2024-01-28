@@ -17,16 +17,31 @@ public:
         if (!scene->rayIntersect(ray, its))
             return Color3f(0.0f);
 
-        // for now we just do one sample
-        Color3f radiance;
+        const BSDF* bsdf = its.mesh->getBSDF();
 
-        Mesh* random_emitter = scene->pickMeshEmitter();
+        if(bsdf->isDiffuse()) {
+            Color3f radiance;
 
-        if(random_emitter) {
-            radiance += random_emitter->getEmitter()->computeRadiance(its.mesh->getBSDF(), its.p, its.shFrame.n, -ray.d, *sampler, scene);
+            Mesh* random_emitter = scene->pickMeshEmitter();
+
+            if(random_emitter) {
+                radiance += random_emitter->getEmitter()->computeRadiance(its.mesh->getBSDF(), its.p, its.shFrame.n, -ray.d, *sampler, scene);
+            }
+
+            return radiance;
+
+        } else {
+            float eps = sampler->next1D();
+            if(eps > 0.95) {
+                return Color3f(0.0f);
+            }
+
+            BSDFQueryRecord record(its.shFrame.toLocal(-ray.d));
+            Color3f sampled_value = bsdf->sample(record, sampler->next2D());
+
+            return 1 / 0.95 * sampled_value * Li(scene, sampler, Ray3f(its.p, its.shFrame.toWorld(record.wo))); 
         }
-
-        return radiance;
+        
 
     }
 

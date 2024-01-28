@@ -43,7 +43,51 @@ public:
     }
 
     Color3f sample(BSDFQueryRecord &bRec, const Point2f &sample) const {
-        throw NoriException("Unimplemented!");
+
+        // TODO : use the record's eta?
+        float eta1 = m_extIOR;
+        float eta2 = m_intIOR;
+
+
+        Vector3f wi = bRec.wi;
+
+        Vector3f n(0.0f, 0.0f, 1.0f);
+
+        // if wi is in the same direction as n, it means the light is exiting the surface, not entering it (so no refraction)
+        if(Frame::cosTheta(wi) > 0) {
+            bRec.wo = -wi;
+            return Color3f(1.0f);
+        }
+
+        // snell's law
+        Vector3f w_refracted = - eta1 / eta2 * (wi - (wi.dot(n)*n) - n * sqrt(1 - pow(eta1/eta2, 2)*(1 - pow(wi.dot(n), 2))));
+
+        float cos_theta_1 = wi.z(); //wi.dot(n);
+
+
+        // why is this value negative ??
+        float cos_theta_2 = -w_refracted.z(); //-w_refracted.dot(n);
+
+
+        std::cout << cos_theta_1 << "\n";
+        
+        // fresnel's equations 
+        float rho_paral = (eta2 * cos_theta_1 - eta1 * cos_theta_2) / (eta2 * cos_theta_1 + eta1 * cos_theta_2);
+        float rho_perp  = (eta1 * cos_theta_1 - eta2 * cos_theta_2) / (eta1 * cos_theta_1 + eta2 * cos_theta_2);
+        float f_r = 0.5 * (rho_paral*rho_paral + rho_perp*rho_perp);
+        float f_t = 1 - f_r;
+
+        if(sample.x() < f_r) {
+            bRec.wo = Vector3f(
+                -bRec.wi.x(),
+                -bRec.wi.y(),
+                bRec.wi.z()
+            );
+            return Color3f(1 / f_r * -cos_theta_2);
+        } else {
+            bRec.wo = w_refracted;
+            return Color3f(1 / f_t * -cos_theta_2);
+        }
     }
 
     std::string toString() const {

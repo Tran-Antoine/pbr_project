@@ -27,7 +27,6 @@ Color3f MeshEmitter::computeRadiance(const BSDF* bsdf, Point3f at, Vector3f at_n
 
 
     // Things to add: 
-    // - should we use the sampler of the BSDF, if it exists? Probably not
     // To think about: maybe only sample points whose normal goes against the incoming direction?
 
     Point2f sample(sampler.next2D());
