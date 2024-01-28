@@ -18,10 +18,6 @@ void MeshEmitter::setParent(NoriObject *parent) {
 }
 
 Color3f MeshEmitter::getEmittance(Point3f pos, Vector3f normal, Vector3f direction) {
-    return getPower() /*/ normal.dot(direction)*/;
-}
-
-Color3f MeshEmitter::getPower() {
     return color;
 }
 
@@ -48,22 +44,20 @@ Color3f MeshEmitter::computeRadiance(Point3f at, Vector3f at_normal, Vector3f di
     Ray3f ray = Ray3f(at, x_to_y, Epsilon, (1 - Epsilon) * distance);
 
     if(scene->rayIntersect(ray)) {
+        // meaning the ray hit an object BEFORE hitting the light source
         return Color3f(0.0f);
     }
 
-    float jacobian = abs(at_normal.dot(-y_to_x)) * abs(n.dot(y_to_x)) / (surface_point - at).squaredNorm();
+    float jacobian = abs(at_normal.dot(x_to_y) * (n.dot(y_to_x))) / (distance*distance);
 
 
     Color3f emitted = getEmittance(surface_point, n, y_to_x);
+
     const BSDF* bsdf = mesh->getBSDF();
-
-    BSDFQueryRecord query(-y_to_x, dir_to_camera, EMeasure::ESolidAngle);
-
+    BSDFQueryRecord query(x_to_y, dir_to_camera, EMeasure::ESolidAngle);
     Color3f bsdf_term = bsdf->eval(query);
 
-    //std::cout << c.x() << " " << c.y() << " " << c.z() << "\n";
-
-    return jacobian * (emitted * bsdf_term) / pdf; // check: is this point wise multiplication? Hopefully yes
+    return jacobian/pdf * (emitted * bsdf_term); 
 }
 
 NORI_NAMESPACE_END

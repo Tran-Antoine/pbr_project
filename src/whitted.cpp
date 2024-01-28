@@ -15,12 +15,11 @@ public:
         Intersection its;
         
         if (!scene->rayIntersect(ray, its))
-            return Color3f(0.7f); // black background is a bit sad
+            return Color3f(0.0f);
 
         // for now we just do one sample
         Color3f radiance;
 
-        // TODO : SHOULD NOT BE ONE PER MESH, BUT JUST ONE (one mesh gets selected at random depending on their area)
         Mesh* random_emitter = scene->pickMeshEmitter();
 
         if(random_emitter) {
