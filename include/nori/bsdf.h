@@ -26,7 +26,7 @@ NORI_NAMESPACE_BEGIN
  * \brief Convenience data structure used to pass multiple
  * parameters to the evaluation and sampling routines in \ref BSDF
  */
-struct BSDFQueryRecord {
+struct  BSDFQueryRecord {
     /// Incident direction (in the local frame)
     Vector3f wi;
 
