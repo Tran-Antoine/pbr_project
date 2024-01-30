@@ -1,6 +1,7 @@
 #include <nori/integrator.h>
 #include <nori/scene.h>
 #include <nori/emitter.h>
+#include <algorithm>
 
 NORI_NAMESPACE_BEGIN
 
@@ -8,6 +9,10 @@ class WhittedIntegrator : public Integrator {
 public:
     WhittedIntegrator(const PropertyList &props) {
         /* No parameters */
+    }
+
+    static Color3f clip(Color3f i) {
+        return Color3f(std::clamp(i.x(), 0.0f, 1.0f), std::clamp(i.y(), 0.0f, 1.0f), std::clamp(i.z(), 0.0f, 1.0f));
     }
 
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const {
@@ -18,7 +23,7 @@ public:
             return Color3f(0.0f);
 
         if(its.mesh->getEmitter()) {
-            return Color3f(1.0f);
+            return Color3f(0.0f);
         }
 
         const BSDF* bsdf = its.mesh->getBSDF();
@@ -32,7 +37,7 @@ public:
                 radiance += random_emitter->getEmitter()->computeRadiance(its.mesh->getBSDF(), its.p, its.shFrame.n, -ray.d, *sampler, scene);
             }
 
-            return radiance;
+            return clip(radiance);
 
         } else {
             float eps = sampler->next1D();
@@ -43,7 +48,7 @@ public:
             BSDFQueryRecord record(its.shFrame.toLocal(-ray.d));
             Color3f sampled_value = bsdf->sample(record, sampler->next2D());
 
-            return 1 / 0.95 * sampled_value * Li(scene, sampler, Ray3f(its.p, its.shFrame.toWorld(record.wo))); 
+            return clip(1 / 0.95 * sampled_value * Li(scene, sampler, Ray3f(its.p, its.shFrame.toWorld(record.wo)))); 
         }
         
 
