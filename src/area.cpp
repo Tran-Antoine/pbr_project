@@ -49,10 +49,11 @@ Color3f MeshEmitter::computeRadiance(const BSDF* bsdf, Point3f at, Vector3f at_n
 
     float jacobian = abs(at_normal.dot(x_to_y) * (n.dot(y_to_x))) / (distance*distance);
 
-
     Color3f emitted = getEmittance(surface_point, n, y_to_x);
 
-    BSDFQueryRecord query(x_to_y, dir_to_camera, EMeasure::ESolidAngle);
+    Frame local(at_normal);
+
+    BSDFQueryRecord query(local.toLocal(dir_to_camera), local.toLocal(x_to_y), EMeasure::ESolidAngle);
     Color3f bsdf_term = bsdf->eval(query);
 
     return jacobian/pdf * (emitted * bsdf_term); 

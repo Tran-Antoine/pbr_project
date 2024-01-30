@@ -86,10 +86,10 @@ public:
 
         if(sample.x() < f_r) {
             bRec.wo = wr;
-            return Color3f(1 / f_r * cos_theta_i);
+            return Color3f(1.0f);
         } else {
             bRec.wo = wt;
-            return Color3f(1 / f_t * cos_theta_t);
+            return Color3f(1.0f);
         }
         /*Vector3f n(0.0f, 0.0f, 1.0f);
 
