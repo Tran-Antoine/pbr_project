@@ -27,24 +27,25 @@ public:
             Mesh* random_emitter = scene->pickMeshEmitter();
 
             if(random_emitter) {
-                return random_emitter->getEmitter()->sampleRadiance(its.mesh->getBSDF(), its.p, frame.n, -ray.d, *sampler, scene);
+                // crucial to use the total emitters area and NOT the area of the selected mesh, as the PDF of the sampled points depends on the total area
+                Color3f sampled_radiance = random_emitter->getEmitter()->sampleRadiance(its.mesh->getBSDF(), its.p, frame.n, -ray.d, *sampler, scene);
+                return scene->getEmittersArea() * sampled_radiance; // 1/pdf = total area
             }
 
             return Color3f(0.0f);
 
         } else {
+
             float eps = sampler->next1D();
-            if(eps > 0.95) {
+            if(eps >= 0.95) {
                 return Color3f(0.0f);
             }
 
             BSDFQueryRecord record(frame.toLocal(-ray.d));
             Color3f sampled_value = bsdf->sample(record, sampler->next2D());
 
-            return 1 / 0.95 * sampled_value * Li(scene, sampler, Ray3f(its.p, frame.toWorld(record.wo))); 
+            return (1.0 / 0.95) * sampled_value * Li(scene, sampler, Ray3f(its.p, frame.toWorld(record.wo))); 
         }
-        
-
     }
 
     std::string toString() const {

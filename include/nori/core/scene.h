@@ -120,11 +120,14 @@ public:
 
     EClassType getClassType() const { return EScene; }
 
+    float getEmittersArea() const { return emitters_total_area; }
+
 protected:
     DiscretePDF* emitters_pdf = nullptr;
 private:
     std::vector<Mesh *> m_meshes;
     std::vector<Mesh *> m_mesh_emitters;
+    float emitters_total_area;
 
     Integrator *m_integrator = nullptr;
     Sampler *m_sampler = nullptr;

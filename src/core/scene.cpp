@@ -56,11 +56,9 @@ void Scene::activate() {
 
     for(uint32_t i = 0; i < m_mesh_emitters.size(); i++) {
         emitters_pdf->append(m_mesh_emitters[i]->getTotalArea());
-        cout << m_mesh_emitters[i]->getTotalArea() << endl;
     }
 
-    emitters_pdf->normalize();
-
+    this->emitters_total_area = emitters_pdf->normalize();
     this->emitters_pdf = emitters_pdf;
 
     cout << endl;

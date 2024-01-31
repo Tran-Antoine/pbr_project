@@ -53,7 +53,7 @@ Color3f MeshEmitter::sampleRadiance(const BSDF* bsdf, Point3f p, Vector3f n, Vec
 
     Color3f bsdf_term = bsdf->eval(query);
 
-    return distortion_factor/pdf * (emitted * bsdf_term); 
+    return distortion_factor * (emitted * bsdf_term); 
 }
 
 NORI_NAMESPACE_END
