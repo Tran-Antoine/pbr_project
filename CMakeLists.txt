@@ -5,7 +5,7 @@ add_subdirectory(ext ext_build)
 
 include_directories(
   # Nori include files
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/nori
   # tinyformat string formatting library
   ${TFM_INCLUDE_DIR}
   # Eigen linear algebra library
@@ -40,69 +40,79 @@ include_directories(
 add_executable(nori
 
   # Header files
-  include/nori/bbox.h
-  include/nori/bitmap.h
-  include/nori/block.h
-  include/nori/bsdf.h
-  include/nori/accel.h
-  include/nori/camera.h
-  include/nori/color.h
-  include/nori/common.h
-  include/nori/dpdf.h
-  include/nori/frame.h
-  include/nori/integrator.h
-  include/nori/emitter.h
-  include/nori/mesh.h
-  include/nori/object.h
-  include/nori/parser.h
-  include/nori/proplist.h
-  include/nori/ray.h
-  include/nori/rfilter.h
-  include/nori/sampler.h
-  include/nori/scene.h
-  include/nori/timer.h
-  include/nori/transform.h
-  include/nori/vector.h
-  include/nori/warp.h
+  include/nori/core/bbox.h
+  include/nori/core/camera.h
+  include/nori/core/color.h
+  include/nori/core/common.h
+  include/nori/core/frame.h
+  include/nori/core/mesh.h
+  include/nori/core/object.h
+  include/nori/core/ray.h
+  include/nori/core/timer.h
+  include/nori/core/transform.h
+  include/nori/core/vector.h
+  include/nori/core/scene.h
+
+  include/nori/gui/bitmap.h
+  include/nori/gui/block.h
+
+  include/nori/bsdf/bsdf.h
+
+  include/nori/collection/accel.h
+  include/nori/collection/octree.h
+
+  include/nori/stats/dpdf.h
+  include/nori/stats/sampler.h
+  include/nori/stats/warp.h
+
+  include/nori/integrator/integrator.h
+
+  include/nori/emitter/area.h
+  include/nori/emitter/emitter.h
   
-  include/nori/octree.h
-  include/nori/strutil.h
-  include/nori/area.h
+  include/nori/parser/parser.h
+  include/nori/parser/proplist.h
+
+  include/nori/postprocessing/rfilter.h
+  
   
   # Source code files
-  src/bitmap.cpp
-  src/block.cpp
-  src/accel.cpp
-  src/chi2test.cpp
-  src/common.cpp
-  src/diffuse.cpp
-  src/gui.cpp
-  src/independent.cpp
-  src/mesh.cpp
-  src/obj.cpp
-  src/object.cpp
-  src/parser.cpp
-  src/perspective.cpp
-  src/proplist.cpp
-  src/rfilter.cpp
-  src/scene.cpp
-  src/ttest.cpp
-  src/warp.cpp
-  src/microfacet.cpp
-  src/mirror.cpp
-  src/dielectric.cpp
+  src/core/common.cpp
+  src/core/object.cpp
+  src/core/mesh.cpp
+  src/core/perspective.cpp
+  src/core/scene.cpp
 
-  src/pointlight.cpp
-  src/normals.cpp
-  src/ambient.cpp
-  src/octree.cpp
-  src/area.cpp
-  src/strutil.cpp
-  src/whitted.cpp
+  src/gui/bitmap.cpp
+  src/gui/block.cpp
+  src/gui/gui.cpp
 
-  #src/main.cpp
+  src/bsdf/diffuse.cpp
+  src/bsdf/microfacet.cpp
+  src/bsdf/mirror.cpp
+  src/bsdf/dielectric.cpp
+
+  src/collection/accel.cpp
+  src/collection/octree.cpp
+
+  src/stats/chi2test.cpp
+  src/stats/independent.cpp
+  src/stats/ttest.cpp
+  src/stats/warp.cpp
+
+  src/integrator/pointlight.cpp
+  src/integrator/normals.cpp
+  src/integrator/ambient.cpp
+  src/integrator/whitted.cpp
+
+  src/emitter/area.cpp
+
+  src/parser/obj.cpp
+  src/parser/parser.cpp
+  src/parser/proplist.cpp
+  src/postprocessing/rfilter.cpp
+
   src/main.cpp
-
 )
 
 # The following lines build the warping test application

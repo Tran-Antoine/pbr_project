@@ -16,15 +16,15 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <nori/parser.h>
-#include <nori/scene.h>
-#include <nori/camera.h>
-#include <nori/block.h>
-#include <nori/timer.h>
-#include <nori/bitmap.h>
-#include <nori/sampler.h>
-#include <nori/integrator.h>
-#include <nori/gui.h>
+#include <parser/parser.h>
+#include <core/scene.h>
+#include <core/camera.h>
+#include <gui/block.h>
+#include <core/timer.h>
+#include <gui/bitmap.h>
+#include <stats/sampler.h>
+#include <integrator/integrator.h>
+#include <gui/gui.h>
 #include <tbb/parallel_for.h>
 #include <tbb/blocked_range.h>
 #include <tbb/task_scheduler_init.h>
