@@ -21,42 +21,39 @@ Color3f MeshEmitter::getEmittance(Point3f pos, Vector3f normal, Vector3f directi
     return color;
 }
 
-Color3f MeshEmitter::computeRadiance(const BSDF* bsdf, Point3f at, Vector3f at_normal, Vector3f dir_to_camera, Sampler& sampler, const Scene* scene)
+Color3f MeshEmitter::sampleRadiance(const BSDF* bsdf, Point3f p, Vector3f n, Vector3f wi, Sampler& sampler, const Scene* scene)
 {
     // TODO: Add many "Sampler" implementations, one per warping scheme
 
-
-    // Things to add: 
-    // To think about: maybe only sample points whose normal goes against the incoming direction?
-
     Point2f sample(sampler.next2D());
 
-    Point3f surface_point;
-    Vector3f n;
+    Point3f light_point;
+    Vector3f light_n;
     float pdf;
-    Warp::squareToMeshPoint(sample, *mesh, surface_point, n, pdf);
+    Warp::squareToMeshPoint(sample, *mesh, light_point, light_n, pdf);
 
-    Vector3f y_to_x = (at - surface_point).normalized();
-    Vector3f x_to_y = -y_to_x;
-    float distance = (surface_point - at).norm();
+    Vector3f x_to_y = (light_point - p).normalized();
+    float distance = (light_point - p).norm();
 
-    Ray3f ray = Ray3f(at, x_to_y, Epsilon, (1 - Epsilon) * distance);
+    // We stop the ray right before its intersection with the light source (which would be guaranteed to happen)
+    Ray3f ray = Ray3f(p, x_to_y, Epsilon, (1 - Epsilon) * distance);
 
     if(scene->rayIntersect(ray)) {
         // meaning the ray hit an object BEFORE hitting the light source
         return Color3f(0.0f);
     }
 
-    float jacobian = abs(at_normal.dot(x_to_y) * (n.dot(y_to_x))) / (distance*distance);
+    // determinant of the jacobian of the change of coordinates
+    float distortion_factor = abs(n.dot(x_to_y) * (light_n.dot(x_to_y))) / (distance*distance);
 
-    Color3f emitted = getEmittance(surface_point, n, y_to_x);
+    Color3f emitted = getEmittance(light_point, light_n, -x_to_y);
 
-    Frame local(at_normal);
+    Frame frame(n); // BSDFQueryRecord expects local vectors
+    BSDFQueryRecord query(frame.toLocal(wi), frame.toLocal(x_to_y), EMeasure::ESolidAngle);
 
-    BSDFQueryRecord query(local.toLocal(dir_to_camera), local.toLocal(x_to_y), EMeasure::ESolidAngle);
     Color3f bsdf_term = bsdf->eval(query);
 
-    return jacobian/pdf * (emitted * bsdf_term); 
+    return distortion_factor/pdf * (emitted * bsdf_term); 
 }
 
 NORI_NAMESPACE_END

@@ -16,21 +16,21 @@ public:
         
         Intersection its;
         
-        if (!scene->rayIntersect(ray, its))
+        if (!scene->rayIntersect(ray, its)) {
             return Color3f(0.0f);
+        }
 
+        Vector3f sampled_point = Warp::squareToCosineHemisphere(sampler->next2D());
+        Vector3f w = its.shFrame.toWorld(sampled_point);
 
-        Vector3f w = Warp::squareToCosineHemisphere(sampler->next2D());
-
-        w = its.shFrame.toWorld(w);
 
         if(scene->rayIntersect(Ray3f(its.p, w))) {
-            return 0;
+            return Color3f(0.0f);
         }
     
         float cos_theta = its.shFrame.n.dot(w);
-
-        float intensity = std::max(0.0f, cos_theta) / M_PI;
+        // divide by PDF to make our estimator unbiaised
+        float intensity = std::max(0.0f, cos_theta) / (M_PI * (Warp::squareToCosineHemispherePdf(sampled_point)));
     
         return Color3f(intensity);
     }

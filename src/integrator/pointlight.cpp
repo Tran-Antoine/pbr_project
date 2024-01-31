@@ -15,8 +15,9 @@ public:
         
         Intersection its;
         
-        if (!scene->rayIntersect(ray, its))
+        if (!scene->rayIntersect(ray, its)) {
             return Color3f(0.0f);
+        }
 
         Vector3f point_to_light = position - its.p;   
 
