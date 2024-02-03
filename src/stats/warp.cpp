@@ -197,7 +197,7 @@ float Warp::squareToCosineHemispherePdf(const Vector3f &v) {
     float z = v.z();
 
     if(z < 0) return 0;
-    if(abs(x*x + y*y + z*z - 1) > 1e-5) return 0;
+    if(abs(x*x + y*y + z*z - 1) > Epsilon) return 0;
 
     float cos_theta = z;
     return cos_theta / M_PI;
