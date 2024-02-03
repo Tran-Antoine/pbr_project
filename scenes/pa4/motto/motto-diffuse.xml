@@ -4,7 +4,7 @@
 
     <sampler type="independent">
         <!-- You might want to reduce this number during development -->
-        <integer name="sampleCount" value="32"/>
+        <integer name="sampleCount" value="256"/>
     </sampler>
 
     <camera type="perspective">
@@ -23,7 +23,7 @@
 
     <mesh type="obj">
         <string name="filename" value="meshes/title.obj"/>
-        <bsdf type="dielectric">
+        <bsdf type="diffuse">
             <color name="albedo" value="0.5, 0.5, 0.5"/>
         </bsdf>
     </mesh>

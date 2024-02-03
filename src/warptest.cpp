@@ -16,9 +16,9 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <nori/warp.h>
-#include <nori/bsdf.h>
-#include <nori/vector.h>
+#include <stats/warp.h>
+#include <bsdf/bsdf.h>
+#include <core/vector.h>
 #include <nanogui/screen.h>
 #include <nanogui/label.h>
 #include <nanogui/window.h>
@@ -44,9 +44,9 @@
 
 #include <Eigen/Geometry>
 
-#include <nori/mesh.h>
-#include <nori/parser.h>
-#include <nori/scene.h>
+#include <core/mesh.h>
+#include <parser/parser.h>
+#include <core/scene.h>
 #include <filesystem/resolver.h>
 
 

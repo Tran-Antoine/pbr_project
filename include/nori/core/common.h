@@ -31,6 +31,7 @@
 #include <vector>
 #include <Eigen/Core>
 #include <stdint.h>
+#include <filesystem/resolver.h>
 #include <ImathPlatform.h>
 #include <tinyformat.h>
 
@@ -52,6 +53,7 @@
 /* A few useful constants */
 #undef M_PI
 
+#define M_E          2.71828182845904523536f
 #define M_PI         3.14159265358979323846f
 #define INV_PI       0.31830988618379067154f
 #define INV_TWOPI    0.15915494309189533577f
