@@ -216,15 +216,18 @@ Vector3f Warp::squareToBeckmann(const Point2f &sample, float alpha) {
     float cos_theta = 1 / sqrt(1 + tan2_theta);
     float sin_theta = sqrt(std::max(0.0f, 1 - cos_theta * cos_theta));
 
-    return Vector3f(sin_theta*cos_phi, sin_theta*sin_phi, cos_theta);
+    Vector3f wh = Vector3f(sin_theta*cos_phi, sin_theta*sin_phi, cos_theta);
+
+    return wh;
 }
 
 float Warp::squareToBeckmannPdf(const Vector3f &m, float alpha) {
     
-    float cos_theta = Frame::cosTheta(m);
+    float cos_theta = Frame::cosTheta(m); 
     float tan_theta = Frame::tanTheta(m);
 
     float pdf = 1 / (2 * M_PI) * (2 * exp(-pow(tan_theta, 2) / (alpha * alpha)) / (alpha * alpha * pow(cos_theta, 3)));
+
     return std::max(0.0f, pdf);
 }
 

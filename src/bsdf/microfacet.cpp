@@ -95,6 +95,11 @@ public:
     float pdf(const BSDFQueryRecord &bRec) const {
     	float ks = 1 - std::max({m_kd.x(), m_kd.y(), m_kd.z()});
         Vector3f wh = (bRec.wi + bRec.wo).normalized();
+        
+        /*if(wh.z() < 0) {
+            wh = -wh; // if uncomment, also add abs(.) on wh.dot(wo)
+        }*/
+
         return ks * Warp::squareToBeckmannPdf(wh, m_alpha) / (4*wh.dot(bRec.wo)) + (1 - ks) * Warp::squareToCosineHemispherePdf(bRec.wo);
     }
 
@@ -110,10 +115,11 @@ public:
             eps1 = eps1 / ks;
 
             Vector3f wi = bRec.wi;
+
             Vector3f normal = Warp::squareToBeckmann(Point2f(eps1, eps2), m_alpha);
 
+      
             Vector3f wo = 2 * normal.dot(wi) * normal - wi;
-
             bRec.wo = wo;
 
             return eval(bRec) * Frame::cosTheta(bRec.wo) / pdf(bRec);

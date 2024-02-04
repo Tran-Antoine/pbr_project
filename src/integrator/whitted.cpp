@@ -34,6 +34,17 @@ public:
 
             return Color3f(0.0f);
 
+            // Alternative : sample all light sources
+            /*Color3f test;
+
+            for(Mesh* mesh : scene->getMeshes()) {
+                if(mesh->getEmitter()) {
+                    test += mesh->getEmitter()->sampleRadiance(its.mesh->getBSDF(), its.p, frame.n, -ray.d, *sampler, scene) * mesh->getTotalArea();
+                }
+            }
+
+            return test;*/
+
         } else {
 
             float eps = sampler->next1D();

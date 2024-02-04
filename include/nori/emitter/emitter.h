@@ -37,9 +37,9 @@ public:
      * */
     EClassType getClassType() const { return EEmitter; }
 
-    virtual Color3f sampleRadiance(const BSDF* bsdf, Point3f at, Vector3f at_normal, Vector3f dir, Sampler& sampler, const Scene* scene) = 0;
+    virtual Color3f sampleRadiance(const BSDF* bsdf, Point3f at, Vector3f at_normal, Vector3f dir, Sampler& sampler, const Scene* scene) const = 0;
 
-    virtual Color3f getEmittance(Point3f pos, Vector3f normal, Vector3f direction) = 0;
+    virtual Color3f getEmittance(Point3f pos, Vector3f normal, Vector3f direction) const = 0;
 };
 
 

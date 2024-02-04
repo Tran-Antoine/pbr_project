@@ -17,13 +17,14 @@ void MeshEmitter::setParent(NoriObject *parent) {
     mesh = static_cast<Mesh*>(parent);
 }
 
-Color3f MeshEmitter::getEmittance(Point3f pos, Vector3f normal, Vector3f direction) {
+Color3f MeshEmitter::getEmittance(Point3f pos, Vector3f normal, Vector3f direction) const {
+    
+    if(normal.dot(direction) < 0) return Color3f(0.0f);
+
     return color;
 }
 
-Color3f MeshEmitter::sampleRadiance(const BSDF* bsdf, Point3f p, Vector3f n, Vector3f wi, Sampler& sampler, const Scene* scene)
-{
-    // TODO: Add many "Sampler" implementations, one per warping scheme
+Color3f MeshEmitter::sampleRadiance(const BSDF* bsdf, Point3f p, Vector3f n, Vector3f wi, Sampler& sampler, const Scene* scene) const {
 
     Point2f sample(sampler.next2D());
 

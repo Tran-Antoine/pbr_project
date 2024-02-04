@@ -12,8 +12,8 @@ public:
 
     MeshEmitter(const PropertyList& props);
 
-    Color3f sampleRadiance(const BSDF* bsdf, Point3f at, Vector3f at_normal, Vector3f dir, Sampler& sampler, const Scene* scene) override;
-    Color3f getEmittance(Point3f pos, Vector3f normal, Vector3f direction) override;
+    Color3f sampleRadiance(const BSDF* bsdf, Point3f at, Vector3f at_normal, Vector3f dir, Sampler& sampler, const Scene* scene) const override;
+    Color3f getEmittance(Point3f pos, Vector3f normal, Vector3f direction) const override;
 
     void setParent(NoriObject *parent) override;
 

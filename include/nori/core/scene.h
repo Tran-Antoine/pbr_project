@@ -59,6 +59,8 @@ public:
     /// Return a reference to an array containing all meshes
     const std::vector<Mesh *> &getMeshes() const { return m_meshes; }
 
+    const std::vector<Mesh *> &getMeshEmitters() const { return m_mesh_emitters; }
+
     Mesh* pickMeshEmitter() const;
 
     /**
