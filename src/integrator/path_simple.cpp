@@ -52,6 +52,9 @@ public:
             // Direct illumination component
             for(Mesh* mesh : scene->getMeshEmitters()) {
                 Color3f direct_rad = mesh->getEmitter()->sampleRadiance(surface_bsdf, x, n, wi, *sampler, scene);
+                if(!direct_rad.isValid()) {
+                    std::cout << "nan";
+                }
                 Ld += beta * mesh->getTotalArea() * direct_rad; // 1/pdf = total area
             }
 
@@ -61,49 +64,15 @@ public:
 
             Color3f bsdf_term = surface_bsdf->sample(record, sampler->next2D()); 
 
+            if(!bsdf_term.isValid()) {
+                //std::cout << typeid(*surface_bsdf).name() << "\n";
+            }
             beta = beta * bsdf_term / (1-q);
 
             current_ray = Ray3f(x, frame.toWorld(record.wo));
             last_specular = !surface_bsdf->isDiffuse();
             bounces++;
         }
-
-        /*if(its.mesh->getEmitter()) {
-            Le += its.mesh->getEmitter()->getEmittance(x, n, wi);
-        }
-
-        for(Mesh* mesh : scene->getMeshEmitters()) {
-
-            // Direct illumination component
-            Emitter* emitter = mesh->getEmitter();
-            Color3f sampled_radiance = emitter->sampleRadiance(surface_bsdf, x, n, wi, *sampler, scene);
-            Ld += mesh->getTotalArea() * sampled_radiance; // 1/pdf = total area
-        }
-
- 
-
-        if(sampler->next1D() > 0.05) {
-            Frame frame(n);
-            BSDFQueryRecord record(frame.toLocal(wi));
-
-            Color3f bsdf_term = surface_bsdf->sample(record, sampler->next2D()); 
-
-            const Ray3f new_query(x, frame.toWorld(record.wo));
-
-            // TODO: make sure we need this cosine factor here (probably we dont need it as BRDF already has it implicitely by not divinding by costheta when it should)
-            Li += bsdf_term * this->Li(scene, sampler, new_query); // bsdf_term is already divided by the PDF
-        }
-
-        bool last_specular = true;
-
-        if(last_specular) {
-            return Le + Ld + Li / 0.95f;
-        } else {
-            return Ld + Li / 0.95f;
-        }
-
-        // Here the refraction part is considered as indirect illumination, treated the same as ray bouncing off surfaces*/
-
         return (Le + Ld);
     }
 

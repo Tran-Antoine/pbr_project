@@ -53,11 +53,11 @@ public:
             float cos_theta_v = Frame::cosTheta(wv);
             float b = 1 / (m_alpha * tan(cos_theta_v));
 
-            float coeff = b < 1.6 ? (3.535*b + 2.181*b*b) / (1 + 2.276*b + 2.577*b*b) : 1;
+            float coeff = b < 1.6f ? (3.535f*b + 2.181f*b*b) / (1.0f + 2.276f*b + 2.577f*b*b) : 1.0f;
 
             float c = wv.dot(wh) / wv.z();
 
-            float xplus = c > 0 ? 1 : 0;
+            float xplus = c > 0.0f ? 1.0f : 0.0f;
 
             return xplus * coeff;
         };
@@ -122,7 +122,12 @@ public:
             Vector3f wo = 2 * normal.dot(wi) * normal - wi;
             bRec.wo = wo;
 
-            return eval(bRec) * Frame::cosTheta(bRec.wo) / pdf(bRec);
+            if(pdf(bRec) == 0.0f || Frame::cosTheta(bRec.wo) < 0) { // TODO: is this the right way to do it?
+                return Color3f(0.0f);
+            }
+
+            Color3f output = eval(bRec) * Frame::cosTheta(bRec.wo) / pdf(bRec);
+            return output;
 
         } else { // handle diffuse
             eps1 = (eps1 - ks) / (1 - ks);
