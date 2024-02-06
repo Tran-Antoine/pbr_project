@@ -105,6 +105,7 @@ add_executable(nori
   src/integrator/ambient.cpp
   src/integrator/whitted.cpp
   src/integrator/path_simple.cpp
+  src/integrator/path_mis.cpp
 
   src/emitter/area.cpp
 
