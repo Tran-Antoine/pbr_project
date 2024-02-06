@@ -23,7 +23,9 @@ rules.ninja
 *.sln
 *.dir
 *.opendb
+*.m
 Debug
 x64
 /scenes/pa2/ajax.obj
 /scenes/pa3/ajax.obj
+/scenes/pa3/ajax/ajax.obj

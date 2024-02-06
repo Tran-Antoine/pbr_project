@@ -25,6 +25,26 @@
 
 NORI_NAMESPACE_BEGIN
 
+struct EmitterQueryRecord {
+
+    bool empty;
+    Point3f p, l;
+    Vector3f n_p, n_l, wi;
+    const BSDF* bsdf;
+
+    EmitterQueryRecord() : empty(true) {}
+
+    EmitterQueryRecord(const BSDF* bsdf, Point3f p, Vector3f n_p, Vector3f wi) : bsdf(bsdf), p(p), n_p(n_p), wi(wi), empty(false) {}
+
+    EmitterQueryRecord(const BSDF* bsdf, Point3f p, Vector3f n_p, Vector3f wi, Point3f l, Vector3f n_l) : bsdf(bsdf), p(p), n_p(n_p), l(l), n_l(n_l), wi(wi), empty(false) {}
+
+    bool isEmpty() const { return empty; }
+
+    Vector3f wo() const {
+        return (l-p).normalized();
+    }
+};
+
 /**
  * \brief Superclass of all emitters
  */
@@ -37,7 +57,9 @@ public:
      * */
     EClassType getClassType() const { return EEmitter; }
 
-    virtual Color3f sampleRadiance(const BSDF* bsdf, Point3f at, Vector3f at_normal, Vector3f dir, Sampler& sampler, const Scene* scene) const = 0;
+    virtual Color3f evalRadiance(EmitterQueryRecord& rec, const Scene* scene) const = 0;
+
+    virtual Color3f sampleRadiance(EmitterQueryRecord& rec, Sampler& sampler, const Scene* scene, float& angular_pdf) const = 0;
 
     virtual Color3f getEmittance(Point3f pos, Vector3f normal, Vector3f direction) const = 0;
 };

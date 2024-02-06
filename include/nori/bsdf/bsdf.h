@@ -39,14 +39,20 @@ struct  BSDFQueryRecord {
     /// Measure associated with the sample
     EMeasure measure;
 
+    bool empty;
+
+    BSDFQueryRecord() : empty(true) {}
+
     /// Create a new record for sampling the BSDF
     BSDFQueryRecord(const Vector3f &wi)
-        : wi(wi), eta(1.f), measure(EUnknownMeasure) { }
+        : wi(wi), eta(1.f), measure(EUnknownMeasure), empty(false) { }
 
     /// Create a new record for querying the BSDF
     BSDFQueryRecord(const Vector3f &wi,
             const Vector3f &wo, EMeasure measure)
-        : wi(wi), wo(wo), eta(1.f), measure(measure) { }
+        : wi(wi), wo(wo), eta(1.f), measure(measure), empty(false) { }
+
+    bool isEmpty() const { return empty; }
 };
 
 /**

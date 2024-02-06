@@ -24,20 +24,40 @@ Color3f MeshEmitter::getEmittance(Point3f pos, Vector3f normal, Vector3f directi
     return color;
 }
 
-Color3f MeshEmitter::sampleRadiance(const BSDF* bsdf, Point3f p, Vector3f n, Vector3f wi, Sampler& sampler, const Scene* scene) const {
+Color3f MeshEmitter::evalRadiance(EmitterQueryRecord& rec, const Scene* scene) const {
+    
+    Vector3f x_to_y = (rec.l - rec.p).normalized();
+    float distance = (rec.l - rec.p).norm();
 
+    // determinant of the jacobian of the change of coordinates
+    float distortion_factor = abs(rec.n_p.dot(x_to_y) * (rec.n_l.dot(x_to_y))) / (distance*distance);
+
+    Color3f emitted = getEmittance(rec.l, rec.n_l, -x_to_y);
+
+    Frame frame(rec.n_p); // BSDFQueryRecord expects local vectors
+    BSDFQueryRecord query(frame.toLocal(rec.wi), frame.toLocal(x_to_y), EMeasure::ESolidAngle);
+
+    Color3f bsdf_term = rec.bsdf->eval(query);
+
+    return distortion_factor * (emitted * bsdf_term); 
+}
+
+Color3f MeshEmitter::sampleRadiance(EmitterQueryRecord& rec, Sampler& sampler, const Scene* scene, float& angular_pdf) const {
+
+    // TODO: get rid of duplication with evalRadiance
     Point2f sample(sampler.next2D());
 
     Point3f light_point;
     Vector3f light_n;
-    float pdf;
-    Warp::squareToMeshPoint(sample, *mesh, light_point, light_n, pdf);
+    float pdf_light;
+    Warp::squareToMeshPoint(sample, *mesh, light_point, light_n, pdf_light);
 
-    Vector3f x_to_y = (light_point - p).normalized();
-    float distance = (light_point - p).norm();
+
+    Vector3f x_to_y = (light_point - rec.p).normalized();
+    float distance = (light_point - rec.p).norm();
 
     // We stop the ray right before its intersection with the light source (which would be guaranteed to happen)
-    Ray3f ray = Ray3f(p, x_to_y, Epsilon, (1 - Epsilon) * distance);
+    Ray3f ray = Ray3f(rec.p, x_to_y, Epsilon, (1 - Epsilon) * distance);
 
     if(scene->rayIntersect(ray)) {
         // meaning the ray hit an object BEFORE hitting the light source
@@ -45,16 +65,20 @@ Color3f MeshEmitter::sampleRadiance(const BSDF* bsdf, Point3f p, Vector3f n, Vec
     }
 
     // determinant of the jacobian of the change of coordinates
-    float distortion_factor = abs(n.dot(x_to_y) * (light_n.dot(x_to_y))) / (distance*distance);
+    float distortion_factor = abs(rec.n_p.dot(x_to_y) * (light_n.dot(x_to_y))) / (distance*distance);
 
     Color3f emitted = getEmittance(light_point, light_n, -x_to_y);
 
-    Frame frame(n); // BSDFQueryRecord expects local vectors
-    BSDFQueryRecord query(frame.toLocal(wi), frame.toLocal(x_to_y), EMeasure::ESolidAngle);
+    Frame frame(rec.n_p); // BSDFQueryRecord expects local vectors
+    BSDFQueryRecord query(frame.toLocal(rec.wi), frame.toLocal(x_to_y), EMeasure::ESolidAngle);
 
-    Color3f bsdf_term = bsdf->eval(query);
+    Color3f bsdf_term = rec.bsdf->eval(query);
 
-    return distortion_factor * (emitted * bsdf_term); 
+    angular_pdf = pdf_light * distance * distance / Frame::cosTheta(frame.toLocal(x_to_y));
+    rec.l = light_point;
+    rec.n_l = light_n;
+
+    return distortion_factor * (emitted * bsdf_term) / pdf_light; 
 }
 
 NORI_NAMESPACE_END
