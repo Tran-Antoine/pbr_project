@@ -24,6 +24,14 @@ Color3f MeshEmitter::getEmittance(Point3f pos, Vector3f normal, Vector3f directi
     return color;
 }
 
+float MeshEmitter::pdf(EmitterQueryRecord& rec) const {
+    float d2 = (rec.l - rec.p).squaredNorm();
+    float cos_theta = rec.n_l.dot((rec.p - rec.l).normalized());
+    float area = mesh->getTotalArea();
+
+    return d2 / (area * cos_theta);
+}
+
 Color3f MeshEmitter::evalRadiance(EmitterQueryRecord& rec, const Scene* scene) const {
     
     Vector3f x_to_y = (rec.l - rec.p).normalized();
@@ -74,7 +82,7 @@ Color3f MeshEmitter::sampleRadiance(EmitterQueryRecord& rec, Sampler& sampler, c
 
     Color3f bsdf_term = rec.bsdf->eval(query);
 
-    angular_pdf = pdf_light * distance * distance / Frame::cosTheta(frame.toLocal(x_to_y));
+    angular_pdf = pdf_light * distance * distance / light_n.dot(-x_to_y);
     rec.l = light_point;
     rec.n_l = light_n;
 

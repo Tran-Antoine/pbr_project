@@ -100,6 +100,8 @@ public:
             wh = -wh; // if uncomment, also add abs(.) on wh.dot(wo)
         }*/
 
+        if(wh.z() < 0) ks = 0;
+
         return ks * Warp::squareToBeckmannPdf(wh, m_alpha) / (4*wh.dot(bRec.wo)) + (1 - ks) * Warp::squareToCosineHemispherePdf(bRec.wo);
     }
 
