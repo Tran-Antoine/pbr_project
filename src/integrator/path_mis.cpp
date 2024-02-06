@@ -9,22 +9,17 @@ NORI_NAMESPACE_BEGIN
 class MISPathTracer : public Integrator {
 public:
     MISPathTracer(const PropertyList &props) {
-        
+        q = props.getFloat("q", 0.1f);
     }
 
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const {
         
-        Color3f Le = Color3f(0.0f), Ld = Color3f(0.0f);
+        Color3f Le(0.0f), Ld(0.0f), beta(1.0f);
 
         int bounces = 0;
-        bool last_specular = false;
-
-        Color3f beta(1.0f);
+        bool last_specular = false; 
 
         Ray3f current_ray = ray;
-
-        float q = 0.1;
-
         const BSDF* surface_bsdf;
         EmitterQueryRecord emitter_rec;
         BSDFQueryRecord bsdf_record;
@@ -67,15 +62,15 @@ public:
 
             surface_bsdf = its.mesh->getBSDF(); // delayed initialization so that the lines above use the previous bsdf
             bsdf_record = BSDFQueryRecord(frame.toLocal(wi));
-            
+            emitter_rec = EmitterQueryRecord(surface_bsdf, x, n, wi);
 
             // Direct illumination component
             for(Mesh* mesh : scene->getMeshEmitters()) {
-                emitter_rec = EmitterQueryRecord(surface_bsdf, x, n, wi);
+                
                 Color3f direct_rad = mesh->getEmitter()->sampleRadiance(emitter_rec, *sampler, scene, angular_light_pdf);
 
-                float pdf_light = angular_light_pdf;
-                float pdf_brdf  = surface_bsdf->pdf(BSDFQueryRecord(bsdf_record.wi, emitter_rec.wo(), EMeasure::ESolidAngle));
+                float pdf_light = angular_light_pdf; // fix not local
+                float pdf_brdf  = surface_bsdf->pdf(BSDFQueryRecord(bsdf_record.wi, frame.toLocal(emitter_rec.wo()), EMeasure::ESolidAngle));
                 float weight = pdf_light / (pdf_light + pdf_brdf);
 
                 Ld += beta * weight * direct_rad;
@@ -94,6 +89,10 @@ public:
     std::string toString() const {
         return "MISPathTracerIntegrator[]";
     }
+
+private:
+    float q;
+
 };
 
 NORI_REGISTER_CLASS(MISPathTracer, "path_mis");
