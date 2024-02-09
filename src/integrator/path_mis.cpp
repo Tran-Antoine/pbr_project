@@ -86,7 +86,11 @@ public:
 
             // Indirect illumination (computing the next step)
             bsdf_record = BSDFQueryRecord(frame.toLocal(wi));
-            Color3f bsdf_term = surface_bsdf->sample(bsdf_record, sampler->next2D()); 
+            Color3f bsdf_term = surface_bsdf->sample(bsdf_record, sampler->next2D());
+
+            if(bsdf_term.isZero()) {
+                break;
+            } 
 
             previous_pdf = surface_bsdf->pdf(bsdf_record);
 

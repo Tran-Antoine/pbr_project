@@ -78,6 +78,10 @@ public:
         Vector3f wi = bRec.wi;
         Vector3f wo = bRec.wo;
         Vector3f wh = (wi + wo).normalized();
+ 
+        if(Frame::cosTheta(wo) < 0) {
+            return Color3f(0.0f);
+        }
 
         float cos_theta_i = Frame::cosTheta(wi), 
               cos_theta_o = Frame::cosTheta(wo), 
@@ -96,11 +100,10 @@ public:
     	float ks = 1 - std::max({m_kd.x(), m_kd.y(), m_kd.z()});
         Vector3f wh = (bRec.wi + bRec.wo).normalized();
         
-        /*if(wh.z() < 0) {
-            wh = -wh; // if uncomment, also add abs(.) on wh.dot(wo)
-        }*/
-
-        if(wh.z() < 0) return 0;
+        if(Frame::cosTheta(bRec.wo) < 0) {
+            // a BRDF would never sample a direction outside the hemisphere
+            return 0.0f;
+        }
 
         return ks * Warp::squareToBeckmannPdf(wh, m_alpha) / (4*wh.dot(bRec.wo)) + (1 - ks) * Warp::squareToCosineHemispherePdf(bRec.wo);
     }
@@ -108,7 +111,6 @@ public:
     /// Sample the BRDF
     Color3f sample(BSDFQueryRecord &bRec, const Point2f &_sample) const {
     	
-        Color3f output;
 
         float eps1 = _sample.x();
         float eps2 = _sample.y();
@@ -121,24 +123,21 @@ public:
             Vector3f wi = bRec.wi;
 
             Vector3f wh = Warp::squareToBeckmann(Point2f(eps1, eps2), m_alpha);
-
       
             Vector3f wo = 2 * wh.dot(wi) * wh - wi;
             bRec.wo = wo;
 
-            if(Frame::cosTheta(bRec.wo) < 0) { // TODO: is this the right way to do it?
-                // ??
-            }
-
-            output = eval(bRec);
-            
-
         } else { // handle diffuse
             eps1 = (eps1 - ks) / (1 - ks);
             bRec.wo = Warp::squareToCosineHemisphere(Point2f(eps1, eps2));
-            output = m_kd;
         } 
         
+        Color3f output = eval(bRec);
+
+        if(output.isZero()) {
+            return output;
+        }
+
         return output * Frame::cosTheta(bRec.wo) / pdf(bRec);
         // TODO: Have a common return statement
 
