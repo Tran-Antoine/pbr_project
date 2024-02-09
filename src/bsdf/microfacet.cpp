@@ -100,7 +100,7 @@ public:
             wh = -wh; // if uncomment, also add abs(.) on wh.dot(wo)
         }*/
 
-        if(wh.z() < 0) ks = 0;
+        if(wh.z() < 0) return 0;
 
         return ks * Warp::squareToBeckmannPdf(wh, m_alpha) / (4*wh.dot(bRec.wo)) + (1 - ks) * Warp::squareToCosineHemispherePdf(bRec.wo);
     }
@@ -108,6 +108,8 @@ public:
     /// Sample the BRDF
     Color3f sample(BSDFQueryRecord &bRec, const Point2f &_sample) const {
     	
+        Color3f output;
+
         float eps1 = _sample.x();
         float eps2 = _sample.y();
 
@@ -118,24 +120,28 @@ public:
 
             Vector3f wi = bRec.wi;
 
-            Vector3f normal = Warp::squareToBeckmann(Point2f(eps1, eps2), m_alpha);
+            Vector3f wh = Warp::squareToBeckmann(Point2f(eps1, eps2), m_alpha);
 
       
-            Vector3f wo = 2 * normal.dot(wi) * normal - wi;
+            Vector3f wo = 2 * wh.dot(wi) * wh - wi;
             bRec.wo = wo;
 
-            if(pdf(bRec) == 0.0f || Frame::cosTheta(bRec.wo) < 0) { // TODO: is this the right way to do it?
-                return Color3f(0.0f);
+            if(Frame::cosTheta(bRec.wo) < 0) { // TODO: is this the right way to do it?
+                // ??
             }
 
-            Color3f output = eval(bRec) * Frame::cosTheta(bRec.wo) / pdf(bRec);
-            return output;
+            output = eval(bRec);
+            
 
         } else { // handle diffuse
             eps1 = (eps1 - ks) / (1 - ks);
             bRec.wo = Warp::squareToCosineHemisphere(Point2f(eps1, eps2));
-            return m_kd;
-        }
+            output = m_kd;
+        } 
+        
+        return output * Frame::cosTheta(bRec.wo) / pdf(bRec);
+        // TODO: Have a common return statement
+
         // Note: Once you have implemented the part that computes the scattered
         // direction, the last part of this function should simply return the
         // BRDF value divided by the solid angle density and multiplied by the

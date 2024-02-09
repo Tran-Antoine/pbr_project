@@ -25,6 +25,8 @@ public:
         BSDFQueryRecord bsdf_record;
         float angular_light_pdf; 
 
+        float previous_pdf;
+
         Point3f previous_p;
 
         while(sampler->next1D() > q) {
@@ -52,11 +54,13 @@ public:
                 // whether the indirect ray intersected with an emitter
                 // This whole procedure simulates using two samples and not one, one picked from the BRDF, the other from the light source
                 if(surface_bsdf && !bsdf_record.isEmpty()) {
-                    float brdf_pdf = surface_bsdf->pdf(bsdf_record);
+                    float brdf_pdf = previous_pdf;
                     float light_pdf = emitter->pdf(EmitterQueryRecord(surface_bsdf, previous_p, Vector3f(), Vector3f(), x, n));
                     float weight = brdf_pdf / (brdf_pdf + light_pdf);
-                    Ld += beta_lag * emitter->evalRadiance(emitter_rec, scene);
+                    Ld += beta_lag * weight * emitter->evalRadiance(emitter_rec, scene);
                 }
+
+                break;
                 
             }
             
@@ -83,6 +87,9 @@ public:
             // Indirect illumination (computing the next step)
             bsdf_record = BSDFQueryRecord(frame.toLocal(wi));
             Color3f bsdf_term = surface_bsdf->sample(bsdf_record, sampler->next2D()); 
+
+            previous_pdf = surface_bsdf->pdf(bsdf_record);
+
             beta = beta * bsdf_term / (1-q);
             current_ray = Ray3f(x, frame.toWorld(bsdf_record.wo));
             last_specular = !surface_bsdf->isDiffuse();
