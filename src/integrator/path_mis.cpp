@@ -14,7 +14,7 @@ public:
 
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const {
         
-        Color3f Le(0.0f), Ld(0.0f), beta(1.0f), beta_lag(1.0f);
+        Color3f Le(0.0f), Ld(0.0f), beta(1.0f);
 
         int bounces = 0;
         bool last_specular = false; 
@@ -23,11 +23,6 @@ public:
         const BSDF* surface_bsdf;
         EmitterQueryRecord emitter_rec;
         BSDFQueryRecord bsdf_record;
-        float angular_light_pdf; 
-
-        float previous_pdf;
-
-        Point3f previous_p;
 
         while(sampler->next1D() > q) {
 
@@ -49,35 +44,22 @@ public:
                     Le += beta * emitter->getEmittance(x, n, wi);
                 }
 
-                // Add MIS component from the PREVIOUS interaction
-                // This can only be done now because during the previous interaction we couldn't know
-                // whether the indirect ray intersected with an emitter
-                // This whole procedure simulates using two samples and not one, one picked from the BRDF, the other from the light source
-                if(surface_bsdf && !bsdf_record.isEmpty()) {
-                    float brdf_pdf = previous_pdf;
-                    float light_pdf = emitter->pdf(EmitterQueryRecord(surface_bsdf, previous_p, Vector3f(), Vector3f(), x, n));
-                    float weight = brdf_pdf / (brdf_pdf + light_pdf);
-                    Ld += beta_lag * weight * emitter->evalRadiance(emitter_rec, scene);
-                }
-
                 break;
-                
             }
             
             Frame frame(n);
 
-            previous_p = x;
-            beta_lag = beta;
+
             surface_bsdf = its.mesh->getBSDF(); // delayed initialization so that the lines above use the previous bsdf
             emitter_rec = EmitterQueryRecord(surface_bsdf, x, n, wi);
 
             // Direct illumination component
             for(Mesh* mesh : scene->getMeshEmitters()) {
                 
-                Color3f direct_rad = mesh->getEmitter()->sampleRadiance(emitter_rec, *sampler, scene, angular_light_pdf);
+                float pdf_light;
+                Color3f direct_rad = mesh->getEmitter()->sampleRadiance(emitter_rec, *sampler, scene, pdf_light);
                 Vector3f wo = emitter_rec.wo();
 
-                float pdf_light = angular_light_pdf;
                 float pdf_brdf  = surface_bsdf->pdf(BSDFQueryRecord(frame.toLocal(wi), frame.toLocal(emitter_rec.wo()), EMeasure::ESolidAngle));
                 float weight = pdf_light / (pdf_light + pdf_brdf);
 
@@ -92,7 +74,6 @@ public:
                 break;
             } 
 
-            previous_pdf = surface_bsdf->pdf(bsdf_record);
 
             beta = beta * bsdf_term / (1-q);
             current_ray = Ray3f(x, frame.toWorld(bsdf_record.wo));

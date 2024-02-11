@@ -43,9 +43,10 @@ public:
             if(emitter) {
                 if(bounces == 0 || last_specular) {
                     Le += beta * emitter->getEmittance(x, n, wi);
-                } else {
-                    break;
                 }
+                // seems more logic to break the indirect lighting loop whenever we hit an emitter,
+                // regardless of whether its contribution should be counted or not
+                break;
             }
             
             // Direct illumination component

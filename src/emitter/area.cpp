@@ -82,7 +82,10 @@ Color3f MeshEmitter::sampleRadiance(EmitterQueryRecord& rec, Sampler& sampler, c
 
     Color3f bsdf_term = rec.bsdf->eval(query);
 
-    angular_pdf = pdf_light * distance * distance / light_n.dot(-x_to_y);
+    angular_pdf = pdf_light * 1 * 1 / rec.n_p.dot(x_to_y);
+    if(angular_pdf > 1) {
+        std::cout << "sus";
+    }
     rec.l = light_point;
     rec.n_l = light_n;
 
