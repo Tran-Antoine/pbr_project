@@ -24,10 +24,14 @@ public:
         EmitterQueryRecord emitter_rec;
         BSDFQueryRecord bsdf_record;
 
+        Intersection its;
+        bool found_intersection;
+
         while(sampler->next1D() > q) {
 
-            Intersection its;
-            bool found_intersection = scene->rayIntersect(current_ray, its);
+            if(bounces == 0) {
+                found_intersection = scene->rayIntersect(current_ray, its);
+            }
             
             if(!found_intersection) {
                 break;
@@ -76,17 +80,16 @@ public:
             
             current_ray = Ray3f(x, frame.toWorld(bsdf_record.wo));
 
-            Intersection its2;
-            found_intersection = scene->rayIntersect(current_ray, its2);
+            found_intersection = scene->rayIntersect(current_ray, its);
             
             beta = beta * bsdf_term / (1-q);
 
             if(found_intersection) {
-                if(its2.mesh->getEmitter()) {
-                    float light_pdf = its2.mesh->getEmitter()->pdf(EmitterQueryRecord(surface_bsdf, x, n, wi, its2.p, its2.shFrame.n));
+                if(its.mesh->getEmitter()) {
+                    float light_pdf = its.mesh->getEmitter()->pdf(EmitterQueryRecord(surface_bsdf, x, n, wi, its.p, its.shFrame.n));
                     float brdf_pdf = surface_bsdf->pdf(bsdf_record);
                     float weight = brdf_pdf / (brdf_pdf + light_pdf);
-                    Ld += beta * weight * its2.mesh->getEmitter()->getEmittance(its2.p, its2.shFrame.n, -current_ray.d);
+                    Ld += beta * weight * its.mesh->getEmitter()->getEmittance(its.p, its.shFrame.n, -current_ray.d);
                 }
             }
 
