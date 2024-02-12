@@ -139,7 +139,6 @@ public:
         }
 
         return output * Frame::cosTheta(bRec.wo) / pdf(bRec);
-        // TODO: Have a common return statement
 
         // Note: Once you have implemented the part that computes the scattered
         // direction, the last part of this function should simply return the

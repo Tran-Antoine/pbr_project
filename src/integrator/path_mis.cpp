@@ -73,10 +73,24 @@ public:
             if(bsdf_term.isZero()) {
                 break;
             } 
-
-
-            beta = beta * bsdf_term / (1-q);
+            
             current_ray = Ray3f(x, frame.toWorld(bsdf_record.wo));
+
+            Intersection its2;
+            found_intersection = scene->rayIntersect(current_ray, its2);
+            
+            beta = beta * bsdf_term / (1-q);
+
+            if(found_intersection) {
+                if(its2.mesh->getEmitter()) {
+                    float light_pdf = its2.mesh->getEmitter()->pdf(EmitterQueryRecord(surface_bsdf, x, n, wi, its2.p, its2.shFrame.n));
+                    float brdf_pdf = surface_bsdf->pdf(bsdf_record);
+                    float weight = brdf_pdf / (brdf_pdf + light_pdf);
+                    Ld += beta * weight * its2.mesh->getEmitter()->getEmittance(its2.p, its2.shFrame.n, -current_ray.d);
+                }
+            }
+
+
             last_specular = !surface_bsdf->isDiffuse();
             bounces++;
         }
