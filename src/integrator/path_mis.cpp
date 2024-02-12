@@ -12,6 +12,10 @@ public:
         q = props.getFloat("q", 0.1f);
     }
 
+    static Color3f direct(Color3f beta, float weight, Color3f emittance) {
+        return weight * (beta * emittance);
+    }
+
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const {
         
         Color3f Le(0.0f), Ld(0.0f), beta(1.0f);
@@ -20,18 +24,10 @@ public:
         bool last_specular = false; 
 
         Ray3f current_ray = ray;
-        const BSDF* surface_bsdf;
-        EmitterQueryRecord emitter_rec;
-        BSDFQueryRecord bsdf_record;
-
         Intersection its;
-        bool found_intersection;
+        bool found_intersection = scene->rayIntersect(current_ray, its);
 
         while(sampler->next1D() > q) {
-
-            if(bounces == 0) {
-                found_intersection = scene->rayIntersect(current_ray, its);
-            }
             
             if(!found_intersection) {
                 break;
@@ -41,63 +37,59 @@ public:
             const Vector3f n = its.shFrame.n;
             const Vector3f wi = -current_ray.d;
             const Emitter* emitter = its.mesh->getEmitter();
-            
-            
+            const BSDF* surface_bsdf = its.mesh->getBSDF(); 
+            Frame frame(n);
+            EmitterQueryRecord emitter_rec = EmitterQueryRecord(surface_bsdf, x, n, wi);
+
+
             if(emitter) {
                 if(bounces == 0 || last_specular) {
                     Le += beta * emitter->getEmittance(x, n, wi);
                 }
-
                 break;
             }
-            
-            Frame frame(n);
 
 
-            surface_bsdf = its.mesh->getBSDF(); // delayed initialization so that the lines above use the previous bsdf
-            emitter_rec = EmitterQueryRecord(surface_bsdf, x, n, wi);
-
-            // Direct illumination component
+            // Direct illumination with Emitter Importance Sampling
             for(Mesh* mesh : scene->getMeshEmitters()) {
                 
                 float pdf_light;
                 Color3f direct_rad = mesh->getEmitter()->sampleRadiance(emitter_rec, *sampler, scene, pdf_light);
                 Vector3f wo = emitter_rec.wo();
 
-                float pdf_brdf  = surface_bsdf->pdf(BSDFQueryRecord(frame.toLocal(wi), frame.toLocal(emitter_rec.wo()), EMeasure::ESolidAngle));
-                float weight = pdf_light / (pdf_light + pdf_brdf);
+                float pdf_brdf  = surface_bsdf->pdf(BSDFQueryRecord(wi, wo, frame, EMeasure::ESolidAngle));
+                float weight = balancedMIS(pdf_light, pdf_brdf);
 
-                Ld += beta * weight * direct_rad;
+                Ld += direct(beta, weight, direct_rad);
             }
 
             // Indirect illumination (computing the next step)
-            bsdf_record = BSDFQueryRecord(frame.toLocal(wi));
+            BSDFQueryRecord bsdf_record = BSDFQueryRecord(wi, frame);
             Color3f bsdf_term = surface_bsdf->sample(bsdf_record, sampler->next2D());
 
-            if(bsdf_term.isZero()) {
-                break;
-            } 
+            if(bsdf_term.isZero()) { break; } 
             
             current_ray = Ray3f(x, frame.toWorld(bsdf_record.wo));
-
             found_intersection = scene->rayIntersect(current_ray, its);
-            
             beta = beta * bsdf_term / (1-q);
-
-            if(found_intersection) {
-                if(its.mesh->getEmitter()) {
-                    float light_pdf = its.mesh->getEmitter()->pdf(EmitterQueryRecord(surface_bsdf, x, n, wi, its.p, its.shFrame.n));
-                    float brdf_pdf = surface_bsdf->pdf(bsdf_record);
-                    float weight = brdf_pdf / (brdf_pdf + light_pdf);
-                    Ld += beta * weight * its.mesh->getEmitter()->getEmittance(its.p, its.shFrame.n, -current_ray.d);
-                }
-            }
-
-
             last_specular = !surface_bsdf->isDiffuse();
             bounces++;
+
+            // Direct illumination with BRDF Importance Sampling
+            // Done late as we need the collision result from the next step first
+            if(found_intersection && its.mesh->getEmitter()) {
+                
+                const Emitter* emitter = its.mesh->getEmitter();
+
+                float light_pdf = emitter->pdf(EmitterQueryRecord(surface_bsdf, x, n, wi, its.p, its.shFrame.n));
+                float brdf_pdf = surface_bsdf->pdf(bsdf_record);
+                float weight = balancedMIS(brdf_pdf, light_pdf);
+
+                Ld += direct(beta, weight, emitter->getEmittance(its.p, its.shFrame.n, -current_ray.d));
+            }
         }
-        return (Le + Ld);
+
+        return Le + Ld;
     }
 
     std::string toString() const {

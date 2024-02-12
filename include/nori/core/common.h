@@ -239,6 +239,11 @@ inline int mod(int a, int b) {
     return (r < 0) ? r+b : r;
 }
 
+/// Compute the balanced heuristic for MIS
+inline float balancedMIS(float p, float other) {
+    return p / (other + p);
+}
+
 /// Compute a direction for the given coordinates in spherical coordinates
 extern Vector3f sphericalDirection(float theta, float phi);
 

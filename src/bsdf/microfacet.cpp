@@ -102,7 +102,8 @@ public:
         
         if(Frame::cosTheta(bRec.wo) < 0) {
             // a BRDF would never sample a direction outside the hemisphere
-            return 0.0f;
+            return 0;
+            //return ks * Warp::squareToBeckmannPdf(-wh, m_alpha) / (4*abs(wh.dot(bRec.wo)));
         }
 
         return ks * Warp::squareToBeckmannPdf(wh, m_alpha) / (4*wh.dot(bRec.wo)) + (1 - ks) * Warp::squareToCosineHemispherePdf(bRec.wo);
@@ -125,6 +126,7 @@ public:
             Vector3f wh = Warp::squareToBeckmann(Point2f(eps1, eps2), m_alpha);
       
             Vector3f wo = 2 * wh.dot(wi) * wh - wi;
+
             bRec.wo = wo;
 
         } else { // handle diffuse

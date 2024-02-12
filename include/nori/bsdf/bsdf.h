@@ -19,6 +19,7 @@
 #pragma once
 
 #include <core/object.h>
+#include <core/frame.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -47,10 +48,17 @@ struct  BSDFQueryRecord {
     BSDFQueryRecord(const Vector3f &wi)
         : wi(wi), eta(1.f), measure(EUnknownMeasure), empty(false) { }
 
+    /// Converts wi to the local frame before storing it. Does NOT store the frame or use it beyond initialization
+    BSDFQueryRecord(const Vector3f &wi, Frame frame)
+        : wi(frame.toLocal(wi)) { }
     /// Create a new record for querying the BSDF
     BSDFQueryRecord(const Vector3f &wi,
             const Vector3f &wo, EMeasure measure)
         : wi(wi), wo(wo), eta(1.f), measure(measure), empty(false) { }
+
+    /// Converts wi and wo to the local frame before storing them. Does NOT store the frame or use it beyond initialization
+    BSDFQueryRecord(const Vector3f &wi, const Vector3f &wo, Frame frame, EMeasure measure)
+        : wi(frame.toLocal(wi)), wo(frame.toLocal(wo)), measure(measure), empty(false) { }
 
     bool isEmpty() const { return empty; }
 };
