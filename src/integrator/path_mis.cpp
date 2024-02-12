@@ -9,7 +9,7 @@ NORI_NAMESPACE_BEGIN
 class MISPathTracer : public Integrator {
 public:
     MISPathTracer(const PropertyList &props) {
-        q = props.getFloat("q", 0.1f);
+        q = props.getFloat("q", 0.05f);
     }
 
     static Color3f direct(Color3f beta, float weight, Color3f emittance) {
