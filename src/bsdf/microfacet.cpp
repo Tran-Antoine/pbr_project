@@ -140,7 +140,8 @@ public:
             return output;
         }
 
-        return output * Frame::cosTheta(bRec.wo) / pdf(bRec);
+        // max(0, x) to avoid values such as -10E-7
+        return output * std::max(0.0f, Frame::cosTheta(bRec.wo) / pdf(bRec));
 
         // Note: Once you have implemented the part that computes the scattered
         // direction, the last part of this function should simply return the

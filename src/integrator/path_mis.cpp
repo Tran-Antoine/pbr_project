@@ -13,7 +13,8 @@ public:
     }
 
     static Color3f direct(Color3f beta, float weight, Color3f emittance) {
-        return weight * (beta * emittance);
+        Color3f out = weight * (beta * emittance);
+        return out;
     }
 
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const {
@@ -55,6 +56,11 @@ public:
                 
                 float pdf_light;
                 Color3f direct_rad = mesh->getEmitter()->sampleRadiance(emitter_rec, *sampler, scene, pdf_light);
+                
+                if(direct_rad.isZero()) {
+                    continue;
+                }
+
                 Vector3f wo = emitter_rec.wo();
 
                 float pdf_brdf  = surface_bsdf->pdf(BSDFQueryRecord(wi, wo, frame, EMeasure::ESolidAngle));
@@ -66,8 +72,10 @@ public:
             // Indirect illumination (computing the next step)
             BSDFQueryRecord bsdf_record = BSDFQueryRecord(wi, frame);
             Color3f bsdf_term = surface_bsdf->sample(bsdf_record, sampler->next2D());
-
-            if(bsdf_term.isZero()) { break; } 
+            
+            if(bsdf_term.isZero()) { 
+                break; 
+            } 
             
             current_ray = Ray3f(x, frame.toWorld(bsdf_record.wo));
             found_intersection = scene->rayIntersect(current_ray, its);
@@ -79,13 +87,14 @@ public:
             // Done late as we need the collision result from the next step first
             if(found_intersection && its.mesh->getEmitter()) {
                 
-                const Emitter* emitter = its.mesh->getEmitter();
-
-                float light_pdf = emitter->pdf(EmitterQueryRecord(surface_bsdf, x, n, wi, its.p, its.shFrame.n));
+                const Emitter* emitter_hit = its.mesh->getEmitter();
+                Color3f emittance = emitter_hit->getEmittance(its.p, its.shFrame.n, -current_ray.d);
+  
+                float light_pdf = emitter_hit->pdf(EmitterQueryRecord(surface_bsdf, x, n, wi, its.p, its.shFrame.n));
                 float brdf_pdf = surface_bsdf->pdf(bsdf_record);
                 float weight = balancedMIS(brdf_pdf, light_pdf);
 
-                Ld += direct(beta, weight, emitter->getEmittance(its.p, its.shFrame.n, -current_ray.d));
+                Ld += direct(beta, weight, emittance);
             }
         }
 
