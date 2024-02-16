@@ -110,6 +110,7 @@ add_executable(nori
   src/emitter/area.cpp
 
   src/parser/obj.cpp
+  src/parser/heightmap.cpp
   src/parser/parser.cpp
   src/parser/proplist.cpp
   src/postprocessing/rfilter.cpp

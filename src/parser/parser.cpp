@@ -127,6 +127,7 @@ NoriObject *loadFromXML(const std::string &filename) {
                                 filename, *attrs.begin(), node.name(), offset(node.offset_debug()));
     };
 
+
     Eigen::Affine3f transform;
 
     /* Helper function to parse a Nori XML node (recursive) */
@@ -304,7 +305,7 @@ NoriObject *loadFromXML(const std::string &filename) {
                     default: throw NoriException("Unhandled element \"%s\"", node.name());
                 };
             }
-        } catch (const NoriException &e) {
+        } catch (const std::runtime_error &e) {
             throw NoriException("Error while parsing \"%s\": %s (at %s)", filename,
                                 e.what(), offset(node.offset_debug()));
         }

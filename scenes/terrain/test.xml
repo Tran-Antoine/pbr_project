@@ -1,0 +1,30 @@
+<scene>
+	<!-- Independent sample generator, 32 samples per pixel -->
+	<sampler type="independent">
+		<integer name="sampleCount" value="64"/>
+	</sampler>
+
+	<!-- Use the simple point light integrator -->
+    <integrator type="normals">
+        <point name="position" value="0, 4, 15"/>
+        <color name="energy" value="3.76e4, 3.76e4, 3.76e4"/>
+    </integrator>
+
+	<mesh type="hmap">
+		<string name="filename" value="binary.pgm"/>
+        <boolean name="plain" value="false"/>
+		<bsdf type="diffuse"/>
+	</mesh>
+
+	<!-- Render the scene viewed by a perspective camera -->
+	<camera type="perspective">
+		<float name="fov" value="60"/>
+		<transform name="toWorld">
+			<scale value="-1,1,1"/>
+			<lookat target="0, 0, 0" origin="0, 3, 7" up="0, 1, 0"/>
+		</transform>
+
+		<integer name="height" value="600"/>
+		<integer name="width" value="800"/>
+	</camera>
+</scene>
