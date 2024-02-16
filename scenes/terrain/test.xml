@@ -5,26 +5,26 @@
 	</sampler>
 
 	<!-- Use the simple point light integrator -->
-    <integrator type="ao">
-        <point name="position" value="250, 30, 250"/>
-        <color name="energy" value="3.76e5, 3.76e5, 3.76e5"/>
+    <integrator type="simple">
+        <point name="position" value="0, 300, 0"/>
+        <color name="energy" value="3.76e8, 3.76e8, 3.76e7"/>
     </integrator>
 
 	<mesh type="hmap">
-		<string name="filename" value="leman.exr"/>
+		<string name="filename" value="lowres.exr"/>
         <float name="minh" value="0"/>
-        <float name="maxh" value="1700"/>
-        <float name="xratio" value ="2.62"/>
-        <float name="zratio" value ="2.62"/>
+        <float name="maxh" value="2000"/>
+        <float name="xratio" value ="210"/>
+        <float name="zratio" value ="210"/>
 		<bsdf type="diffuse"/>
 	</mesh>
 
 	<!-- Render the scene viewed by a perspective camera -->
 	<camera type="perspective">
-		<float name="fov" value="120"/>
+		<float name="fov" value="60"/>
 		<transform name="toWorld">
-			<scale value="-1,1,1"/>
-			<lookat target="50, 100, 100" origin="-100, 10, -100" up="0, 1, 0"/>
+			<scale value="1,1,1"/>
+			<lookat target="1000, 300, 1000" origin="0, 300, 0" up="0, 1, 0"/>
 		</transform>
 
 		<integer name="height" value="600"/>

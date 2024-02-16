@@ -21,13 +21,14 @@ public:
 
         Vector3f point_to_light = position - its.p;   
 
-        Ray3f shadowQuery = Ray3f(its.p, point_to_light);
+        Ray3f shadowQuery = Ray3f(its.p, point_to_light, Epsilon, point_to_light.norm());
 
         if(scene->rayIntersect(shadowQuery)) {
             return Color3f(0.0f);
         }
 
         float cos_theta = its.shFrame.n.dot(point_to_light.normalized());
+
         Color3f output_color = color * 1 / (4 * M_PI * M_PI) * std::max(0.0f, cos_theta) / (point_to_light).squaredNorm();
         
         return output_color;

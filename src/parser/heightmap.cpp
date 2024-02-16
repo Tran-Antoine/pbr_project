@@ -112,7 +112,7 @@ public:
             for(int x = 0; x < res_x; ++x) {
                 Vector3f n = normal(x, z, positions);
                 normals[index(x,z)] = n; // no need to apply trafo again
-
+                // HERE NORMAL IS WRONG
                 if(x >= res_x - 1 || z >= res_z - 1) {
                     continue;
                 }
@@ -201,7 +201,7 @@ protected:
         float hD = height(x, z - 1, positions);
         float hU = height(x, z + 1, positions);
 
-        return Vector3f(hL - hR, hD - hU, 2).normalized();
+        return Vector3f(hL - hR, 2, hD - hU).normalized();
     }
     /// Vertex indices used by the OBJ format
     int res_x, res_z;
