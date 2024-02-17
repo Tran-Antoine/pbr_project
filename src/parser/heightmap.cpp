@@ -112,7 +112,7 @@ public:
             for(int x = 0; x < res_x; ++x) {
                 Vector3f n = normal(x, z, positions);
                 normals[index(x,z)] = n; // no need to apply trafo again
-                // HERE NORMAL IS WRONG
+
                 if(x >= res_x - 1 || z >= res_z - 1) {
                     continue;
                 }
