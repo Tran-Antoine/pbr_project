@@ -117,7 +117,8 @@ add_executable(nori
   src/parser/proplist.cpp
   src/postprocessing/rfilter.cpp
 
-  test/perlin_test.cpp
+  src/main.cpp
+  #test/perlin_test.cpp
 )
 
 # The following lines build the warping test application

@@ -34,17 +34,17 @@ float PerlinGenerator::get(float x, float z) const {
     int z0 = (int) z;
     int z1 = z0 + 1;
 
-    const Vector2f& g0 = random_gradient(x0, z0);
-    const Vector2f& g1 = random_gradient(x0, z1);
-    const Vector2f& g2 = random_gradient(x1, z0);
-    const Vector2f& g3 = random_gradient(x1, z1);
+    const Vector2f g0 = random_gradient(x0, z0);
+    const Vector2f g1 = random_gradient(x0, z1);
+    const Vector2f g2 = random_gradient(x1, z0);
+    const Vector2f g3 = random_gradient(x1, z1);
 
     Point2f p(x, z);
 
-    const Vector2f& off0 = p - Point2f(x0, z0);
-    const Vector2f& off1 = p - Point2f(x0, z1);
-    const Vector2f& off2 = p - Point2f(x1, z0);
-    const Vector2f& off3 = p - Point2f(x1, z1);
+    const Vector2f off0 = p - Point2f(x0, z0);
+    const Vector2f off1 = p - Point2f(x0, z1);
+    const Vector2f off2 = p - Point2f(x1, z0);
+    const Vector2f off3 = p - Point2f(x1, z1);
 
     float dp0 = g0.dot(off0);    
     float dp1 = g1.dot(off1);
