@@ -13,9 +13,9 @@
 	<mesh type="hmap">
 		<string name="filename" value="perlin-heights.exr"/>
         <float name="minh" value="0"/>
-        <float name="maxh" value="10"/>
-        <float name="xratio" value ="1"/>
-        <float name="zratio" value ="1"/>
+        <float name="maxh" value="150"/>
+        <float name="xratio" value ="3"/>
+        <float name="zratio" value ="3"/>
 		<bsdf type="diffuse"/>
 	</mesh>
 
@@ -24,7 +24,7 @@
 		<float name="fov" value="60"/>
 		<transform name="toWorld">
 			<scale value="-1,1,1"/>
-			<lookat target="5, 5, 0" origin="0, 5, 0" up="0, 1, 0"/>
+			<lookat target="-1000, 600, 0" origin="-2000, 1000, 0" up="0, 1, 0"/>
 		</transform>
 
 		<integer name="height" value="600"/>

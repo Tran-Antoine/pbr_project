@@ -14,14 +14,14 @@ void PerlinGenerator::init_gradients() {
     for(int z = 0; z < res_z; ++z) {
         for(int x = 0; x < res_x; ++x) {
             Vector2f p = Vector2f(2*random.nextFloat() - 1, 2*random.nextFloat() - 1).normalized();
-            gradients[x + z * res_x] = std::move(p);
+            gradients[x + z * res_x] = p;
         }
     } 
 }
 
 float PerlinGenerator::get(float x, float z) const {
 
-    if(gradients.size() == 0) {
+    if(gradients.empty()) {
         throw NoriException("Cannot call PerlinGenerator::get before PerlinGenerator::init_gradients");
     }
 
@@ -34,22 +34,22 @@ float PerlinGenerator::get(float x, float z) const {
     int z0 = (int) z;
     int z1 = z0 + 1;
 
-    const Vector2f g0 = random_gradient(x0, z0);
-    const Vector2f g1 = random_gradient(x0, z1);
-    const Vector2f g2 = random_gradient(x1, z0);
-    const Vector2f g3 = random_gradient(x1, z1);
+    const Vector2f c0 = random_gradient(x0, z0);
+    const Vector2f c1 = random_gradient(x0, z1);
+    const Vector2f c2 = random_gradient(x1, z1);
+    const Vector2f c3 = random_gradient(x1, z0);
 
     Point2f p(x, z);
 
     const Vector2f off0 = p - Point2f(x0, z0);
     const Vector2f off1 = p - Point2f(x0, z1);
-    const Vector2f off2 = p - Point2f(x1, z0);
-    const Vector2f off3 = p - Point2f(x1, z1);
+    const Vector2f off2 = p - Point2f(x1, z1);
+    const Vector2f off3 = p - Point2f(x1, z0);
 
-    float dp0 = g0.dot(off0);    
-    float dp1 = g1.dot(off1);
-    float dp2 = g2.dot(off2);
-    float dp3 = g3.dot(off3);
+    float dp0 = c0.dot(off0);
+    float dp1 = c1.dot(off1);
+    float dp2 = c2.dot(off2);
+    float dp3 = c3.dot(off3);
 
     float t_h = fade(x - x0);
     float t_v = fade(z - z0);
