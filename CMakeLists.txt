@@ -64,6 +64,7 @@ add_executable(nori
   include/nori/stats/dpdf.h
   include/nori/stats/sampler.h
   include/nori/stats/warp.h
+  include/nori/stats/perlin.h
 
   include/nori/integrator/integrator.h
 
@@ -99,6 +100,7 @@ add_executable(nori
   src/stats/independent.cpp
   src/stats/ttest.cpp
   src/stats/warp.cpp
+  src/stats/perlin.cpp
 
   src/integrator/pointlight.cpp
   src/integrator/normals.cpp
@@ -115,7 +117,7 @@ add_executable(nori
   src/parser/proplist.cpp
   src/postprocessing/rfilter.cpp
 
-  src/main.cpp
+  test/perlin_test.cpp
 )
 
 # The following lines build the warping test application
