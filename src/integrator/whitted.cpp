@@ -31,7 +31,7 @@ public:
                 EmitterQueryRecord record(its.mesh->getBSDF(), its.p, frame.n, -ray.d);
                 float unused;
                 Color3f sampled_radiance = random_emitter->getEmitter()->sampleRadiance(record, *sampler, scene, unused);
-                return scene->getEmittersArea() * sampled_radiance; // 1/pdf = total area
+                return sampled_radiance; // 1/pdf = total area
             }
 
             return Color3f(0.0f);

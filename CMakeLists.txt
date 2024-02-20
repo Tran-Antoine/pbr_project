@@ -116,6 +116,7 @@ add_executable(nori
   src/postprocessing/rfilter.cpp
 
   src/main.cpp
+  #src/warptest.cpp
 )
 
 # The following lines build the warping test application

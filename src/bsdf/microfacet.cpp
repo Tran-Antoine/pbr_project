@@ -49,9 +49,9 @@ public:
     }
 
     Color3f G(Vector3f wi, Vector3f wo, Vector3f wh) const {
-        auto G1 = [&](Vector3f wv, Vector3f wh) -> float {
+        auto G1 = [this](Vector3f wv, Vector3f wh) -> float {
             float cos_theta_v = Frame::cosTheta(wv);
-            float b = 1 / (m_alpha * tan(cos_theta_v));
+            float b = 1 / (m_alpha * Frame::tanTheta(wv));
 
             float coeff = b < 1.6f ? (3.535f*b + 2.181f*b*b) / (1.0f + 2.276f*b + 2.577f*b*b) : 1.0f;
 
@@ -75,13 +75,14 @@ public:
     /// Evaluate the BRDF for the given pair of directions
     Color3f eval(const BSDFQueryRecord &bRec) const {
     	
+        if (bRec.measure != ESolidAngle
+            || Frame::cosTheta(bRec.wi) <= 0
+            || Frame::cosTheta(bRec.wo) <= 0)
+            return Color3f(0.0f);
+
         Vector3f wi = bRec.wi;
         Vector3f wo = bRec.wo;
         Vector3f wh = (wi + wo).normalized();
- 
-        if(Frame::cosTheta(wo) < 0) {
-            return Color3f(0.0f);
-        }
 
         float cos_theta_i = Frame::cosTheta(wi), 
               cos_theta_o = Frame::cosTheta(wo), 
@@ -97,21 +98,21 @@ public:
 
     /// Evaluate the sampling density of \ref sample() wrt. solid angles
     float pdf(const BSDFQueryRecord &bRec) const {
+        if (bRec.measure != ESolidAngle
+            || Frame::cosTheta(bRec.wi) <= 0
+            || Frame::cosTheta(bRec.wo) <= 0)
+            return 0.0f;
+
     	float ks = 1 - std::max({m_kd.x(), m_kd.y(), m_kd.z()});
         Vector3f wh = (bRec.wi + bRec.wo).normalized();
         
-        if(Frame::cosTheta(bRec.wo) < 0) {
-            // a BRDF would never sample a direction outside the hemisphere
-            return 0;
-            //return ks * Warp::squareToBeckmannPdf(-wh, m_alpha) / (4*abs(wh.dot(bRec.wo)));
-        }
-
         return ks * Warp::squareToBeckmannPdf(wh, m_alpha) / (4*wh.dot(bRec.wo)) + (1 - ks) * Warp::squareToCosineHemispherePdf(bRec.wo);
     }
 
     /// Sample the BRDF
     Color3f sample(BSDFQueryRecord &bRec, const Point2f &_sample) const {
     	
+        bRec.measure = EMeasure::ESolidAngle;
 
         float eps1 = _sample.x();
         float eps2 = _sample.y();
