@@ -57,7 +57,8 @@ float PerlinGenerator::get(float x, float z) const {
     float v_inter_left  = lerp(t_v, dp0, dp1);
     float v_inter_right = lerp(t_v, dp3, dp2);
 
-    return lerp(t_h, v_inter_left, v_inter_right);
+    float final_value = lerp(t_h, v_inter_left, v_inter_right);
+    return final_value;
 }
 
 NORI_NAMESPACE_END
