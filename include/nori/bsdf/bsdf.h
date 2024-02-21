@@ -37,6 +37,11 @@ struct  BSDFQueryRecord {
     /// Relative refractive index in the sampled direction
     float eta;
 
+    /// Point of intersection
+    Point3f p;
+    // Triangle index of the point of intersection
+    uint32_t triangle_index;
+
     /// Measure associated with the sample
     EMeasure measure;
 
