@@ -79,7 +79,9 @@ Color3f MeshEmitter::sampleRadiance(EmitterQueryRecord& rec, Sampler& sampler, c
 
     Frame frame(rec.n_p); // BSDFQueryRecord expects local vectors
     BSDFQueryRecord query(frame.toLocal(rec.wi), frame.toLocal(x_to_y), EMeasure::ESolidAngle);
-
+    query.p = rec.p;
+    query.triangle_index = rec.triangle_index;
+    
     Color3f bsdf_term = rec.bsdf->eval(query);
 
     angular_pdf = pdf_light * distance * distance / rec.n_p.dot(x_to_y);

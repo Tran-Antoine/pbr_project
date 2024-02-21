@@ -50,7 +50,7 @@ public:
         std::vector<uint32_t>   indices;
         std::vector<OBJVertex>  vertices;
         VertexMap vertexMap;
-
+        
         std::string line_str;
         while (std::getline(is, line_str)) {
             std::istringstream line(line_str);
@@ -117,10 +117,12 @@ public:
                 m_N.col(i) = normals.at(vertices[i].n-1);
         }
 
+
         if (!texcoords.empty()) {
             m_UV.resize(2, vertices.size());
-            for (uint32_t i=0; i<vertices.size(); ++i)
+            for (uint32_t i=0; i<vertices.size(); ++i) {
                 m_UV.col(i) = texcoords.at(vertices[i].uv-1);
+            }
         }
 
         m_name = filename.str();

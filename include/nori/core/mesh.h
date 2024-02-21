@@ -39,6 +39,8 @@ struct Intersection {
     Point3f p;
     /// Unoccluded distance along the ray
     float t;
+    /// Triangle index, if any
+    uint32_t triangle_index;
     /// UV coordinates, if any
     Point2f uv;
     /// Shading frame (based on the shading normal)
@@ -168,6 +170,24 @@ public:
     DiscretePDF* getTrianglePDF() const { return triangle_pdf; }
 
     float getTotalArea() const { return total_area; }
+
+    Point2f toTextureCoords(Point3f p, uint32_t triangle_index) {
+
+        uint32_t i0 = m_F(0, triangle_index), i1 = m_F(1, triangle_index), i2 = m_F(2, triangle_index);
+        const Point3f p0 = m_V.col(i0), p1 = m_V.col(i1), p2 = m_V.col(i2);
+
+        float w0 = (p0 - p).norm(), w1 = (p1 - p).norm(), w2 = (p2 - p).norm();
+        float total_weight = w0 + w1 + w2;
+
+        float t0 = m_UV(i0, 0), s0 = m_UV(i0, 1), 
+            t1 = m_UV(i0, 0), s1 = m_UV(i0, 1), 
+            t2 = m_UV(i0, 0), s2 = m_UV(i0, 1);
+
+        float s = (w0 * s0 + w1 * s1 + w2 * s2) / total_weight;
+        float t = (w0 * t0 + w1 * t1 + w2 * t2) / total_weight;
+
+        return Point2f(s, t);
+    }
 
 protected:
     /// Create an empty mesh

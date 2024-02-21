@@ -84,7 +84,6 @@ public:
             file.setFrameBuffer(&pixels[0][0] - dw.min.x - dw.min.y * res_x, 1, res_x);
             file.readPixels(dw.min.y, dw.max.y);
 
-            // Print every pixel value
             for (int z = 0; z < res_z; ++z) {
                 for (int x = 0; x < res_x; ++x) {
                     const Rgba &pixel = pixels[z][x];

@@ -29,14 +29,21 @@ struct EmitterQueryRecord {
 
     bool empty;
     Point3f p, l;
+    uint32_t triangle_index;
     Vector3f n_p, n_l, wi;
     const BSDF* bsdf;
 
     EmitterQueryRecord() : empty(true) {}
 
-    EmitterQueryRecord(const BSDF* bsdf, Point3f p, Vector3f n_p, Vector3f wi) : bsdf(bsdf), p(p), n_p(n_p), wi(wi), empty(false) {}
+    EmitterQueryRecord(const BSDF* bsdf, Point3f p, Vector3f n_p, Vector3f wi) : 
+        bsdf(bsdf), p(p), n_p(n_p), wi(wi), empty(false) {}
+    EmitterQueryRecord(const BSDF* bsdf, Point3f p, Vector3f n_p, uint32_t t_index, Vector3f wi) : 
+        bsdf(bsdf), p(p), n_p(n_p), triangle_index(t_index), wi(wi), empty(false) {}
 
-    EmitterQueryRecord(const BSDF* bsdf, Point3f p, Vector3f n_p, Vector3f wi, Point3f l, Vector3f n_l) : bsdf(bsdf), p(p), n_p(n_p), l(l), n_l(n_l), wi(wi), empty(false) {}
+    EmitterQueryRecord(const BSDF* bsdf, Point3f p, Vector3f n_p, Vector3f wi, Point3f l, Vector3f n_l) : 
+        bsdf(bsdf), p(p), n_p(n_p), l(l), n_l(n_l), wi(wi), empty(false) {}
+    EmitterQueryRecord(const BSDF* bsdf, Point3f p, Vector3f n_p, uint32_t t_index, Vector3f wi, Point3f l, Vector3f n_l) : 
+        bsdf(bsdf), p(p), n_p(n_p), triangle_index(t_index), l(l), n_l(n_l), wi(wi), empty(false) {}
 
     bool isEmpty() const { return empty; }
 
