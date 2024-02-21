@@ -33,7 +33,7 @@ public:
     Diffuse(const PropertyList &propList) {
 
         std::string texture_map = propList.getString("texturemap", "");
-        if(texture_map.size() != 0) {
+        if(!texture_map.empty()) {
             m_albedo = new TextureDiffuseMap(texture_map);
         } else {
             Color3f constant = propList.getColor("albedo", Color3f(0.5f));
@@ -55,7 +55,7 @@ public:
             return Color3f(0.0f);
 
         
-        Color3f albedo = m_albedo->T(mesh->toTextureCoords(bRec.p, bRec.triangle_index));
+        Color3f albedo = m_albedo->T(bRec.uv);
         /* The BRDF is simply the albedo / pi */
         return albedo * INV_PI;
     }
@@ -95,7 +95,7 @@ public:
 
         /* eval() / pdf() * cos(theta) = albedo. There
            is no need to call these functions. */
-        Color3f albedo = m_albedo->T(mesh->toTextureCoords(bRec.p, bRec.triangle_index));
+        Color3f albedo = m_albedo->T(bRec.uv);
         return albedo;
     }
 
@@ -111,14 +111,9 @@ public:
             "]", "todo"); // TODO Complete this
     }
 
-    void setParent(NoriObject *parent) {
-        mesh = static_cast<Mesh*>(parent);
-    }
-
     EClassType getClassType() const { return EBSDF; }
 private:
     DiffuseMap* m_albedo;
-    Mesh* mesh;
 };
 
 NORI_REGISTER_CLASS(Diffuse, "diffuse");

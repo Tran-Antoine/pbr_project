@@ -3,6 +3,10 @@ project(nori)
 
 add_subdirectory(ext ext_build)
 
+set(OpenCV_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ext/opencv/build)
+# Find OpenCV package
+find_package(OpenCV REQUIRED)
+
 include_directories(
   # Nori include files
   ${CMAKE_CURRENT_SOURCE_DIR}/include/nori
@@ -33,6 +37,8 @@ include_directories(
   SYSTEM ${FILESYSTEM_INCLUDE_DIR}
   # STB Image Write
   SYSTEM ${STB_IMAGE_WRITE_INCLUDE_DIR}
+  # OpenCV
+  SYSTEM ${OPENCV_INCLUDE_DIR}
 )
 
 # The following lines build the main executable. If you add a source
@@ -121,9 +127,10 @@ add_executable(nori
   src/postprocessing/rfilter.cpp
 
   src/main.cpp
-  #src/warptest.cpp
 )
 
+# Link OpenCV libraries
+#target_link_libraries(nori PRIVATE ${OpenCV_LIBS})
 # The following lines build the warping test application
 
 
@@ -132,9 +139,9 @@ add_definitions(${NANOGUI_EXTRA_DEFS})
 
 
 if (WIN32)
-  target_link_libraries(nori tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS} zlibstatic)
+  target_link_libraries(nori tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS} zlibstatic ${OpenCV_LIBS})
 else()
-  target_link_libraries(nori tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS})
+  target_link_libraries(nori tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS} ${OpenCV_LIBS})
 endif()
 
 #target_link_libraries(warptest tbb_static nanogui ${NANOGUI_EXTRA_LIBS})

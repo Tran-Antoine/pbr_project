@@ -9,8 +9,7 @@ NORI_NAMESPACE_BEGIN
 class TextureDiffuseMap : public DiffuseMap {
 
 public:
-    TextureDiffuseMap(std::string filename);
-    ~TextureDiffuseMap();
+    explicit TextureDiffuseMap(const std::string& filename);
     Color3f T(float s, float t) const override;
 
 private:

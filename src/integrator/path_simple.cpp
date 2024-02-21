@@ -51,7 +51,7 @@ public:
             
             // Direct illumination component
             for(Mesh* mesh : scene->getMeshEmitters()) {
-                EmitterQueryRecord emitter_rec(surface_bsdf, x, n, wi);
+                EmitterQueryRecord emitter_rec(surface_bsdf, x, n, wi, its.uv);
                 float unused;
                 Color3f direct_rad = mesh->getEmitter()->sampleRadiance(emitter_rec, *sampler, scene, unused);
 
