@@ -22,6 +22,8 @@
 #include <bsdf/diffusemap.h>
 #include <bsdf/uniformmap.h>
 #include <bsdf/texturemap.h>
+#include <bsdf/graymap.h>
+#include <bsdf/mountainmap.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -36,8 +38,13 @@ public:
         if(!texture_map.empty()) {
             m_albedo = new TextureDiffuseMap(texture_map);
         } else {
-            Color3f constant = propList.getColor("albedo", Color3f(0.5f));
-            m_albedo = new UniformDiffuseMap(constant);
+            std::string gray_map = propList.getString("graymap", "");
+            if(!gray_map.empty()) {
+                m_albedo = new MountainMap(new TextureDiffuseMap(gray_map), 0.08f, 0.4f);
+            } else {
+                Color3f constant = propList.getColor("albedo", Color3f(0.5f));
+                m_albedo = new UniformDiffuseMap(constant);
+            }
         }
     }
 

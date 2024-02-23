@@ -53,6 +53,7 @@ public:
     HeightMap(const PropertyList &propList) {
 
         filesystem::path filename = getFileResolver()->resolve(propList.getString("filename"));
+
         Transform trafo = propList.getTransform("toWorld", Transform());
         float min_height = propList.getFloat("minh");
         float max_height = propList.getFloat("maxh");
@@ -61,7 +62,7 @@ public:
 
         Timer timer;
         std::vector<Vector3f>   positions;
-        std::vector<Vector2f>   texcoords; // currently unused
+        std::vector<Vector2f>   texcoords;
         std::vector<Vector3f>   normals;
         std::vector<uint32_t>   indices;
 
@@ -159,14 +160,24 @@ public:
         }
 
         m_V.resize(3, positions.size());
-        for (uint32_t i=0; i<positions.size(); ++i)
+        for (uint32_t i = 0; i < positions.size(); ++i) {
             m_V.col(i) = positions[i];
+        }
 
         if (!normals.empty()) {
             m_N.resize(3, normals.size());
             for (uint32_t i=0; i<normals.size(); ++i)
                 m_N.col(i) = normals[i];
-        }        
+        }
+
+        m_UV.resize(2, positions.size());
+        for(int z = 0; z < res_z; z++) {
+            for(int x = 0; x < res_x; x++) {
+                float u = (float) x / ((float) res_x - 1.f);
+                float v = (float) z / ((float) res_z - 1.f);
+                m_UV.col(index(x, z)) = Point2f(u, v);
+            }
+        }
         
         m_name = filename.str();
         cout << "done. (V=" << m_V.cols() << ", F=" << m_F.cols() << ", took "

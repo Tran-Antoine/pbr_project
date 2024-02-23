@@ -27,10 +27,14 @@
 	</mesh>
 
 	<mesh type="obj">
+		<transform name="toWorld">
+			<!-- Any sequence of the following operations: -->
+			<translate value="0,80,0"/>
+		</transform>
 		<string name="filename" value="light.obj"/>
 
 		<emitter type="area">
-			<color name="radiance" value="40 40 40"/>
+			<color name="radiance" value="400 400 400"/>
 		</emitter>
 	</mesh>
 </scene>
