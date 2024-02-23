@@ -21,6 +21,8 @@
 #include <core/object.h>
 #include <core/frame.h>
 
+#include <utility>
+
 NORI_NAMESPACE_BEGIN
 
 /**
@@ -37,6 +39,8 @@ struct  BSDFQueryRecord {
     /// Relative refractive index in the sampled direction
     float eta;
 
+    Point2f uv;
+
     /// Measure associated with the sample
     EMeasure measure;
 
@@ -45,20 +49,20 @@ struct  BSDFQueryRecord {
     BSDFQueryRecord() : empty(true) {}
 
     /// Create a new record for sampling the BSDF
-    BSDFQueryRecord(const Vector3f &wi)
-        : wi(wi), eta(1.f), measure(EUnknownMeasure), empty(false) { }
+    explicit BSDFQueryRecord(Vector3f wi, Point2f uv=0.f)
+        : wi(std::move(wi)), eta(1.f), uv(std::move(uv)), measure(EUnknownMeasure), empty(false) { }
 
     /// Converts wi to the local frame before storing it. Does NOT store the frame or use it beyond initialization
-    BSDFQueryRecord(const Vector3f &wi, Frame frame)
-        : wi(frame.toLocal(wi)) { }
+    BSDFQueryRecord(const Vector3f &wi, const Frame& frame, Point2f uv)
+        : wi(frame.toLocal(wi)), uv(std::move(uv)) { }
     /// Create a new record for querying the BSDF
-    BSDFQueryRecord(const Vector3f &wi,
-            const Vector3f &wo, EMeasure measure)
-        : wi(wi), wo(wo), eta(1.f), measure(measure), empty(false) { }
+    BSDFQueryRecord(Vector3f wi,
+            Vector3f wo, EMeasure measure, Point2f uv=0.f)
+        : wi(std::move(wi)), wo(std::move(wo)), eta(1.f), uv(std::move(uv)), measure(measure), empty(false) { }
 
     /// Converts wi and wo to the local frame before storing them. Does NOT store the frame or use it beyond initialization
-    BSDFQueryRecord(const Vector3f &wi, const Vector3f &wo, Frame frame, EMeasure measure)
-        : wi(frame.toLocal(wi)), wo(frame.toLocal(wo)), measure(measure), empty(false) { }
+    BSDFQueryRecord(const Vector3f &wi, const Vector3f &wo, const Frame& frame, EMeasure measure, Point2f uv=0.f)
+        : wi(frame.toLocal(wi)), wo(frame.toLocal(wo)), uv(std::move(uv)), measure(measure), empty(false) { }
 
     bool isEmpty() const { return empty; }
 };

@@ -29,14 +29,22 @@ struct EmitterQueryRecord {
 
     bool empty;
     Point3f p, l;
+    uint32_t triangle_index;
     Vector3f n_p, n_l, wi;
+    Point2f uv;
     const BSDF* bsdf;
 
     EmitterQueryRecord() : empty(true) {}
 
-    EmitterQueryRecord(const BSDF* bsdf, Point3f p, Vector3f n_p, Vector3f wi) : bsdf(bsdf), p(p), n_p(n_p), wi(wi), empty(false) {}
+    EmitterQueryRecord(const BSDF* bsdf, Point3f p, Vector3f n_p, Vector3f wi, Point2f uv) :
+        bsdf(bsdf), p(p), n_p(n_p), wi(wi), uv(std::move(uv)), empty(false) {}
+    EmitterQueryRecord(const BSDF* bsdf, Point3f p, Vector3f n_p, uint32_t t_index, Vector3f wi, Point2f uv) :
+        bsdf(bsdf), p(p), n_p(n_p), triangle_index(t_index), wi(wi), uv(uv), empty(false) {}
 
-    EmitterQueryRecord(const BSDF* bsdf, Point3f p, Vector3f n_p, Vector3f wi, Point3f l, Vector3f n_l) : bsdf(bsdf), p(p), n_p(n_p), l(l), n_l(n_l), wi(wi), empty(false) {}
+    EmitterQueryRecord(const BSDF* bsdf, Point3f p, Vector3f n_p, Vector3f wi, Point3f l, Vector3f n_l, Point2f uv) :
+        bsdf(bsdf), p(p), n_p(n_p), l(l), n_l(n_l), wi(wi), uv(uv), empty(false) {}
+    EmitterQueryRecord(const BSDF* bsdf, Point3f p, Vector3f n_p, uint32_t t_index, Vector3f wi, Point3f l, Vector3f n_l, Point2f uv) :
+        bsdf(bsdf), p(p), n_p(n_p), triangle_index(t_index), l(l), n_l(n_l), wi(wi), uv(uv), empty(false) {}
 
     bool isEmpty() const { return empty; }
 
@@ -57,7 +65,7 @@ public:
      * */
     EClassType getClassType() const { return EEmitter; }
 
-    virtual float pdf(EmitterQueryRecord& rec) const = 0;
+    virtual float pdf(const EmitterQueryRecord& rec) const = 0;
 
     virtual Color3f evalRadiance(EmitterQueryRecord& rec, const Scene* scene) const = 0;
 

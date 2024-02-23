@@ -40,7 +40,7 @@ public:
             const Emitter* emitter = its.mesh->getEmitter();
             const BSDF* surface_bsdf = its.mesh->getBSDF(); 
             Frame frame(n);
-            EmitterQueryRecord emitter_rec = EmitterQueryRecord(surface_bsdf, x, n, wi);
+            EmitterQueryRecord emitter_rec = EmitterQueryRecord(surface_bsdf, x, n, wi, its.uv);
 
 
             if(emitter) {
@@ -70,7 +70,7 @@ public:
             }
 
             // Indirect illumination (computing the next step)
-            BSDFQueryRecord bsdf_record = BSDFQueryRecord(wi, frame);
+            BSDFQueryRecord bsdf_record = BSDFQueryRecord(wi, frame, its.uv);
             Color3f bsdf_term = surface_bsdf->sample(bsdf_record, sampler->next2D());
             
             if(bsdf_term.isZero()) { 
@@ -90,7 +90,7 @@ public:
                 const Emitter* emitter_hit = its.mesh->getEmitter();
                 Color3f emittance = emitter_hit->getEmittance(its.p, its.shFrame.n, -current_ray.d);
   
-                float light_pdf = emitter_hit->pdf(EmitterQueryRecord(surface_bsdf, x, n, wi, its.p, its.shFrame.n));
+                float light_pdf = emitter_hit->pdf(EmitterQueryRecord(surface_bsdf, x, n, wi, its.p, its.shFrame.n, its.uv));
                 float brdf_pdf = surface_bsdf->pdf(bsdf_record);
                 float weight = balancedMIS(brdf_pdf, light_pdf);
 

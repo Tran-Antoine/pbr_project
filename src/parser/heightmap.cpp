@@ -84,8 +84,7 @@ public:
             file.setFrameBuffer(&pixels[0][0] - dw.min.x - dw.min.y * res_x, 1, res_x);
             file.readPixels(dw.min.y, dw.max.y);
 
-            int count_test = 0;
-            // Print every pixel value
+
             for (int z = 0; z < res_z; ++z) {
                 for (int x = 0; x < res_x; ++x) {
                     const Rgba &pixel = pixels[z][x];
@@ -98,24 +97,13 @@ public:
                     float t_z = (z - offset_z) * z_ratio;
 
                     Point3f p(t_x, y, t_z);
-                    if(gray < 0.00001) {
-                        //std::cout << "Before" << p.y() << "\n";
-                        count_test++;
-                    }
 
                     p = trafo * p;
-
-                    if(gray < 0.00001) {
-                        //std::cout << "After" << p.y() << "\n";
-                        count_test++;
-                    }
 
                     m_bbox.expandBy(p);
                     positions[index(x, z)] = p; 
                 }
             }
-
-            std::cout << "Ratio: " << (float) count_test / (res_z * res_x);
 
         } catch (const std::exception &e) {
             std::cerr << "Error reading EXR file: " << e.what() << std::endl;

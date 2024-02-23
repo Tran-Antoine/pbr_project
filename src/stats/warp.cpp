@@ -226,6 +226,8 @@ float Warp::squareToBeckmannPdf(const Vector3f &m, float alpha) {
     float cos_theta = Frame::cosTheta(m); 
     float tan_theta = Frame::tanTheta(m);
 
+    if(cos_theta < 0) return 0.f;
+
     float pdf = 1 / (2 * M_PI) * (2 * exp(-pow(tan_theta, 2) / (alpha * alpha)) / (alpha * alpha * pow(cos_theta, 3)));
 
     return std::max(0.0f, pdf);

@@ -19,6 +19,9 @@
 #include <bsdf/bsdf.h>
 #include <core/frame.h>
 #include <stats/warp.h>
+#include <bsdf/diffusemap.h>
+#include <bsdf/uniformmap.h>
+#include <bsdf/texturemap.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -28,7 +31,18 @@ NORI_NAMESPACE_BEGIN
 class Diffuse : public BSDF {
 public:
     Diffuse(const PropertyList &propList) {
-        m_albedo = propList.getColor("albedo", Color3f(0.5f));
+
+        std::string texture_map = propList.getString("texturemap", "");
+        if(!texture_map.empty()) {
+            m_albedo = new TextureDiffuseMap(texture_map);
+        } else {
+            Color3f constant = propList.getColor("albedo", Color3f(0.5f));
+            m_albedo = new UniformDiffuseMap(constant);
+        }
+    }
+
+    ~Diffuse() {
+        delete m_albedo;
     }
 
     /// Evaluate the BRDF model
@@ -40,8 +54,10 @@ public:
             || Frame::cosTheta(bRec.wo) <= 0)
             return Color3f(0.0f);
 
+        
+        Color3f albedo = m_albedo->T(bRec.uv);
         /* The BRDF is simply the albedo / pi */
-        return m_albedo * INV_PI;
+        return albedo * INV_PI;
     }
 
     /// Compute the density of \ref sample() wrt. solid angles
@@ -79,7 +95,8 @@ public:
 
         /* eval() / pdf() * cos(theta) = albedo. There
            is no need to call these functions. */
-        return m_albedo;
+        Color3f albedo = m_albedo->T(bRec.uv);
+        return albedo;
     }
 
     bool isDiffuse() const {
@@ -91,12 +108,12 @@ public:
         return tfm::format(
             "Diffuse[\n"
             "  albedo = %s\n"
-            "]", m_albedo.toString());
+            "]", "todo"); // TODO Complete this
     }
 
     EClassType getClassType() const { return EBSDF; }
 private:
-    Color3f m_albedo;
+    DiffuseMap* m_albedo;
 };
 
 NORI_REGISTER_CLASS(Diffuse, "diffuse");
