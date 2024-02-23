@@ -84,18 +84,22 @@ public:
             file.setFrameBuffer(&pixels[0][0] - dw.min.x - dw.min.y * res_x, 1, res_x);
             file.readPixels(dw.min.y, dw.max.y);
 
+
             for (int z = 0; z < res_z; ++z) {
                 for (int x = 0; x < res_x; ++x) {
                     const Rgba &pixel = pixels[z][x];
 
-                    float gray = (pixel.r + pixel.g + pixel.b) / 3.f;
+                    float gray = clamp(pixel.r, 0.f, 1.f);
+
                     float y = min_height + gray * (max_height - min_height);
 
                     float t_x = (x - offset_x) * x_ratio;
                     float t_z = (z - offset_z) * z_ratio;
 
                     Point3f p(t_x, y, t_z);
+
                     p = trafo * p;
+
                     m_bbox.expandBy(p);
                     positions[index(x, z)] = p; 
                 }
