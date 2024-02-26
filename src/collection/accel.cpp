@@ -492,11 +492,18 @@ bool Accel::rayIntersect(const Ray3f &_ray, Intersection &its, bool shadowRay) c
                tangents that are continuous across the surface. That
                means that this code will need to be modified to be able
                use anisotropic BRDFs, which need tangent continuity */
+            Vector3f normal = (bary.x() * N.col(idx0) +
+                               bary.y() * N.col(idx1) +
+                               bary.z() * N.col(idx2)).normalized();
+            Frame frame(normal);
 
-            its.shFrame = Frame(
-                (bary.x() * N.col(idx0) +
-                 bary.y() * N.col(idx1) +
-                 bary.z() * N.col(idx2)).normalized());
+            if(mesh->has_normal_map()) {
+                Vector3f bump_normal = mesh->get_normal_bump(its.uv).normalized();
+                its.shFrame = Frame(frame.toWorld(bump_normal));
+            } else {
+                its.shFrame = frame;
+            }
+
         } else {
             its.shFrame = its.geoFrame;
         }
