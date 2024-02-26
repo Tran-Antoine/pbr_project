@@ -22,7 +22,7 @@
 #include <core/frame.h>
 #include <core/bbox.h>
 #include <stats/dpdf.h>
-
+#include <bsdf/diffusemap.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -191,6 +191,14 @@ public:
 
     bool is_uv_mapped() { return m_UV.size() > 0; }
 
+    Vector3f get_normal_bump(float u, float v) const {
+        if(!normal_map) {
+            return Vector3f(0.1f);
+        }
+        Color3f color = normal_map->T(u, v);
+        return Vector3f(color.x(), color.y(), color.z());
+    }
+
 
 protected:
     /// Create an empty mesh
@@ -206,6 +214,7 @@ protected:
     Emitter    *m_emitter = nullptr;     ///< Associated emitter, if any
     BoundingBox3f m_bbox;                ///< Bounding box of the mesh
     DiscretePDF* triangle_pdf;
+    DiffuseMap* normal_map{};
     float total_area;
 
 };

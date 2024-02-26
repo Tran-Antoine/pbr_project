@@ -1,9 +1,7 @@
 #include <core/common.h>
 #include <core/color.h>
-#include <bsdf/diffusemap.h>
 #include <bsdf/texturemap.h>
 #include <ImfRgbaFile.h>
-#include <ImfArray.h>
 #include <algorithm>
 #include <opencv2/opencv.hpp>
 
