@@ -23,6 +23,7 @@
 #include <fstream>
 #include <ImfRgbaFile.h>
 #include <ImfArray.h>
+#include <bsdf/texturemap.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -59,6 +60,12 @@ public:
         float max_height = propList.getFloat("maxh");
         float x_ratio = propList.getFloat("xratio", 1.f);
         float z_ratio = propList.getFloat("zratio", 1.f);
+
+        std::string normal_map_name = propList.getString("nmap", "");
+
+        if(!normal_map_name.empty()) {
+            normal_map = new TextureDiffuseMap(normal_map_name);
+        }
 
         Timer timer;
         std::vector<Vector3f>   positions;

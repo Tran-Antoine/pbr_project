@@ -20,6 +20,7 @@
 
 	<mesh type="obj">
 		<string name="filename" value="rock2.obj"/>
+		<string name="nmap" value="normal.jpg"/>
 
 		<bsdf type="diffuse">
 			<string name="texturemap" value="diffuse-map.png"/>

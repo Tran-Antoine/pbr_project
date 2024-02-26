@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<scene>
+	<integrator type="whitted"/>
+
+	<camera type="perspective">
+		<float name="fov" value="27.7856"/>
+		<transform name="toWorld">
+			<scale value="-1,1,1"/>
+			<lookat target="0, 0.893051, 0" origin="0, 10, 1" up="0, 1, 0"/>
+		</transform>
+
+		<integer name="height" value="800"/>
+		<integer name="width" value="1200"/>
+	</camera>
+
+	<sampler type="independent">
+		<integer name="sampleCount" value="128"/>
+	</sampler>
+
+	<mesh type="hmap">
+		<string name="filename" value="flat_hmap.exr"/>
+		<string name="nmap" value="bumpmap.jpg"/>
+		<float name="minh" value="0"/>
+		<float name="maxh" value="500"/>
+		<float name="xratio" value ="0.005"/>
+		<float name="zratio" value ="0.005"/>
+
+		<bsdf type="microfacet">
+			<string name="texturemap" value="brickwall.jpg"/>
+		</bsdf>
+	</mesh>
+
+	<mesh type="obj">
+		<transform name="toWorld">
+			<!-- Any sequence of the following operations: -->
+			<scale value="0.5, 0.5, 0.5"/>
+			<translate value="0,20,0"/>
+		</transform>
+		<string name="filename" value="sphere.obj"/>
+
+		<emitter type="area">
+			<color name="radiance" value="80 80 80"/>
+		</emitter>
+	</mesh>
+</scene>

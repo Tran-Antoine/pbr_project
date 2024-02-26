@@ -189,13 +189,15 @@ public:
         return Point2f(s, t);
     }
 
-    bool is_uv_mapped() { return m_UV.size() > 0; }
+    bool is_uv_mapped() const { return m_UV.size() > 0; }
 
-    Vector3f get_normal_bump(float u, float v) const {
+    bool has_normal_map() const { return normal_map; }
+
+    Vector3f get_normal_bump(Point2f uv) const {
         if(!normal_map) {
             return Vector3f(0.1f);
         }
-        Color3f color = normal_map->T(u, v);
+        Color3f color = normal_map->T(uv.x(), 1-uv.y());
         return Vector3f(color.x(), color.y(), color.z());
     }
 
@@ -213,8 +215,8 @@ protected:
     BSDF         *m_bsdf = nullptr;      ///< BSDF of the surface
     Emitter    *m_emitter = nullptr;     ///< Associated emitter, if any
     BoundingBox3f m_bbox;                ///< Bounding box of the mesh
-    DiscretePDF* triangle_pdf;
-    DiffuseMap* normal_map{};
+    DiscretePDF *triangle_pdf = nullptr;
+    DiffuseMap *normal_map = nullptr;
     float total_area;
 
 };
