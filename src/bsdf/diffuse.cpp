@@ -61,8 +61,8 @@ public:
             || Frame::cosTheta(bRec.wo) <= 0)
             return Color3f(0.0f);
 
-        
-        Color3f albedo = m_albedo->T(bRec.uv);
+        // Texture coordinates are y-inverted
+        Color3f albedo = m_albedo->T(bRec.uv.x(), 1-bRec.uv.y());
         /* The BRDF is simply the albedo / pi */
         return albedo * INV_PI;
     }
