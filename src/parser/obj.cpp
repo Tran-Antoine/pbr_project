@@ -21,6 +21,8 @@
 #include <filesystem/resolver.h>
 #include <unordered_map>
 #include <fstream>
+#include <bsdf/texturemap.h>
+
 
 NORI_NAMESPACE_BEGIN
 
@@ -34,6 +36,12 @@ public:
 
         filesystem::path filename =
             getFileResolver()->resolve(propList.getString("filename"));
+
+        std::string normal_map_name = propList.getString("nmap", "");
+
+        if(!normal_map_name.empty()) {
+            normal_map = new TextureDiffuseMap(normal_map_name);
+        }
 
         std::ifstream is(filename.str());
         if (is.fail())
