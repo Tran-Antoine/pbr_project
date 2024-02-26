@@ -1,11 +1,11 @@
 <scene>
 	<!-- Independent sample generator, 32 samples per pixel -->
 	<sampler type="independent">
-		<integer name="sampleCount" value="64"/>
+		<integer name="sampleCount" value="256"/>
 	</sampler>
 
 	<!-- Use the simple point light integrator -->
-    <integrator type="normals">
+    <integrator type="whitted">
         <point name="position" value="0, 300, 0"/>
         <color name="energy" value="3.76e8, 3.76e8, 3.76e7"/>
     </integrator>
@@ -16,9 +16,22 @@
         <float name="maxh" value="150"/>
         <float name="xratio" value ="3"/>
         <float name="zratio" value ="3"/>
-		<bsdf type="diffuse"/>
+		<bsdf type="diffuse">
+			<string name="texturemap" value="board.jpg"/>
+		</bsdf>
 	</mesh>
 
+	<mesh type="obj">
+		<transform name="toWorld">
+			<!-- Any sequence of the following operations: -->
+			<translate value="0,1000,0"/>
+		</transform>
+		<string name="filename" value="sphere.obj"/>
+
+		<emitter type="area">
+			<color name="radiance" value="3.76e5, 3.76e5, 3.46e5"/>
+		</emitter>
+	</mesh>
 	<!-- Render the scene viewed by a perspective camera -->
 	<camera type="perspective">
 		<float name="fov" value="60"/>

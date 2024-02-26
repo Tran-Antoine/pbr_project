@@ -12,7 +12,7 @@ public:
 
     virtual Color3f T(float s, float t) const = 0;
 
-    Color3f T(Point2f p) {
+    Color3f T(Point2f p) const {
         return T(p.x(), p.y());
     }
 

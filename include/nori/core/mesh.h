@@ -189,6 +189,9 @@ public:
         return Point2f(s, t);
     }
 
+    bool is_uv_mapped() { return m_UV.size() > 0; }
+
+
 protected:
     /// Create an empty mesh
     Mesh();
