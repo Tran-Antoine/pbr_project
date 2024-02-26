@@ -56,6 +56,7 @@ public:
         filesystem::path filename = getFileResolver()->resolve(propList.getString("filename"));
 
         Transform trafo = propList.getTransform("toWorld", Transform());
+
         float min_height = propList.getFloat("minh");
         float max_height = propList.getFloat("maxh");
         float x_ratio = propList.getFloat("xratio", 1.f);
