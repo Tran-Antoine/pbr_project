@@ -19,6 +19,9 @@
 #include <bsdf/bsdf.h>
 #include <core/frame.h>
 #include <stats/warp.h>
+#include <bsdf/diffusemap.h>
+#include <bsdf/texturemap.h>
+#include <bsdf/uniformmap.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -35,7 +38,13 @@ public:
         m_extIOR = propList.getFloat("extIOR", 1.000277f);
 
         /* Albedo of the diffuse base material (a.k.a "kd") */
-        m_kd = propList.getColor("kd", Color3f(0.5f));
+        std::string texture_map = propList.getString("texturemap", "");
+        if(!texture_map.empty()) {
+            m_albedo = new TextureDiffuseMap(texture_map);
+        } else {
+            Color3f constant = propList.getColor("albedo", Color3f(0.5f));
+            m_albedo = new UniformDiffuseMap(constant);
+        }
 
         /* To ensure energy conservation, we must scale the 
            specular component by 1-kd. 
@@ -45,7 +54,6 @@ public:
            implementation. Please see the course staff if you're 
            interested in implementing a more realistic version 
            of this BRDF. */
-        m_ks = 1 - m_kd.maxCoeff();
     }
 
     Color3f G(Vector3f wi, Vector3f wo, Vector3f wh) const {
@@ -88,7 +96,7 @@ public:
               cos_theta_o = Frame::cosTheta(wo), 
               cos_theta_h = Frame::cosTheta(wh);
 
-        Color3f kd = m_kd;
+        Color3f kd = m_albedo->T(bRec.uv);
         float ks = 1 - std::max({kd.x(), kd.y(), kd.z()});
 
         Color3f out = kd / M_PI + ks * (D(wh) * F(wh.dot(wi), m_extIOR, m_intIOR) * G(wi, wo, wh)) / (4*cos_theta_i*cos_theta_o*cos_theta_h);
@@ -103,6 +111,7 @@ public:
             || Frame::cosTheta(bRec.wo) <= 0)
             return 0.0f;
 
+        Color3f m_kd = m_albedo->T(bRec.uv);
     	float ks = 1 - std::max({m_kd.x(), m_kd.y(), m_kd.z()});
         Vector3f wh = (bRec.wi + bRec.wo).normalized();
         
@@ -117,6 +126,7 @@ public:
         float eps1 = _sample.x();
         float eps2 = _sample.y();
 
+        Color3f m_kd = m_albedo->T(bRec.uv);
         float ks = 1 - std::max({m_kd.x(), m_kd.y(), m_kd.z()});
 
         if(eps1 < ks) { // handle specular
@@ -170,7 +180,7 @@ public:
             m_alpha,
             m_intIOR,
             m_extIOR,
-            m_kd.toString(),
+            "",
             m_ks
         );
     }
@@ -178,7 +188,7 @@ private:
     float m_alpha;
     float m_intIOR, m_extIOR;
     float m_ks;
-    Color3f m_kd;
+    DiffuseMap* m_albedo = nullptr;
 };
 
 NORI_REGISTER_CLASS(Microfacet, "microfacet");

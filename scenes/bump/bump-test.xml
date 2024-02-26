@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
 
 <scene>
-	<integrator type="whitted"/>
+	<integrator type="normals"/>
 
 	<camera type="perspective">
 		<float name="fov" value="27.7856"/>
 		<transform name="toWorld">
 			<scale value="-1,1,1"/>
-			<lookat target="0, 0.893051, 0" origin="0, 10, 1" up="0, 1, 0"/>
+			<lookat target="0, 0, 0" origin="-120, 0.4, 0" up="0, 1, 0"/>
 		</transform>
 
 		<integer name="height" value="800"/>
@@ -19,28 +19,35 @@
 	</sampler>
 
 	<mesh type="hmap">
-		<string name="filename" value="flat_hmap.exr"/>
-		<string name="nmap" value="bumpmap.jpg"/>
-		<float name="minh" value="0"/>
-		<float name="maxh" value="500"/>
-		<float name="xratio" value ="0.005"/>
-		<float name="zratio" value ="0.005"/>
+		<transform name="toWorld">
+			<rotate axis="0, 0, 1" angle="90"/>
+			<rotate axis="1, 0, 0" angle="-90"/>
 
-		<bsdf type="microfacet">
+		</transform>
+
+		<string name="filename" value="flat_hmap.exr"/>
+		<string name="nmap" value="bumpmap.exr"/>
+		<float name="minh" value="0"/>
+		<float name="maxh" value="1"/>
+		<float name="xratio" value ="0.1"/>
+		<float name="zratio" value ="0.1"/>
+
+		<bsdf type="diffuse">
 			<string name="texturemap" value="brickwall.jpg"/>
+			<float name="intIOR" value="1.7"/>
+			<float name="alpha" value="0.9"/>
 		</bsdf>
 	</mesh>
 
 	<mesh type="obj">
 		<transform name="toWorld">
 			<!-- Any sequence of the following operations: -->
-			<scale value="0.5, 0.5, 0.5"/>
-			<translate value="0,20,0"/>
+			<translate value="-110, 5, 0"/>
 		</transform>
 		<string name="filename" value="sphere.obj"/>
 
 		<emitter type="area">
-			<color name="radiance" value="80 80 80"/>
+			<color name="radiance" value="25000 25000 25000"/>
 		</emitter>
 	</mesh>
 </scene>

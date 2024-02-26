@@ -120,7 +120,7 @@ public:
 
     EClassType getClassType() const { return EBSDF; }
 private:
-    DiffuseMap* m_albedo;
+    DiffuseMap* m_albedo = nullptr;
 };
 
 NORI_REGISTER_CLASS(Diffuse, "diffuse");
