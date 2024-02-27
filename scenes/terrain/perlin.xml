@@ -12,12 +12,13 @@
 
 	<mesh type="hmap">
 		<string name="filename" value="perlin-heights.exr"/>
+		<string name="nmap" value="bumpmap.exr"/>
         <float name="minh" value="0"/>
         <float name="maxh" value="150"/>
         <float name="xratio" value ="3"/>
         <float name="zratio" value ="3"/>
 		<bsdf type="diffuse">
-			<string name="texturemap" value="board.jpg"/>
+			<string name="texturemap" value="brickwall.jpg"/>
 		</bsdf>
 	</mesh>
 

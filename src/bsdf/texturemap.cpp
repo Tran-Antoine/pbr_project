@@ -61,7 +61,7 @@ Color3f TextureDiffuseMap::T(float s, float t) const {
     int w_index = std::min(width - 1, (int) (s * width));
     const Imf::Rgba &pixel = pixels[h_index][w_index];
 
-    return Color3f(pixel.r, pixel.g, pixel.b);
+    return Color3f(pixel.r, pixel.g, pixel.b).toLinearRGB();
 }
 
 NORI_NAMESPACE_END
