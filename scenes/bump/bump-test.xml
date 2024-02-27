@@ -27,7 +27,7 @@
 
 		<string name="filename" value="flat_hmap.exr"/>
 		<string name="nmap" value="bumpmap.exr"/>
-		<float name="bump_accentuate" value="1.5"/>
+		<float name="bump_accentuate" value="1"/>
 		<float name="minh" value="0"/>
 		<float name="maxh" value="1"/>
 		<float name="xratio" value ="0.1"/>
@@ -48,7 +48,7 @@
 		<string name="filename" value="sphere.obj"/>
 
 		<emitter type="area">
-			<color name="radiance" value="1500 1500 1500"/>
+			<color name="radiance" value="4500 4500 4500"/>
 		</emitter>
 	</mesh>
 </scene>
