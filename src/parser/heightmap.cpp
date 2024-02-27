@@ -61,6 +61,7 @@ public:
         float max_height = propList.getFloat("maxh");
         float x_ratio = propList.getFloat("xratio", 1.f);
         float z_ratio = propList.getFloat("zratio", 1.f);
+        bump_increase_factor = propList.getFloat("bump_accentuate", 1.f);
 
         std::string normal_map_name = propList.getString("nmap", "");
 
@@ -73,7 +74,6 @@ public:
         std::vector<Vector2f>   texcoords;
         std::vector<Vector3f>   normals;
         std::vector<uint32_t>   indices;
-
         
         try {
 
@@ -107,9 +107,9 @@ public:
 
                     Point3f p(t_x, y, t_z);
 
-                    p = trafo * p;
+                    //p = trafo * p;
 
-                    m_bbox.expandBy(p);
+                    m_bbox.expandBy(trafo * p);
                     positions[index(x, z)] = p; 
                 }
             }
@@ -123,7 +123,8 @@ public:
         for(int z = 0; z < res_z; ++z) {
             for(int x = 0; x < res_x; ++x) {
                 Vector3f n = normal(x, z, positions);
-                normals[index(x,z)] = n; // no need to apply trafo again
+
+                normals[index(x,z)] = n;
 
                 if(x >= res_x - 1 || z >= res_z - 1) {
                     continue;
@@ -155,8 +156,15 @@ public:
                     indices[face_index++] = i3;
                     indices[face_index++] = i0;
                 }
-            }  
+            }
                  
+        }
+
+        for(int z = 0; z < res_z; ++z) {
+            for (int x = 0; x < res_x; ++x) {
+                normals[index(x,z)] = trafo * normals[index(x,z)];
+                positions[index(x,z)] = trafo * positions[index(x,z)];
+            }
         }
 
         m_F.resize(3, indices.size()/3);

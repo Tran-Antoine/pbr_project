@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 
 <scene>
-	<integrator type="normals"/>
+	<integrator type="path_mis"/>
 
 	<camera type="perspective">
 		<float name="fov" value="27.7856"/>
@@ -27,27 +27,28 @@
 
 		<string name="filename" value="flat_hmap.exr"/>
 		<string name="nmap" value="bumpmap.exr"/>
+		<float name="bump_accentuate" value="1.5"/>
 		<float name="minh" value="0"/>
 		<float name="maxh" value="1"/>
 		<float name="xratio" value ="0.1"/>
 		<float name="zratio" value ="0.1"/>
 
-		<bsdf type="diffuse">
+		<bsdf type="microfacet">
 			<string name="texturemap" value="brickwall.jpg"/>
 			<float name="intIOR" value="1.7"/>
-			<float name="alpha" value="0.9"/>
+			<float name="alpha" value="0.2"/>
 		</bsdf>
 	</mesh>
 
 	<mesh type="obj">
 		<transform name="toWorld">
 			<!-- Any sequence of the following operations: -->
-			<translate value="-110, 5, 0"/>
+			<translate value="-120, 3, 3"/>
 		</transform>
 		<string name="filename" value="sphere.obj"/>
 
 		<emitter type="area">
-			<color name="radiance" value="25000 25000 25000"/>
+			<color name="radiance" value="1500 1500 1500"/>
 		</emitter>
 	</mesh>
 </scene>

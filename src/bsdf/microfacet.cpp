@@ -96,7 +96,7 @@ public:
               cos_theta_o = Frame::cosTheta(wo), 
               cos_theta_h = Frame::cosTheta(wh);
 
-        Color3f kd = m_albedo->T(bRec.uv);
+        Color3f kd = m_albedo->T(bRec.uv.x(), 1 - bRec.uv.y());
         float ks = 1 - std::max({kd.x(), kd.y(), kd.z()});
 
         Color3f out = kd / M_PI + ks * (D(wh) * F(wh.dot(wi), m_extIOR, m_intIOR) * G(wi, wo, wh)) / (4*cos_theta_i*cos_theta_o*cos_theta_h);
@@ -111,7 +111,7 @@ public:
             || Frame::cosTheta(bRec.wo) <= 0)
             return 0.0f;
 
-        Color3f m_kd = m_albedo->T(bRec.uv);
+        Color3f m_kd = m_albedo->T(bRec.uv.x(), 1 - bRec.uv.y());
     	float ks = 1 - std::max({m_kd.x(), m_kd.y(), m_kd.z()});
         Vector3f wh = (bRec.wi + bRec.wo).normalized();
         
@@ -126,7 +126,7 @@ public:
         float eps1 = _sample.x();
         float eps2 = _sample.y();
 
-        Color3f m_kd = m_albedo->T(bRec.uv);
+        Color3f m_kd = m_albedo->T(bRec.uv.x(), 1 - bRec.uv.y());
         float ks = 1 - std::max({m_kd.x(), m_kd.y(), m_kd.z()});
 
         if(eps1 < ks) { // handle specular

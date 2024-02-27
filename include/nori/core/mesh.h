@@ -193,6 +193,8 @@ public:
 
     bool has_normal_map() const { return normal_map; }
 
+    float bump_accentuate_factor() const { return bump_increase_factor; }
+
     Vector3f get_normal_bump(Point2f uv) const {
         if(!normal_map) {
             return Vector3f(0.1f);
@@ -217,6 +219,7 @@ protected:
     BoundingBox3f m_bbox;                ///< Bounding box of the mesh
     DiscretePDF *triangle_pdf = nullptr;
     DiffuseMap *normal_map = nullptr;
+    float bump_increase_factor = 1.f;
     float total_area;
 
 };

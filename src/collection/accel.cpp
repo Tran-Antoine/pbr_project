@@ -497,19 +497,10 @@ bool Accel::rayIntersect(const Ray3f &_ray, Intersection &its, bool shadowRay) c
                                bary.z() * N.col(idx2)).normalized();
             Frame frame(normal);
 
-            if(mesh->has_normal_map() && false) {
-
-                // TODO PROBLEM : NORMALS STAY THE SAME EVEN WITH TRANSFORMATION SOMEHOW
-
-                Vector3f bump_normal = mesh->get_normal_bump(its.uv);
-                //std::cout << "\n" << bump_normal.x() << "," << bump_normal.y() << "," << bump_normal.z();
-                //bump_normal = 0.5 * bump_normal + Vector3f(0.5f);
-                bump_normal = 2 * bump_normal - Vector3f(1.f);
+            if(mesh->has_normal_map()) {
+                Vector3f bump_normal = 2 * mesh->get_normal_bump(its.uv) - Vector3f(1.f);
+                bump_normal.z() = bump_normal.z() / mesh->bump_accentuate_factor();
                 bump_normal = frame.toWorld(bump_normal.normalized());
-                if(bump_normal.dot(normal) < -0.1 || true) {
-                    bump_normal = normal;
-                }
-
                 its.shFrame = Frame(bump_normal);
             } else {
                 its.shFrame = frame;
