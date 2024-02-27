@@ -37,6 +37,8 @@ public:
         filesystem::path filename =
             getFileResolver()->resolve(propList.getString("filename"));
 
+        bump_increase_factor = propList.getFloat("bump_accentuate", 1.f);
+
         std::string normal_map_name = propList.getString("nmap", "");
 
         if(!normal_map_name.empty()) {
