@@ -71,6 +71,7 @@ add_executable(nori
 
   include/nori/collection/accel.h
   include/nori/collection/octree.h
+  include/nori/collection/mipmap.h
 
   include/nori/stats/dpdf.h
   include/nori/stats/sampler.h
@@ -85,6 +86,7 @@ add_executable(nori
   
   include/nori/parser/parser.h
   include/nori/parser/proplist.h
+  include/nori/parser/imageutil.h
 
   include/nori/postprocessing/rfilter.h
   
@@ -110,6 +112,7 @@ add_executable(nori
 
   src/collection/accel.cpp
   src/collection/octree.cpp
+  src/collection/mipmap.cpp
 
   src/stats/chi2test.cpp
   src/stats/independent.cpp
@@ -132,6 +135,8 @@ add_executable(nori
   src/parser/heightmap.cpp
   src/parser/parser.cpp
   src/parser/proplist.cpp
+  src/parser/imageutil.cpp
+
   src/postprocessing/rfilter.cpp
 
   src/main.cpp
