@@ -233,4 +233,50 @@ float Warp::squareToBeckmannPdf(const Vector3f &m, float alpha) {
     return std::max(0.0f, pdf);
 }
 
+static MipMap::Quadrant pick_quadrant_reuse(Point2f& current_sample, float left, float right, float up, float down) {
+    bool left_chosen, top_chosen;
+
+    if(current_sample.x() < left) {
+        left_chosen = true;
+        current_sample.x() /= left;
+    } else {
+        left_chosen = false;
+        current_sample.x() = (current_sample.x() - left) / right;
+    }
+
+    if(current_sample.y() < up) {
+        top_chosen = true;
+        current_sample.y() /= up;
+    } else {
+        top_chosen = false;
+        current_sample.y() = (current_sample.y() - up) / down;
+    }
+
+    return MipMap::quadrant(top_chosen, left_chosen);
+}
+
+Point2f Warp::squareToGrayMap(const Point2f &sample, const MipMap &map) {
+
+    MipMap::Quadrant chosen_quadrant = MipMap::Quadrant::UNDEFINED;
+
+    Point2f current_sample = sample;
+    Point2i current_position = Point2i(0);
+
+    for(uint8_t depth = 1; depth <= map.depth(); depth++) {
+        float left, right, up, down;
+        map.distribution(depth, current_position, current_position, left, right, up, down);
+        chosen_quadrant = pick_quadrant_reuse(current_sample, left, right, up, down);
+        MipMap::move(current_position, chosen_quadrant);
+    }
+
+    float final_x = (float) current_position.x() + sample.x();
+    float final_y = (float) current_position.y() + sample.y();
+
+    return Point2f(final_x, final_y);
+}
+
+float Warp::squareToGrayMapPdf(const Point2f &p, const MipMap &map) {
+    return 0;
+}
+
 NORI_NAMESPACE_END

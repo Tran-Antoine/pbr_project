@@ -3,12 +3,12 @@
 
 using namespace nori;
 
-static std::string PATH = R"(.\scenes\ibl\test-probe.png)";
+static std::string PATH = R"(.\scenes\ibl\cat.jpg)";
 
 
 int main(int argc, char **argv) {
 
-    MipMap map(PATH, "png");
+    MipMap map(PATH, "jpg", false);
     map.write_exr();
     return 0;
 }

@@ -3,23 +3,25 @@
 #include <parser/imageutil.h>
 #include <gui/bitmap.h>
 
+NORI_NAMESPACE_BEGIN
+
 static float gray(const Imf::Rgba& pixel) {
     return (pixel.r + pixel.g + pixel.b) / 3.f;
 }
 
-static void shrink(Imf::Array2D<float>& array, int size_x, int size_y) {
+void MipMap::shrink(Imf::Array2D<float>& array, int size_x, int size_y) {
     for(int y = 0; y < size_y; y += 2) {
         for(int x = 0; x < size_x; x += 2) {
             float tl = array[y][x];
             float tr = array[y][x+1];
             float bl = array[y+1][x];
             float br = array[y+1][x+1];
-            array[y/2][x/2] = tl + tr + bl + br;
+            array[y/2][x/2] = norm ? tl + tr + bl + br : (tl + tr + bl + br) / 4.f;
         }
     }
 }
 
-nori::MipMap::MipMap(const std::string &path, const std::string &ext) {
+MipMap::MipMap(const std::string &path, const std::string &ext, bool norm) : norm(norm) {
 
     using GrayMap = Imf::Array2D<float>;
 
@@ -47,10 +49,12 @@ nori::MipMap::MipMap(const std::string &path, const std::string &ext) {
         }
     }
     // Normalizing step
-    for(int y = 0; y < max_res; y++) {
-        for(int x = 0; x < max_res; x++) {
-            map[y][x] /= total;
-            temp[y][x] /= total;
+    if(norm) {
+        for(int y = 0; y < max_res; y++) {
+            for(int x = 0; x < max_res; x++) {
+                map[y][x] /= total;
+                temp[y][x] /= total;
+            }
         }
     }
 
@@ -73,42 +77,55 @@ nori::MipMap::MipMap(const std::string &path, const std::string &ext) {
     }
 }
 
-void nori::MipMap::h_distribution(uint8_t depth, int x, int y, float &left, float &right) {
+void MipMap::h_distribution(uint8_t depth, Quadrant previous, float &left, float &right) const {
     int index_x, index_y;
     corner(depth, index_x, index_y);
 
-    index_x += x;
-    index_y += y;
+    int half_res = 1 << (depth - 1);
 
-    /*float left_total = grayscale(index_x, index_y) + grayscale(index_x, index_y + 1);
+    switch(previous) {
+        case TOP_LEFT: break;
+        case TOP_RIGHT: index_x += half_res; break;
+        case BOTTOM_LEFT: index_y += half_res; break;
+        case BOTTOM_RIGHT: index_x += half_res; index_y += half_res; break;
+        case UNDEFINED: break;
+    }
+
+    float left_total = grayscale(index_x, index_y) + grayscale(index_x, index_y + 1);
     float right_total = grayscale(index_x + 1, index_y) + grayscale(index_x + 1, index_y + 1);
 
     left = left_total / (left_total + right_total);
-    right = 1 - left;*/
-    // above step not needed as the map is normalized
-    left = grayscale(index_x, index_y) + grayscale(index_x, index_y + 1);
     right = 1 - left;
+    // above step not needed as the map is normalized
+    //left = grayscale(index_x, index_y) + grayscale(index_x, index_y + 1);
+    //right = 1 - left;
 }
 
-void nori::MipMap::v_distribution(uint8_t depth, int x, int y, float &up, float &down) {
+void MipMap::v_distribution(uint8_t depth, Quadrant previous, float &up, float &down) const {
     int index_x, index_y;
     corner(depth, index_x, index_y);
 
-    index_x += x;
-    index_y += y;
+    int half_res = 1 << (depth - 1);
 
-    /*
+    switch(previous) {
+        case TOP_LEFT: break;
+        case TOP_RIGHT: index_x += half_res; break;
+        case BOTTOM_LEFT: index_y += half_res; break;
+        case BOTTOM_RIGHT: index_x += half_res; index_y += half_res; break;
+        case UNDEFINED: break;
+    }
     float up_total = grayscale(index_x, index_y) + grayscale(index_x + 1, index_y);
     float down_total = grayscale(index_x, index_y + 1) + grayscale(index_x + 1, index_y + 1);
 
     up = up_total / (up_total + down_total);
-    down = 1 - up;*/
-    // above step not needed as the map is normalized
-    up = grayscale(index_x, index_y) + grayscale(index_x + 1, index_y);
     down = 1 - up;
+    // above step not needed as the map is normalized
+    // yes it is as normalization is overall, not per square of 4 quadrants
+    //up = grayscale(index_x, index_y) + grayscale(index_x + 1, index_y);
+    //down = 1 - up;
 }
 
-void nori::MipMap::corner(uint8_t depth, int &index_x, int &index_y) const {
+void MipMap::corner(uint8_t depth, int &index_x, int &index_y) const {
     if(depth == max_depth) {
         index_x = 0;
         index_y = 0;
@@ -118,19 +135,19 @@ void nori::MipMap::corner(uint8_t depth, int &index_x, int &index_y) const {
     index_y = max_res - ((1 << (depth+1)));
 }
 
-float nori::MipMap::grayscale(int x, int y) const {
+float MipMap::grayscale(int x, int y) const {
     if(x < 0 || y < 0 || x >= map.width() || y >= map.height()) {
         throw NoriException("Grayscale indices out of range");
     }
     return map[y][x];
 }
 
-nori::Color3f nori::MipMap::color(int x, int y) const {
+Color3f MipMap::color(int x, int y) const {
     Imf::Rgba pixel = original[y][x];
     return Color3f(pixel.r, pixel.g, pixel.b);
 }
 
-void nori::MipMap::write_exr() {
+void MipMap::write_exr() const {
 
     std::cout << map.width() << " " << map.height();
     Bitmap out(Vector2i(map.width(), map.height()));
@@ -146,4 +163,41 @@ void nori::MipMap::write_exr() {
     out.savePNG("scenes/ibl/mipmap");
 }
 
+MipMap::Quadrant MipMap::quadrant(bool top, bool left) {
+    if(top && left) return Quadrant::TOP_LEFT;
+    if(top && !left) return Quadrant::TOP_RIGHT;
+    if(!top && left) return Quadrant::BOTTOM_LEFT;
+    else return Quadrant::BOTTOM_RIGHT;
+}
+
+void MipMap::distribution(uint8_t depth, Point2i previous_pos, Point2i next_corner, float &left, float &right, float &up, float &down) const {
+    int index_x, index_y;
+    corner(depth, index_x, index_y);
+
+    index_x += 2 * previous_pos.x();
+    index_y += 2 * previous_pos.y();
+
+    float up_total = grayscale(index_x, index_y) + grayscale(index_x + 1, index_y);
+    float down_total = grayscale(index_x, index_y + 1) + grayscale(index_x + 1, index_y + 1);
+    float left_total = grayscale(index_x, index_y) + grayscale(index_x, index_y + 1);
+    float right_total = grayscale(index_x + 1, index_y) + grayscale(index_x + 1, index_y + 1);
+
+    next_corner = Point2i(index_x, index_y);
+    up = up_total / (up_total + down_total);
+    down = 1 - up;
+    left = left_total / (left_total + right_total);
+    right = 1 - left;
+}
+
+void MipMap::move(Point2i &p, const MipMap::Quadrant &quadrant) {
+    switch(quadrant) {
+        case TOP_LEFT: break;
+        case TOP_RIGHT: p.x() += 1; break;
+        case BOTTOM_LEFT: p.y() += 1; break;
+        case BOTTOM_RIGHT: p.x() += 1; p.y() += 1; break;
+        case UNDEFINED: break;
+    }
+}
+
+NORI_NAMESPACE_END
 
