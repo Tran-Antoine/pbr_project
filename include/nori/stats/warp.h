@@ -20,6 +20,7 @@
 
 #include <core/common.h>
 #include <stats/sampler.h>
+#include <collection/mipmap.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -80,6 +81,12 @@ public:
 
     /// Probability density of \ref squareToBeckmann()
     static float squareToBeckmannPdf(const Vector3f &m, float alpha);
+
+    /// Warp a uniformly distributed square sample to a hierarchical distribution from a gray-scale map
+    static Point2f squareToGrayMap(const Point2f &sample, const MipMap& map);
+
+    /// Probability density of \ref squareToGrayMap()
+    static float squareToGrayMapPdf(const Point2f &p, const MipMap& map);
 };
 
 NORI_NAMESPACE_END
