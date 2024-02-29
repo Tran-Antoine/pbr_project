@@ -1,6 +1,7 @@
 #include <core/common.h>
 #include <collection/mipmap.h>
 #include <parser/imageutil.h>
+#include <gui/bitmap.h>
 
 static float gray(const Imf::Rgba& pixel) {
     return (pixel.r + pixel.g + pixel.b) / 3.f;
@@ -18,27 +19,38 @@ static void shrink(Imf::Array2D<float>& array, int size_x, int size_y) {
     }
 }
 
-nori::MipMap::MipMap(const std::string& filename) {
+nori::MipMap::MipMap(const std::string &path, const std::string &ext) {
 
     using GrayMap = Imf::Array2D<float>;
 
-    load_from_file(filename, original);
+    load_from_file(path, ext,original);
     max_res = original.height();
 
     if((max_res & (max_res - 1)) != 0) {
         throw NoriException("Dimensions must be a power of 2");
     }
 
+    // TODO: figure out what the heck the height and width are connected to
+
     max_depth = (int) log2(max_res); // not very efficient but it doesn't matter
-    map.resizeErase(max_res + max_res / 2, max_res);
+    map.resizeErase(max_res, max_res + max_res / 2);
 
     GrayMap temp(max_res, max_res);
 
+    float total = 0;
     for(int y = 0; y < max_res; y++) {
         for(int x = 0; x < max_res; x++) {
             float gray_value = gray(original[y][x]);
             map[y][x] = gray_value;
             temp[y][x] = gray_value;
+            total += gray_value;
+        }
+    }
+    // Normalizing step
+    for(int y = 0; y < max_res; y++) {
+        for(int x = 0; x < max_res; x++) {
+            map[y][x] /= total;
+            temp[y][x] /= total;
         }
     }
 
@@ -68,10 +80,13 @@ void nori::MipMap::h_distribution(uint8_t depth, int x, int y, float &left, floa
     index_x += x;
     index_y += y;
 
-    float left_total = grayscale(index_x, index_y) + grayscale(index_x, index_y + 1);
+    /*float left_total = grayscale(index_x, index_y) + grayscale(index_x, index_y + 1);
     float right_total = grayscale(index_x + 1, index_y) + grayscale(index_x + 1, index_y + 1);
 
     left = left_total / (left_total + right_total);
+    right = 1 - left;*/
+    // above step not needed as the map is normalized
+    left = grayscale(index_x, index_y) + grayscale(index_x, index_y + 1);
     right = 1 - left;
 }
 
@@ -82,10 +97,14 @@ void nori::MipMap::v_distribution(uint8_t depth, int x, int y, float &up, float 
     index_x += x;
     index_y += y;
 
+    /*
     float up_total = grayscale(index_x, index_y) + grayscale(index_x + 1, index_y);
     float down_total = grayscale(index_x, index_y + 1) + grayscale(index_x + 1, index_y + 1);
 
     up = up_total / (up_total + down_total);
+    down = 1 - up;*/
+    // above step not needed as the map is normalized
+    up = grayscale(index_x, index_y) + grayscale(index_x + 1, index_y);
     down = 1 - up;
 }
 
@@ -110,3 +129,21 @@ nori::Color3f nori::MipMap::color(int x, int y) const {
     Imf::Rgba pixel = original[y][x];
     return Color3f(pixel.r, pixel.g, pixel.b);
 }
+
+void nori::MipMap::write_exr() {
+
+    std::cout << map.width() << " " << map.height();
+    Bitmap out(Vector2i(map.width(), map.height()));
+
+    for(int y = 0; y < map.height(); ++y) {
+        for(int x = 0; x < map.width(); ++x) {
+            out.coeffRef(y, x) = map[y][x];
+        }
+    }
+
+    std::cout << "Bitmap ready to be written\n";
+    out.saveEXR("scenes/ibl/mipmap");
+    out.savePNG("scenes/ibl/mipmap");
+}
+
+

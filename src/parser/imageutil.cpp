@@ -9,10 +9,16 @@ NORI_NAMESPACE_BEGIN
 void load_from_file(const std::string& filename, Imf::Array2D<Imf::Rgba>& pixels) {
 
     filesystem::path path = getFileResolver()->resolve(filename);
+
+    std::string path_name = path.str();
     std::string ext = path.extension();
 
+    load_from_file(path_name, ext, pixels);
+}
+
+void load_from_file(const std::string& path, const std::string& ext, Imf::Array2D<Imf::Rgba>& pixels) {
     if(ext == "exr") {
-        Imf::RgbaInputFile file(path.str().c_str());
+        Imf::RgbaInputFile file(path.c_str());
         Imath::Box2i dw = file.dataWindow();
         long width = dw.max.x - dw.min.x + 1;
         long height = dw.max.y - dw.min.y + 1;
@@ -22,7 +28,7 @@ void load_from_file(const std::string& filename, Imf::Array2D<Imf::Rgba>& pixels
         file.readPixels(dw.min.y, dw.max.y);
     } else if(ext == "png" || ext == "jpg") {
 
-        cv::Mat image = cv::imread(path.str());
+        cv::Mat image = cv::imread(path);
 
         if(image.empty()) {
             throw NoriException("The image could not be found");
@@ -45,5 +51,6 @@ void load_from_file(const std::string& filename, Imf::Array2D<Imf::Rgba>& pixels
         throw NoriException("The file extension is not supported");
     }
 }
+
 
 NORI_NAMESPACE_END
