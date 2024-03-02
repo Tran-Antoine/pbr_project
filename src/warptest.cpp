@@ -146,7 +146,7 @@ struct WarpTest {
             nori::Vector3f sample = points.col(i);
             float x, y;
 
-            if (warpType == Square) {
+            if (warpType == Square || warpType == Hierarchical) {
                 x = sample.x();
                 y = sample.y();
             } else if (warpType == Disk || warpType == Tent) {
@@ -174,7 +174,7 @@ struct WarpTest {
                 x = x * 2 - 1; y = y * 2 - 1;
                 return Warp::squareToTentPdf(Point2f(x, y));
             } else if(warpType == Hierarchical) {
-                x = x * (mipmap->max_resolution() - 1); y = y * (mipmap->max_resolution() - 1);
+                x *= (mipmap->max_resolution() - 1); y *= (1-y)*(mipmap->max_resolution() - 1);
                 return Warp::squareToGrayMapPdf(Point2f(x, y), *mipmap);
             } else {
                 x *= 2 * M_PI;
@@ -210,7 +210,7 @@ struct WarpTest {
         };
 
         double scale = sampleCount;
-        if (warpType == Square)
+        if (warpType == Square || warpType == Hierarchical)
             scale *= 1;
         else if (warpType == Disk || warpType == Tent)
             scale *= 4;
@@ -263,8 +263,11 @@ struct WarpTest {
             case Beckmann:
                 result << Warp::squareToBeckmann(sample, parameterValue); break;
             case Hierarchical:
-                result_2d = Warp::squareToGrayMap(sample, *mipmap) / (float)(mipmap->max_resolution() - 1);
+                result_2d = Warp::squareToGrayMap(sample, *mipmap);
+                result_2d /= (float)(mipmap->max_resolution() - 1);
+                result_2d.y() = 1 - result_2d.y();
                 result_2d = result_2d * 2 - Point2f(1.f);
+
                 result << result_2d, 0; break;
             case UniformMesh: {
                 if(!mesh) {
@@ -619,7 +622,7 @@ public:
             WarpType warpType = (WarpType) m_warpTypeBox->selected_index();
             const int spacer = 20;
             const int histWidth = (width() - 3*spacer) / 2;
-            const int histHeight = (warpType == Square || warpType == Disk || warpType == Tent) ? histWidth : histWidth / 2;
+            const int histHeight = (warpType == Square || warpType == Hierarchical|| warpType == Disk || warpType == Tent) ? histWidth : histWidth / 2;
             const int verticalOffset = (height() - histHeight) / 2;
 
             drawHistogram(Vector2i(spacer, verticalOffset), Vector2i(histWidth, histHeight), m_textures[0].get());

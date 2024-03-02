@@ -271,7 +271,6 @@ static MipMap::Quadrant pick_quadrant_reuse(Point2f& current_sample, float left,
 
 Point2f Warp::squareToGrayMap(const Point2f &sample, const MipMap &map) {
 
-
     Point2f current_sample = Point2f(sample);
     Point2i current_corner;
 
@@ -282,11 +281,11 @@ Point2f Warp::squareToGrayMap(const Point2f &sample, const MipMap &map) {
         current_corner = map.next_corner(depth, current_corner);
 
         float up, down;
-        map.v_distribution(depth, current_corner, up, down);
+        map.v_distribution(current_corner, up, down);
         bool down_picked = pick_reuse(current_sample.y(), down, up);
 
         float left, right;
-        map.h_distribution(depth, current_corner, !down_picked, left, right);
+        map.h_distribution(current_corner, down_picked, left, right);
         bool left_picked = pick_reuse(current_sample.x(), left, right);
 
         MipMap::Quadrant quadrant = MipMap::quadrant(!down_picked, left_picked);
@@ -297,6 +296,7 @@ Point2f Warp::squareToGrayMap(const Point2f &sample, const MipMap &map) {
     float final_y = (float) current_corner.y() + current_sample.y();
 
     Point2f p = Point2f(final_x, final_y);
+
     //std::cout << p.x() << " " << p.y() << "\n";
 
     return p;
@@ -304,17 +304,16 @@ Point2f Warp::squareToGrayMap(const Point2f &sample, const MipMap &map) {
 
 float Warp::squareToGrayMapPdf(const Point2f &p, const MipMap &map) {
 
+
     int x = (int) p.x();
     int y = (int) p.y();
-
-    //std::cout << "Size " << map.max_resolution() << " : " << x << " " << y << "\n";
 
     float value = map.grayscale(x, y);
 
     if(map.is_normalized()) {
-        return value;
+        return value / ((float) map.max_resolution() * (float) map.max_resolution());
     } else {
-        return value / map.get_luminance();
+        return value / map.get_luminance() / ((float) map.max_resolution() * (float) map.max_resolution());
     }
 }
 
