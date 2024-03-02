@@ -276,7 +276,16 @@ Point2f Warp::squareToGrayMap(const Point2f &sample, const MipMap &map) {
 }
 
 float Warp::squareToGrayMapPdf(const Point2f &p, const MipMap &map) {
-    return 0;
+    int x = (int) (p.x() * (map.max_resolution() - 1));
+    int y = (int) (p.y() * (map.max_resolution() - 1));
+
+    float value = map.grayscale(x, y);
+
+    if(map.is_normalized()) {
+        return value;
+    } else {
+        return value / map.get_luminance();
+    }
 }
 
 NORI_NAMESPACE_END

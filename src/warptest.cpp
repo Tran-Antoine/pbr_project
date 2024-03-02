@@ -49,6 +49,8 @@
 #include <core/scene.h>
 #include <filesystem/resolver.h>
 
+#include <collection/mipmap.h>
+
 
 /* =======================================================================
  *   WARNING    WARNING    WARNING    WARNING    WARNING    WARNING
@@ -91,13 +93,14 @@ enum WarpType : int {
     CosineHemisphere,
     Beckmann,
     MicrofacetBRDF,
+    Hierarchical,
     UniformMesh,
     WarpTypeCount
 };
 
 static const std::string kWarpTypeNames[WarpTypeCount] = {
     "square", "tent", "disk", "uniform_sphere", "uniform_hemisphere",
-    "cosine_hemisphere", "beckmann", "microfacet_brdf", "uniform_mesh"
+    "cosine_hemisphere", "beckmann", "microfacet_brdf", "hierarchical", "uniform_mesh"
 };
 
 
@@ -111,6 +114,7 @@ struct WarpTest {
     BSDFQueryRecord bRec;
     int xres, yres, res;
     nori::Mesh* mesh;
+    nori::MipMap* mipmap;
 
     // Observed and expected frequencies, initialized after calling run().
     std::unique_ptr<double[]> obsFrequencies, expFrequencies;
@@ -169,6 +173,9 @@ struct WarpTest {
             } else if (warpType == Tent) {
                 x = x * 2 - 1; y = y * 2 - 1;
                 return Warp::squareToTentPdf(Point2f(x, y));
+            } else if(warpType == Hierarchical) {
+                x = x * 2 - 1; y = y * 2 - 1;
+                return Warp::squareToGrayMapPdf(Point2f(x, y), *mipmap);
             } else {
                 x *= 2 * M_PI;
                 y = y * 2 - 1;
@@ -255,6 +262,8 @@ struct WarpTest {
                 result << Warp::squareToCosineHemisphere(sample); break;
             case Beckmann:
                 result << Warp::squareToBeckmann(sample, parameterValue); break;
+            case Hierarchical:
+                result << Warp::squareToGrayMap(sample, *mipmap); break;
             case UniformMesh: {
                 if(!mesh) {
                     throw NoriException("Mesh unspecified. Did you forget to add the xml path as argument?");
@@ -430,7 +439,7 @@ public:
 class WarpTestScreen : public Screen {
 public:
 
-    WarpTestScreen(nori::Mesh* mesh): Screen(Vector2i(800, 600), "warptest: Sampling and Warping"), m_bRec(nori::Vector3f()), mesh(mesh) {
+    WarpTestScreen(nori::Mesh* mesh, nori::MipMap* mipmap): Screen(Vector2i(800, 600), "warptest: Sampling and Warping"), m_bRec(nori::Vector3f()), mesh(mesh), mipmap(mipmap) {
         inc_ref();
         m_drawHistogram = false;
         initializeGUI();
@@ -967,6 +976,7 @@ private:
     nanogui::ref<RenderPass> m_renderPass;
 
     nori::Mesh* mesh;
+    nori::MipMap* mipmap;
 };
 
 
@@ -994,19 +1004,21 @@ int main(int argc, char **argv) {
         // GUI mode
 
         nori::Mesh* ref_mesh = nullptr;
+        nori::Mesh* ref_mipmap = nullptr;
 
         if(argc == 2) {
 
-            std::string scene_name = argv[1];
+            /*std::string scene_name = argv[1];
             nori::getFileResolver()->prepend_parent(scene_name);
 
             std::unique_ptr<nori::NoriObject> root(nori::loadFromXML(argv[1]));
 
-            /* When the XML root object is a scene, start rendering it .. */
             if (root->getClassType() == nori::NoriObject::EScene) {
                 nori::Scene* scene = static_cast<nori::Scene*>(root.get());
                 ref_mesh = scene->getMeshes()[0];
-            }
+            }*/
+            std::string map_path = argv[1];
+            ref_mipmap = new nori::MipMap(map_path, "png", false);
         }
 
         nanogui::init();
