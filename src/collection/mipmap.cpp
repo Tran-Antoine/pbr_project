@@ -48,6 +48,7 @@ MipMap::MipMap(const std::string &path, const std::string &ext, bool norm) : nor
             total += gray_value;
         }
     }
+    total_luminance = total;
     // Normalizing step
     if(norm) {
         for(int y = 0; y < max_res; y++) {
