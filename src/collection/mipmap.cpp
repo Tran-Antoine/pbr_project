@@ -121,17 +121,8 @@ MipMap::Quadrant MipMap::quadrant(bool top, bool left) {
     else return Quadrant::BOTTOM_RIGHT;
 }
 
-void MipMap::distribution(uint8_t depth, Point2i previous_pos, Point2i& next_corner, float &left, float &right, float &up, float &down) const {
-    int index_x, index_y;
-    corner(depth, index_x, index_y);
-
-    int prev_corner_x = 0, prev_corner_y = 0;
-    if(depth > 1) {
-        corner(depth - 1, prev_corner_x, prev_corner_y);
-    }
-
-    index_x += 2 * (previous_pos.x() - prev_corner_x);
-    index_y += 2 * (previous_pos.y() - prev_corner_y);
+void MipMap::distribution(uint8_t depth, Point2i corner, float &left, float &right, float &up, float &down) const {
+    int index_x = corner.x(), index_y = corner.y();
 
     float up_total = grayscale(index_x, index_y) + grayscale(index_x + 1, index_y);
     float down_total = grayscale(index_x, index_y + 1) + grayscale(index_x + 1, index_y + 1);
@@ -145,17 +136,8 @@ void MipMap::distribution(uint8_t depth, Point2i previous_pos, Point2i& next_cor
     right = 1 - left;
 }
 
-void MipMap::h_distribution(uint8_t depth, Point2i previous_pos, Point2i& next_corner, bool up, float &left, float &right) const {
-    int index_x, index_y;
-    corner(depth, index_x, index_y);
-
-    int prev_corner_x = 0, prev_corner_y = 0;
-    if(depth > 1) {
-        corner(depth - 1, prev_corner_x, prev_corner_y);
-    }
-
-    index_x += 2 * (previous_pos.x() - prev_corner_x);
-    index_y += 2 * (previous_pos.y() - prev_corner_y);
+void MipMap::h_distribution(uint8_t depth, Point2i corner, bool up, float &left, float &right) const {
+    int index_x = corner.x(), index_y = corner.y();
 
     float left_total = up ? grayscale(index_x, index_y + 1) : grayscale(index_x, index_y);
     float right_total = up ? grayscale(index_x + 1, index_y + 1) : grayscale(index_x + 1, index_y);
@@ -167,17 +149,24 @@ void MipMap::h_distribution(uint8_t depth, Point2i previous_pos, Point2i& next_c
     //right = 1 - left;
 }
 
-void MipMap::v_distribution(uint8_t depth, Point2i previous_pos, Point2i& next_corner, float &up, float &down) const {
+Point2f MipMap::next_corner(uint8_t next_depth, Point2i previous_pos) const {
     int index_x, index_y;
     corner(depth, index_x, index_y);
 
-    int prev_corner_x = 0, prev_corner_y = 0;
     if(depth > 1) {
+        int prev_corner_x = 0, prev_corner_y = 0;
         corner(depth - 1, prev_corner_x, prev_corner_y);
+        
+        index_x += 2 * (previous_pos.x() - prev_corner_x);
+        index_y += 2 * (previous_pos.y() - prev_corner_y);
     }
 
-    index_x += 2 * (previous_pos.x() - prev_corner_x);
-    index_y += 2 * (previous_pos.y() - prev_corner_y);
+    return Point2f(index_x, index_y);
+}
+
+
+void MipMap::v_distribution(uint8_t depth, Point2i corner, float &up, float &down) const {
+    int index_x = corner.x(), index_y = corner.y();
 
     float up_total = grayscale(index_x, index_y) + grayscale(index_x + 1, index_y);
     float down_total = grayscale(index_x, index_y + 1) + grayscale(index_x + 1, index_y + 1);
