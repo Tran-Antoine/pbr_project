@@ -142,7 +142,8 @@ add_executable(nori
   #src/main.cpp
   #test/perlin_test.cpp
   #test/fbm_test.cpp
-  test/mipmap_test.cpp
+  #test/mipmap_test.cpp
+  src/warptest.cpp
 )
 
 # Link OpenCV libraries
