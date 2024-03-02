@@ -283,13 +283,13 @@ Point2f Warp::squareToGrayMap(const Point2f &sample, const MipMap &map) {
 
         float up, down;
         map.v_distribution(depth, current_position, current_position, up, down);
-        bool down = pick_reuse(current_sample.y(), down, up);
+        bool down_picked = pick_reuse(current_sample.y(), down, up);
 
         float left, right;
-        map.h_distribution(depth, current_position, current_position, !down, left, right);
-        bool left = pick_reuse(current_sample.x(), left, right);
+        map.h_distribution(depth, current_position, current_position, !down_picked, left, right);
+        bool left_picked = pick_reuse(current_sample.x(), left, right);
 
-        MipMap::Quadrant quadrant = MipMap::quadrant(!down, left);
+        MipMap::Quadrant quadrant = MipMap::quadrant(!down_picked, left_picked);
         MipMap::move(current_position, quadrant);
     }
 
