@@ -234,6 +234,8 @@ float Warp::squareToBeckmannPdf(const Vector3f &m, float alpha) {
 }
 
 static MipMap::Quadrant pick_quadrant_reuse(Point2f& current_sample, float left, float right, float up, float down) {
+
+    //std::cout << "l:" << left << " r:" << right << " u:" << up << " d:" << down << "\n";
     bool left_chosen, top_chosen;
 
     if(current_sample.x() < left) {
@@ -244,13 +246,15 @@ static MipMap::Quadrant pick_quadrant_reuse(Point2f& current_sample, float left,
         current_sample.x() = (current_sample.x() - left) / right;
     }
 
-    if(current_sample.y() < up) {
+    if(current_sample.y() < down) {
         top_chosen = true;
-        current_sample.y() /= up;
+        current_sample.y() /= down;
     } else {
         top_chosen = false;
-        current_sample.y() = (current_sample.y() - up) / down;
+        current_sample.y() = (current_sample.y() - down) / up;
     }
+
+    //std::cout << "Chosen: " << top_chosen << " , " << left_chosen << "\n";
 
     return MipMap::quadrant(top_chosen, left_chosen);
 }
@@ -259,25 +263,37 @@ Point2f Warp::squareToGrayMap(const Point2f &sample, const MipMap &map) {
 
     MipMap::Quadrant chosen_quadrant = MipMap::Quadrant::UNDEFINED;
 
-    Point2f current_sample = sample;
+    Point2f current_sample = Point2f(sample);
     Point2i current_position = Point2i(0);
 
-    for(uint8_t depth = 1; depth <= map.depth(); depth++) {
+
+    for(int depth = 1; depth <= map.depth(); depth++) {
+        //std::cout << "Currently at position " << current_position.x() << ", " << current_position.y() << "\n";
+        //std::cout << "At depth " << depth << "\n";
+        //std::cout << current_sample.x() << ", " << current_sample.y() << "\n";
+
         float left, right, up, down;
         map.distribution(depth, current_position, current_position, left, right, up, down);
+
         chosen_quadrant = pick_quadrant_reuse(current_sample, left, right, up, down);
         MipMap::move(current_position, chosen_quadrant);
     }
 
-    float final_x = (float) current_position.x() + sample.x();
-    float final_y = (float) current_position.y() + sample.y();
+    float final_x = (float) current_position.x() + current_sample.x();
+    float final_y = (float) current_position.y() + current_sample.y();
 
-    return Point2f(final_x, final_y);
+    Point2f p = Point2f(final_x, final_y);
+    //std::cout << p.x() << " " << p.y() << "\n";
+
+    return p;
 }
 
 float Warp::squareToGrayMapPdf(const Point2f &p, const MipMap &map) {
-    int x = (int) (p.x() * (map.max_resolution() - 1));
-    int y = (int) (p.y() * (map.max_resolution() - 1));
+
+    int x = (int) p.x();
+    int y = (int) p.y();
+
+    //std::cout << "Size " << map.max_resolution() << " : " << x << " " << y << "\n";
 
     float value = map.grayscale(x, y);
 

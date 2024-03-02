@@ -32,8 +32,6 @@ MipMap::MipMap(const std::string &path, const std::string &ext, bool norm) : nor
         throw NoriException("Dimensions must be a power of 2");
     }
 
-    // TODO: figure out what the heck the height and width are connected to
-
     max_depth = (int) log2(max_res); // not very efficient but it doesn't matter
     map.resizeErase(max_res, max_res + max_res / 2);
 
@@ -76,6 +74,75 @@ MipMap::MipMap(const std::string &path, const std::string &ext, bool norm) : nor
         }
 
     }
+}
+
+void MipMap::corner(uint8_t depth, int &index_x, int &index_y) const {
+    if(depth == max_depth) {
+        index_x = 0;
+        index_y = 0;
+        return;
+    }
+    index_x = max_res;
+    index_y = max_res - ((1 << (depth+1)));
+}
+
+float MipMap::grayscale(int x, int y) const {
+    if(x < 0 || y < 0 || x >= map.width() || y >= map.height()) {
+        throw NoriException("Grayscale indices out of range");
+    }
+    return map[y][x];
+}
+
+Color3f MipMap::color(int x, int y) const {
+    Imf::Rgba pixel = original[y][x];
+    return Color3f(pixel.r, pixel.g, pixel.b);
+}
+
+void MipMap::write_exr() const {
+
+    std::cout << map.width() << " " << map.height();
+    Bitmap out(Vector2i(map.width(), map.height()));
+
+    for(int y = 0; y < map.height(); ++y) {
+        for(int x = 0; x < map.width(); ++x) {
+            out.coeffRef(y, x) = map[y][x];
+        }
+    }
+
+    std::cout << "Bitmap ready to be written\n";
+    out.saveEXR("scenes/ibl/mipmap");
+    out.savePNG("scenes/ibl/mipmap");
+}
+
+MipMap::Quadrant MipMap::quadrant(bool top, bool left) {
+    if(top && left) return Quadrant::TOP_LEFT;
+    if(top && !left) return Quadrant::TOP_RIGHT;
+    if(!top && left) return Quadrant::BOTTOM_LEFT;
+    else return Quadrant::BOTTOM_RIGHT;
+}
+
+void MipMap::distribution(uint8_t depth, Point2i previous_pos, Point2i& next_corner, float &left, float &right, float &up, float &down) const {
+    int index_x, index_y;
+    corner(depth, index_x, index_y);
+
+    int prev_corner_x = 0, prev_corner_y = 0;
+    if(depth > 1) {
+        corner(depth - 1, prev_corner_x, prev_corner_y);
+    }
+
+    index_x += 2 * (previous_pos.x() - prev_corner_x);
+    index_y += 2 * (previous_pos.y() - prev_corner_y);
+
+    float up_total = grayscale(index_x, index_y) + grayscale(index_x + 1, index_y);
+    float down_total = grayscale(index_x, index_y + 1) + grayscale(index_x + 1, index_y + 1);
+    float left_total = grayscale(index_x, index_y) + grayscale(index_x, index_y + 1);
+    float right_total = grayscale(index_x + 1, index_y) + grayscale(index_x + 1, index_y + 1);
+
+    next_corner = Point2i(index_x, index_y);
+    up = up_total / (up_total + down_total);
+    down = 1 - up;
+    left = left_total / (left_total + right_total);
+    right = 1 - left;
 }
 
 void MipMap::h_distribution(uint8_t depth, Quadrant previous, float &left, float &right) const {
@@ -124,70 +191,6 @@ void MipMap::v_distribution(uint8_t depth, Quadrant previous, float &up, float &
     // yes it is as normalization is overall, not per square of 4 quadrants
     //up = grayscale(index_x, index_y) + grayscale(index_x + 1, index_y);
     //down = 1 - up;
-}
-
-void MipMap::corner(uint8_t depth, int &index_x, int &index_y) const {
-    if(depth == max_depth) {
-        index_x = 0;
-        index_y = 0;
-        return;
-    }
-    index_x = max_res;
-    index_y = max_res - ((1 << (depth+1)));
-}
-
-float MipMap::grayscale(int x, int y) const {
-    if(x < 0 || y < 0 || x >= map.width() || y >= map.height()) {
-        throw NoriException("Grayscale indices out of range");
-    }
-    return map[y][x];
-}
-
-Color3f MipMap::color(int x, int y) const {
-    Imf::Rgba pixel = original[y][x];
-    return Color3f(pixel.r, pixel.g, pixel.b);
-}
-
-void MipMap::write_exr() const {
-
-    std::cout << map.width() << " " << map.height();
-    Bitmap out(Vector2i(map.width(), map.height()));
-
-    for(int y = 0; y < map.height(); ++y) {
-        for(int x = 0; x < map.width(); ++x) {
-            out.coeffRef(y, x) = map[y][x];
-        }
-    }
-
-    std::cout << "Bitmap ready to be written\n";
-    out.saveEXR("scenes/ibl/mipmap");
-    out.savePNG("scenes/ibl/mipmap");
-}
-
-MipMap::Quadrant MipMap::quadrant(bool top, bool left) {
-    if(top && left) return Quadrant::TOP_LEFT;
-    if(top && !left) return Quadrant::TOP_RIGHT;
-    if(!top && left) return Quadrant::BOTTOM_LEFT;
-    else return Quadrant::BOTTOM_RIGHT;
-}
-
-void MipMap::distribution(uint8_t depth, Point2i previous_pos, Point2i next_corner, float &left, float &right, float &up, float &down) const {
-    int index_x, index_y;
-    corner(depth, index_x, index_y);
-
-    index_x += 2 * previous_pos.x();
-    index_y += 2 * previous_pos.y();
-
-    float up_total = grayscale(index_x, index_y) + grayscale(index_x + 1, index_y);
-    float down_total = grayscale(index_x, index_y + 1) + grayscale(index_x + 1, index_y + 1);
-    float left_total = grayscale(index_x, index_y) + grayscale(index_x, index_y + 1);
-    float right_total = grayscale(index_x + 1, index_y) + grayscale(index_x + 1, index_y + 1);
-
-    next_corner = Point2i(index_x, index_y);
-    up = up_total / (up_total + down_total);
-    down = 1 - up;
-    left = left_total / (left_total + right_total);
-    right = 1 - left;
 }
 
 void MipMap::move(Point2i &p, const MipMap::Quadrant &quadrant) {

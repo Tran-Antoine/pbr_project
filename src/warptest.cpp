@@ -121,9 +121,9 @@ struct WarpTest {
 
     WarpTest(WarpType warpType_, float parameterValue_, BSDF *bsdf_ = nullptr,
              BSDFQueryRecord bRec_ = BSDFQueryRecord(nori::Vector3f()),
-             int xres_ = kDefaultXres, int yres_ = kDefaultYres, nori::Mesh* mesh = nullptr)
+             int xres_ = kDefaultXres, int yres_ = kDefaultYres, nori::Mesh* mesh = nullptr, nori::MipMap* mipmap=nullptr)
         : warpType(warpType_), parameterValue(parameterValue_), bsdf(bsdf_),
-          bRec(bRec_), xres(xres_), yres(yres_), mesh(mesh) {
+          bRec(bRec_), xres(xres_), yres(yres_), mesh(mesh), mipmap(mipmap) {
 
         if (warpType != Square && warpType != Disk && warpType != Tent)
             xres *= 2;
@@ -174,7 +174,7 @@ struct WarpTest {
                 x = x * 2 - 1; y = y * 2 - 1;
                 return Warp::squareToTentPdf(Point2f(x, y));
             } else if(warpType == Hierarchical) {
-                x = x * 2 - 1; y = y * 2 - 1;
+                x = x * (mipmap->max_resolution() - 1); y = y * (mipmap->max_resolution() - 1);
                 return Warp::squareToGrayMapPdf(Point2f(x, y), *mipmap);
             } else {
                 x *= 2 * M_PI;
@@ -246,7 +246,7 @@ struct WarpTest {
 
     std::pair<Point3f, float> warpPoint(const Point2f &sample) {
         Point3f result;
-
+        Point2f result_2d;
         switch (warpType) {
             case Square:
                 result << Warp::squareToUniformSquare(sample), 0; break;
@@ -263,7 +263,9 @@ struct WarpTest {
             case Beckmann:
                 result << Warp::squareToBeckmann(sample, parameterValue); break;
             case Hierarchical:
-                result << Warp::squareToGrayMap(sample, *mipmap); break;
+                result_2d = Warp::squareToGrayMap(sample, *mipmap) / (float)(mipmap->max_resolution() - 1);
+                result_2d = result_2d * 2 - Point2f(1.f);
+                result << result_2d, 0; break;
             case UniformMesh: {
                 if(!mesh) {
                     throw NoriException("Mesh unspecified. Did you forget to add the xml path as argument?");
@@ -470,7 +472,7 @@ public:
         /* Generate the point positions */
         nori::MatrixXf positions, values;
         try {
-            WarpTest tester(warpType, parameterValue, m_brdf.get(), m_bRec, 51, 51, mesh);
+            WarpTest tester(warpType, parameterValue, m_brdf.get(), m_bRec, 51, 51, mesh, mipmap);
             tester.generatePoints(m_pointCount, pointType, positions, values);
         } catch (const NoriException &e) {
             m_warpTypeBox->set_selected_index(0);
@@ -698,7 +700,7 @@ public:
         WarpType warpType = (WarpType) m_warpTypeBox->selected_index();
         float parameterValue = mapParameter(warpType, m_parameterSlider->value());
 
-        WarpTest tester(warpType, parameterValue, m_brdf.get(), m_bRec, 51, 51, mesh);
+        WarpTest tester(warpType, parameterValue, m_brdf.get(), m_bRec, 51, 51, mesh, mipmap);
         m_testResult = tester.run();
 
         float maxValue = 0, minValue = std::numeric_limits<float>::infinity();
@@ -759,7 +761,7 @@ public:
 
         new Label(m_window, "Warping method", "sans-bold");
         m_warpTypeBox = new ComboBox(m_window, { "Square", "Tent", "Disk", "Sphere", "Hemisphere (unif.)",
-                "Hemisphere (cos)", "Beckmann distr.", "Microfacet BRDF", "Mesh (unif.)" });
+                "Hemisphere (cos)", "Beckmann distr.", "Microfacet BRDF", "Hierarchical", "Mesh (unif.)" });
         m_warpTypeBox->set_callback([&](int) { refresh(); });
 
         panel = new Widget(m_window);
@@ -1004,7 +1006,7 @@ int main(int argc, char **argv) {
         // GUI mode
 
         nori::Mesh* ref_mesh = nullptr;
-        nori::Mesh* ref_mipmap = nullptr;
+        nori::MipMap* ref_mipmap = nullptr;
 
         if(argc == 2) {
 
@@ -1022,7 +1024,7 @@ int main(int argc, char **argv) {
         }
 
         nanogui::init();
-        WarpTestScreen *screen = new WarpTestScreen(ref_mesh);
+        WarpTestScreen *screen = new WarpTestScreen(ref_mesh, ref_mipmap);
         nanogui::mainloop();
         delete screen;
         nanogui::shutdown();
