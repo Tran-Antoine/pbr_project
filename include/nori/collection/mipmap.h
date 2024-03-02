@@ -20,10 +20,12 @@ public:
 
     MipMap(const std::string &path, const std::string &ext, bool norm);
 
-    void h_distribution(uint8_t depth, Point2i previous_pos, Point2i& next_corner, bool up, float &left, float &right) const;
-    void v_distribution(uint8_t depth, Point2i previous_pos, Point2i& next_corner, float &up, float &down) const;
+    void h_distribution(uint8_t depth, Point2i corner, bool up, float &left, float &right) const;
+    void v_distribution(uint8_t depth, Point2i corner, float &up, float &down) const;
 
-    void distribution(uint8_t depth, Point2i previous_pos, Point2i& next_corner, float& left, float& right, float&up, float& down) const;
+    Point2f next_corner(uint8_t next_depth, Point2i previous_pos) const;
+
+    void distribution(uint8_t depth, Point2i corner, float& left, float& right, float&up, float& down) const;
 
     float get_luminance() const { return total_luminance; }
     bool is_normalized() const { return norm; }

@@ -273,28 +273,28 @@ Point2f Warp::squareToGrayMap(const Point2f &sample, const MipMap &map) {
 
 
     Point2f current_sample = Point2f(sample);
-    Point2i current_position = Point2i(0);
-
+    Point2i current_corner;
 
     for(int depth = 1; depth <= map.depth(); depth++) {
         //std::cout << "Currently at position " << current_position.x() << ", " << current_position.y() << "\n";
         //std::cout << "At depth " << depth << "\n";
         //std::cout << current_sample.x() << ", " << current_sample.y() << "\n";
+        current_corner = map.next_corner(depth, current_corner);
 
         float up, down;
-        map.v_distribution(depth, current_position, current_position, up, down);
+        map.v_distribution(depth, current_corner, up, down);
         bool down_picked = pick_reuse(current_sample.y(), down, up);
 
         float left, right;
-        map.h_distribution(depth, current_position, current_position, !down_picked, left, right);
+        map.h_distribution(depth, current_corner, !down_picked, left, right);
         bool left_picked = pick_reuse(current_sample.x(), left, right);
 
         MipMap::Quadrant quadrant = MipMap::quadrant(!down_picked, left_picked);
-        MipMap::move(current_position, quadrant);
+        MipMap::move(current_corner, quadrant);
     }
 
-    float final_x = (float) current_position.x() + current_sample.x();
-    float final_y = (float) current_position.y() + current_sample.y();
+    float final_x = (float) current_corner.x() + current_sample.x();
+    float final_y = (float) current_corner.y() + current_sample.y();
 
     Point2f p = Point2f(final_x, final_y);
     //std::cout << p.x() << " " << p.y() << "\n";
