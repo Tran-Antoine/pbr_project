@@ -18,6 +18,12 @@ public:
     static Quadrant quadrant(bool top, bool left);
     static void move(Point2i& p, const Quadrant& quadrant);
 
+    //MipMap() {};
+    MipMap(const std::string filename, bool norm) : 
+        MipMap(getFileResolver()->resolve(filename).str(), 
+        getFileResolver()->resolve(filename).extension(), 
+        norm) {}
+        
     MipMap(const std::string &path, const std::string &ext, bool norm);
 
     void h_distribution(Point2i corner, bool down, float &left, float &right) const;
@@ -34,12 +40,14 @@ public:
     float grayscale(int x, int y) const;
 
     int depth() const { return max_depth; }
+    Color3f color(int x, int y) const;
+    Color3f color(const Point2i& p) const { return color(p.x(), p.y()); }
+    Color3f color(const Point2f& p) const { return color((int) p.x(), (int) p.y()); }
 
 protected:
 
     void corner(uint8_t depth, int& index_x, int& index_y) const;
     void shrink(Imf::Array2D<float>& array, int size_x, int size_y);
-    Color3f color(int x, int y) const;
 
     Imf::Array2D<Imf::Rgba> original;
     Imf::Array2D<float> map;
