@@ -145,22 +145,20 @@ void MipMap::distribution(uint8_t depth, Point2i previous_pos, Point2i& next_cor
     right = 1 - left;
 }
 
-void MipMap::h_distribution(uint8_t depth, Quadrant previous, float &left, float &right) const {
+void MipMap::h_distribution(uint8_t depth, Point2i previous_pos, Point2i& next_corner, bool up, float &left, float &right) const {
     int index_x, index_y;
     corner(depth, index_x, index_y);
 
-    int half_res = 1 << (depth - 1);
-
-    switch(previous) {
-        case TOP_LEFT: break;
-        case TOP_RIGHT: index_x += half_res; break;
-        case BOTTOM_LEFT: index_y += half_res; break;
-        case BOTTOM_RIGHT: index_x += half_res; index_y += half_res; break;
-        case UNDEFINED: break;
+    int prev_corner_x = 0, prev_corner_y = 0;
+    if(depth > 1) {
+        corner(depth - 1, prev_corner_x, prev_corner_y);
     }
 
-    float left_total = grayscale(index_x, index_y) + grayscale(index_x, index_y + 1);
-    float right_total = grayscale(index_x + 1, index_y) + grayscale(index_x + 1, index_y + 1);
+    index_x += 2 * (previous_pos.x() - prev_corner_x);
+    index_y += 2 * (previous_pos.y() - prev_corner_y);
+
+    float left_total = up ? grayscale(index_x, index_y + 1) : grayscale(index_x, index_y);
+    float right_total = up ? grayscale(index_x + 1, index_y + 1) : grayscale(index_x + 1, index_y);
 
     left = left_total / (left_total + right_total);
     right = 1 - left;
@@ -169,28 +167,24 @@ void MipMap::h_distribution(uint8_t depth, Quadrant previous, float &left, float
     //right = 1 - left;
 }
 
-void MipMap::v_distribution(uint8_t depth, Quadrant previous, float &up, float &down) const {
+void MipMap::v_distribution(uint8_t depth, Point2i previous_pos, Point2i& next_corner, float &up, float &down) const {
     int index_x, index_y;
     corner(depth, index_x, index_y);
 
-    int half_res = 1 << (depth - 1);
-
-    switch(previous) {
-        case TOP_LEFT: break;
-        case TOP_RIGHT: index_x += half_res; break;
-        case BOTTOM_LEFT: index_y += half_res; break;
-        case BOTTOM_RIGHT: index_x += half_res; index_y += half_res; break;
-        case UNDEFINED: break;
+    int prev_corner_x = 0, prev_corner_y = 0;
+    if(depth > 1) {
+        corner(depth - 1, prev_corner_x, prev_corner_y);
     }
+
+    index_x += 2 * (previous_pos.x() - prev_corner_x);
+    index_y += 2 * (previous_pos.y() - prev_corner_y);
+
     float up_total = grayscale(index_x, index_y) + grayscale(index_x + 1, index_y);
     float down_total = grayscale(index_x, index_y + 1) + grayscale(index_x + 1, index_y + 1);
-
+    
+    next_corner = Point2i(index_x, index_y);
     up = up_total / (up_total + down_total);
     down = 1 - up;
-    // above step not needed as the map is normalized
-    // yes it is as normalization is overall, not per square of 4 quadrants
-    //up = grayscale(index_x, index_y) + grayscale(index_x + 1, index_y);
-    //down = 1 - up;
 }
 
 void MipMap::move(Point2i &p, const MipMap::Quadrant &quadrant) {

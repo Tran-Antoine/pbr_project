@@ -20,8 +20,8 @@ public:
 
     MipMap(const std::string &path, const std::string &ext, bool norm);
 
-    void h_distribution(uint8_t depth, Quadrant previous, float &left, float &right) const;
-    void v_distribution(uint8_t depth, Quadrant previous, float &up, float &down) const;
+    void h_distribution(uint8_t depth, Point2i previous_pos, Point2i& next_corner, bool up, float &left, float &right) const;
+    void v_distribution(uint8_t depth, Point2i previous_pos, Point2i& next_corner, float &up, float &down) const;
 
     void distribution(uint8_t depth, Point2i previous_pos, Point2i& next_corner, float& left, float& right, float&up, float& down) const;
 

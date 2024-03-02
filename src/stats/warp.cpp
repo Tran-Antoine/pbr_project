@@ -233,6 +233,16 @@ float Warp::squareToBeckmannPdf(const Vector3f &m, float alpha) {
     return std::max(0.0f, pdf);
 }
 
+static bool pick_reuse(float& sample, float p, float q) {
+    if(sample < p) {
+        sample /= p;
+        return true;
+    } else {
+        sample = (sample - p) / q;
+        return false;
+    }
+}
+// TODO: implement pick_vertical instead, and pick_horizontal
 static MipMap::Quadrant pick_quadrant_reuse(Point2f& current_sample, float left, float right, float up, float down) {
 
     //std::cout << "l:" << left << " r:" << right << " u:" << up << " d:" << down << "\n";
@@ -261,7 +271,6 @@ static MipMap::Quadrant pick_quadrant_reuse(Point2f& current_sample, float left,
 
 Point2f Warp::squareToGrayMap(const Point2f &sample, const MipMap &map) {
 
-    MipMap::Quadrant chosen_quadrant = MipMap::Quadrant::UNDEFINED;
 
     Point2f current_sample = Point2f(sample);
     Point2i current_position = Point2i(0);
@@ -272,11 +281,16 @@ Point2f Warp::squareToGrayMap(const Point2f &sample, const MipMap &map) {
         //std::cout << "At depth " << depth << "\n";
         //std::cout << current_sample.x() << ", " << current_sample.y() << "\n";
 
-        float left, right, up, down;
-        map.distribution(depth, current_position, current_position, left, right, up, down);
+        float up, down;
+        map.v_distribution(depth, current_position, current_position, up, down);
+        bool down = pick_reuse(current_sample.y(), down, up);
 
-        chosen_quadrant = pick_quadrant_reuse(current_sample, left, right, up, down);
-        MipMap::move(current_position, chosen_quadrant);
+        float left, right;
+        map.h_distribution(depth, current_position, current_position, !down, left, right);
+        bool left = pick_reuse(current_sample.x(), left, right);
+
+        MipMap::Quadrant quadrant = MipMap::quadrant(!down, left);
+        MipMap::move(current_position, quadrant);
     }
 
     float final_x = (float) current_position.x() + current_sample.x();
