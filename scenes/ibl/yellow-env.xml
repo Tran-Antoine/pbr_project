@@ -1,0 +1,28 @@
+<scene>
+    <integrator type="env_only">
+        <float name="radius" value="5.0"/>
+    </integrator>
+
+    <sampler type="independent">
+        <integer name="sampleCount" value="16"/>
+    </sampler>
+
+    <camera type="perspective">
+        <!-- Camera-to-world coordinate system transformation -->
+        <transform name="toWorld">
+            <lookat origin="0, 0, 0" target="0.001, 0.001, 1" up="0,1,0"/>
+        </transform>
+
+        <float name="fov" value="60"/>
+
+        <integer name="width" value="768"/>
+        <integer name="height" value="384"/>
+    </camera>
+
+    <emitter type="env">
+            <string name="map1" value="map1.png"/>
+            <string name="map2" value="map2.png"/>
+            <float name="radius" value="5.0"/>
+            <float name="height" value="10.0"/>
+    </emitter>
+</scene>
