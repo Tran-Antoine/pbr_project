@@ -129,6 +129,7 @@ add_executable(nori
   src/integrator/path_simple.cpp
   src/integrator/path_mis.cpp
   src/integrator/direct.cpp
+  src/integrator/env_only.cpp
 
   src/emitter/area.cpp
   src/emitter/environment.cpp

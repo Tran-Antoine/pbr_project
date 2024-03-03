@@ -9,7 +9,7 @@ NORI_NAMESPACE_BEGIN
 EnvironmentEmitter::EnvironmentEmitter(const PropertyList& props) :
     map1(props.getString("half1"), false), map2(props.getString("half2"), false) {
 
-    radius = props.getPoint("radius");
+    radius = props.getFloat("radius");
     center = props.getPoint("center");
     height = props.getFloat("height");
 }
@@ -139,7 +139,7 @@ bool EnvironmentEmitter::is_on_map2(const Point3f &p) const{
 }
 
 Point2i EnvironmentEmitter::world_to_map1(const Point3f &p) const{
-    float ampl = radius.norm();
+    float ampl = radius;
 
     float theta = acos(-p.x() / ampl);
     float x = theta / M_PI * (map1.max_resolution() - 1);
@@ -149,7 +149,7 @@ Point2i EnvironmentEmitter::world_to_map1(const Point3f &p) const{
 }
 
 Point2i EnvironmentEmitter::world_to_map2(const Point3f &p) const{
-    float ampl = radius.norm();
+    float ampl = radius;
 
     float theta = acos(p.x() / ampl);
     float x = theta / M_PI * (map2.max_resolution() - 1);
@@ -164,7 +164,7 @@ Point3f EnvironmentEmitter::map1_to_world(const Point2f &coords) const{
     float y_norm = coords.y() / (map1.max_resolution() - 1);
 
     float theta = M_PI * x_norm;
-    float ampl = radius.norm();
+    float ampl = radius;
     float x = -ampl * cos(theta);
     float z = ampl * sin(theta);
     float y = 0.5 * height * (2*y_norm - 1);
@@ -177,7 +177,7 @@ Point3f EnvironmentEmitter::map2_to_world(const Point2f &coords) const{
     float y_norm = coords.y() / (map1.max_resolution() - 1);
 
     float angle = M_PI * x_norm;
-    float ampl = radius.norm();
+    float ampl = radius;
 
     float x = ampl * cos(angle);
     float z = -ampl * sin(angle);

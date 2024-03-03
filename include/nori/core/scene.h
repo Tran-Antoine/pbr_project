@@ -20,6 +20,7 @@
 
 #include <collection/accel.h>
 #include <stats/dpdf.h>
+#include <emitter/emitter.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -61,6 +62,8 @@ public:
 
     const std::vector<Mesh *> &getMeshEmitters() const { return m_mesh_emitters; }
 
+    const std::vector<Emitter *> getEmitters() const { return m_emitters; }
+    
     Mesh* pickMeshEmitter() const;
 
     /**
@@ -130,6 +133,7 @@ private:
     std::vector<Mesh *> m_meshes;
     std::vector<Mesh *> m_mesh_emitters;
     float emitters_total_area;
+    std::vector<Emitter *> m_emitters;
 
     Integrator *m_integrator = nullptr;
     Sampler *m_sampler = nullptr;

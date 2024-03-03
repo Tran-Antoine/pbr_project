@@ -35,7 +35,7 @@ protected:
 
     MipMap map1, map2;
     Point3f center;
-    Vector3f radius;
+    float radius;
     float height;
 };
 
