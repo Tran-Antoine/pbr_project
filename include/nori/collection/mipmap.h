@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/common.h>
+#include <core/vector.h>
 #include <ImfArray.h>
 #include <ImfRgba.h>
 #include <core/color.h>

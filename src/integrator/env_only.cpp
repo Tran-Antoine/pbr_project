@@ -1,7 +1,6 @@
 #include <integrator/integrator.h>
 #include <core/scene.h>
 #include <emitter/emitter.h>
-#include <emitter/environment.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -15,7 +14,7 @@ public:
         
         Point3f intersection = ray.o + radius * ray.d.normalized();
 
-        EnvironmentEmitter* emitter = static_cast<EnvironmentEmitter *>(scene->getEmitters()[0]);
+        Emitter* emitter = scene->getEmitters()[0];
 
         return emitter->getEmittance(intersection, 0.f, 0.f);
     }

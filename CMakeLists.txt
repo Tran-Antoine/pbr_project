@@ -142,11 +142,11 @@ add_executable(nori
 
   src/postprocessing/rfilter.cpp
 
-  #src/main.cpp
+  src/main.cpp
   #test/perlin_test.cpp
   #test/fbm_test.cpp
   #test/mipmap_test.cpp
-  src/warptest.cpp
+  #src/warptest.cpp
 )
 
 # Link OpenCV libraries

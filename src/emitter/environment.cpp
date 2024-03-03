@@ -22,9 +22,11 @@ float EnvironmentEmitter::pdf(const EmitterQueryRecord& rec) const {
     float pdf;
 
     if(is_on_map1(rec.l)) {
-        pdf = weight_map1() * Warp::squareToGrayMapPdf(rec.l, map1);
+        Point2i to_map1 = world_to_map1(rec.l);
+        pdf = weight_map1() * Warp::squareToGrayMapPdf(Point2f((float) to_map1.x(), (float) to_map1.y()), map1);
     } else {
-        pdf = weight_map2() * Warp::squareToGrayMapPdf(rec.l, map2);
+        Point2i to_map2 = world_to_map2(rec.l);
+        pdf = weight_map2() * Warp::squareToGrayMapPdf(Point2f((float) to_map2.x(), (float) to_map2.y()), map2);
     }
 
     return pdf * d2 / cos_theta;
@@ -145,7 +147,7 @@ Point2i EnvironmentEmitter::world_to_map1(const Point3f &p) const{
     float x = theta / M_PI * (map1.max_resolution() - 1);
     float y = (p.y() / height + 0.5f) * (map1.max_resolution() - 1);
 
-    return Point2i((int) x, (int) y);
+    return Point2i((int) x, (map1.max_resolution() - 1) - (int) y);
 }
 
 Point2i EnvironmentEmitter::world_to_map2(const Point3f &p) const{
@@ -155,33 +157,33 @@ Point2i EnvironmentEmitter::world_to_map2(const Point3f &p) const{
     float x = theta / M_PI * (map2.max_resolution() - 1);
     float y = (p.y() / height + 0.5f) * (map2.max_resolution() - 1);
 
-    return Point2i((int) x, (int) y);
+    return Point2i((int) x, (map2.max_resolution() - 1) - (int) y);
 }
 
 Point3f EnvironmentEmitter::map1_to_world(const Point2f &coords) const{
 
     float x_norm = coords.x() / (map1.max_resolution() - 1);
-    float y_norm = coords.y() / (map1.max_resolution() - 1);
+    float y_norm = 1 - coords.y() / (map1.max_resolution() - 1);
 
     float theta = M_PI * x_norm;
     float ampl = radius;
     float x = -ampl * cos(theta);
     float z = ampl * sin(theta);
-    float y = 0.5 * height * (2*y_norm - 1);
+    float y = 0.5f * height * (2*y_norm - 1);
 
     return center + Point3f(x, y, z);
 }
 
 Point3f EnvironmentEmitter::map2_to_world(const Point2f &coords) const{
     float x_norm = coords.x() / (map1.max_resolution() - 1);
-    float y_norm = coords.y() / (map1.max_resolution() - 1);
+    float y_norm = 1 - coords.y() / (map1.max_resolution() - 1);
 
     float angle = M_PI * x_norm;
     float ampl = radius;
 
     float x = ampl * cos(angle);
     float z = -ampl * sin(angle);
-    float y = 0.5 * height * (2*y_norm - 1);
+    float y = 0.5f * height * (2*y_norm - 1);
 
     return center + Point3f(x, y, z);
 }
