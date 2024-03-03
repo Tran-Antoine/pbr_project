@@ -20,7 +20,6 @@ public:
         return "EnvironmentEmitter[]";
     }
 
-    void setParent(NoriObject *parent) override;
 
 protected:
 

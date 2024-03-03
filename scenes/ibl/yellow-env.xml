@@ -1,10 +1,10 @@
 <scene>
     <integrator type="env_only">
-        <float name="radius" value="5.0"/>
+        <float name="radius" value="4.0"/>
     </integrator>
 
     <sampler type="independent">
-        <integer name="sampleCount" value="16"/>
+        <integer name="sampleCount" value="128"/>
     </sampler>
 
     <camera type="perspective">
@@ -20,9 +20,10 @@
     </camera>
 
     <emitter type="env">
-            <string name="map1" value="map1.png"/>
-            <string name="map2" value="map2.png"/>
-            <float name="radius" value="5.0"/>
+            <string name="half1" value="half1.png"/>
+            <string name="half2" value="half2.png"/>
+            <float name="radius" value="4.0"/>
             <float name="height" value="10.0"/>
+            <point name="center" value="0,0,0"/>
     </emitter>
 </scene>
