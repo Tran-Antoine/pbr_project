@@ -28,8 +28,8 @@ protected:
     bool is_on_map2(const Point3f& p) const;
     Point2i world_to_map1(const Point3f& p) const;
     Point2i world_to_map2(const Point3f& p) const;
-    Point3f map1_to_world(const Point2i& coords) const;
-    Point3f map2_to_world(const Point2i& coords) const;
+    Point3f map1_to_world(const Point2f& coords) const;
+    Point3f map2_to_world(const Point2f& coords) const;
     float weight_map1() const;
     float weight_map2() const { return 1 - weight_map1(); }
 
