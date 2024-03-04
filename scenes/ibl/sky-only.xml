@@ -1,6 +1,6 @@
 <scene>
     <integrator type="env_only">
-        <float name="radius" value="4.0"/>
+        <float name="radius" value="20.0"/>
     </integrator>
 
     <sampler type="independent">
@@ -13,16 +13,16 @@
             <lookat origin="0, 0, 0" target="0.001, 0.001, 1" up="0,1,0"/>
         </transform>
 
-        <float name="fov" value="60"/>
+        <float name="fov" value="80"/>
 
         <integer name="width" value="768"/>
         <integer name="height" value="384"/>
     </camera>
 
     <emitter type="env">
-            <string name="half1" value="half1.png"/>
-            <string name="half2" value="half2.png"/>
-            <float name="radius" value="4.0"/>
+            <string name="half1" value="left.exr"/>
+            <string name="half2" value="right.exr"/>
+            <float name="radius" value="20.0"/>
             <float name="height" value="10.0"/>
             <point name="center" value="0,0,0"/>
     </emitter>

@@ -124,9 +124,14 @@ Color3f EnvironmentEmitter::sampleRadiance(EmitterQueryRecord& rec, Sampler& sam
 
 Color3f EnvironmentEmitter::getEmittance(Point3f pos, Vector3f normal, Vector3f direction) const {
     if(is_on_map1(pos)) {
-        return map1.color(world_to_map1(pos));
+        Point2i p = world_to_map1(pos);
+        return map1.color(p);
     } else if(is_on_map2(pos)) {
-        return map2.color(world_to_map2(pos));
+        if(pos.z() < -128) {
+            std::cout << "test";
+        }
+        Point2i p = world_to_map2(pos);
+        return map2.color(p);
     } else {
         return 0.f;
     }
@@ -146,6 +151,9 @@ Point2i EnvironmentEmitter::world_to_map1(const Point3f &p) const{
     float theta = acos(-p.x() / ampl);
     float x = theta / M_PI * (map1.max_resolution() - 1);
     float y = (p.y() / height + 0.5f) * (map1.max_resolution() - 1);
+    x = clamp(x, 0.f, (float) map1.max_resolution() - 1);
+    y = clamp(y, 0.f, (float) map1.max_resolution() - 1);
+
 
     return Point2i((int) x, (map1.max_resolution() - 1) - (int) y);
 }
@@ -156,6 +164,10 @@ Point2i EnvironmentEmitter::world_to_map2(const Point3f &p) const{
     float theta = acos(p.x() / ampl);
     float x = theta / M_PI * (map2.max_resolution() - 1);
     float y = (p.y() / height + 0.5f) * (map2.max_resolution() - 1);
+
+    x = clamp(x, 0.f, (float) map2.max_resolution() - 1);
+    y = clamp(y, 0.f, (float) map2.max_resolution() - 1);
+
 
     return Point2i((int) x, (map2.max_resolution() - 1) - (int) y);
 }
