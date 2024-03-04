@@ -127,9 +127,6 @@ Color3f EnvironmentEmitter::getEmittance(Point3f pos, Vector3f normal, Vector3f 
         Point2i p = world_to_map1(pos);
         return map1.color(p);
     } else if(is_on_map2(pos)) {
-        if(pos.z() < -128) {
-            std::cout << "test";
-        }
         Point2i p = world_to_map2(pos);
         return map2.color(p);
     } else {
@@ -148,7 +145,7 @@ bool EnvironmentEmitter::is_on_map2(const Point3f &p) const{
 Point2i EnvironmentEmitter::world_to_map1(const Point3f &p) const{
     float ampl = radius;
 
-    float theta = acos(-p.x() / ampl);
+    float theta = acos(std::max(-1.f,-p.x() / ampl));
     float x = theta / M_PI * (map1.max_resolution() - 1);
     float y = (p.y() / height + 0.5f) * (map1.max_resolution() - 1);
     x = clamp(x, 0.f, (float) map1.max_resolution() - 1);
@@ -161,7 +158,7 @@ Point2i EnvironmentEmitter::world_to_map1(const Point3f &p) const{
 Point2i EnvironmentEmitter::world_to_map2(const Point3f &p) const{
     float ampl = radius;
 
-    float theta = acos(p.x() / ampl);
+    float theta = acos(std::min(1.f,p.x() / ampl));
     float x = theta / M_PI * (map2.max_resolution() - 1);
     float y = (p.y() / height + 0.5f) * (map2.max_resolution() - 1);
 

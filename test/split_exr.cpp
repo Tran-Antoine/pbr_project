@@ -7,7 +7,7 @@
 
 using namespace nori;
 
-static std::string PATH = R"(.\scenes\ibl\sky.exr)";
+static std::string PATH = "./scenes/ibl/sky.exr";
 
 
 int main(int argc, char **argv) {
@@ -17,45 +17,25 @@ int main(int argc, char **argv) {
     long width = dw.max.x - dw.min.x + 1;
     long height = dw.max.y - dw.min.y + 1;
 
-    Imf::Array2D<Color3f> left;
-    Imf::Array2D<Color3f> right;
-    Imf::Array2D<Imf::Rgba> pixels;
-
-    pixels.resizeErase(width, height);
-    left.resizeErase(width/2, height);
-    right.resizeErase(width/2, height);
+    Imf::Array2D<Imf::Rgba> left(height, width / 2);
+    Imf::Array2D<Imf::Rgba> right(height, width / 2);
+    Imf::Array2D<Imf::Rgba> pixels(height, width);
 
     file.setFrameBuffer(&pixels[0][0] - dw.min.x - dw.min.y * width, 1, width);
     file.readPixels(dw.min.y, dw.max.y);
 
-    for(int y = 0; y < height; ++y) {
-        for(int x = 0; x < width/2; ++x) {
-            const Imf::Rgba& pixel = pixels[y][x];
-            left[y][x] = Color3f(pixel.r, pixel.g, pixel.b);
-        }
-        for(int x = width/2; x < width; ++x) {
-            const Imf::Rgba& pixel = pixels[y][x];
-            right[y][x-width/2] = Color3f(pixel.r, pixel.g, pixel.b);
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width / 2; ++x) {
+            left[y][x] = pixels[y][x];
+            right[y][x] = pixels[y][x + width / 2];
         }
     }
 
-    Bitmap left_out(Vector2i(left.width(), left.height()));
+    Imf::RgbaOutputFile fileLeft("left.exr", width / 2, height, Imf::WRITE_RGBA);
+    fileLeft.setFrameBuffer(&left[0][0], 1, width / 2);
+    fileLeft.writePixels(height);
 
-    for(int y = 0; y < left.height(); ++y) {
-        for(int x = 0; x < left.width(); ++x) {
-            left_out.coeffRef(y, x) = left[y][x];
-        }
-    }
-
-    Bitmap right_out(Vector2i(left.width(), left.height()));
-
-    for(int y = 0; y < left.height(); ++y) {
-        for(int x = 0; x < left.width(); ++x) {
-            right_out.coeffRef(y, x) = left[y][x];
-        }
-    }
-
-    left_out.saveEXR("left");
-    right_out.saveEXR("right");
-
+    Imf::RgbaOutputFile fileRight("right.exr", width / 2, height, Imf::WRITE_RGBA);
+    fileRight.setFrameBuffer(&right[0][0], 1, width / 2);
+    fileRight.writePixels(height);
 }

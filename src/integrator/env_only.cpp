@@ -8,6 +8,7 @@ class EnvOnlyIntegrator : public Integrator {
 public:
     EnvOnlyIntegrator(const PropertyList &props) {
         radius = props.getFloat("radius");
+        height = props.getFloat("height");
     }
 
     static float Sqr(float x) {return x*x;}
@@ -51,6 +52,11 @@ public:
         }
 
         Point3f intersection = oi + t*di;
+
+        if(intersection.y() > height / 2 || intersection.y() < -height/2) {
+            return Color3f(0.f);
+        }
+
         Emitter* emitter = scene->getEmitters()[0];
 
         return emitter->getEmittance(intersection, 0.f, 0.f);
@@ -61,6 +67,7 @@ public:
     }
 private:
     float radius;
+    float height;
 };
 
 NORI_REGISTER_CLASS(EnvOnlyIntegrator, "env_only");
