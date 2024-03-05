@@ -23,14 +23,14 @@ public:
         Frame frame = its.shFrame;
 
         if(bsdf->isDiffuse()) {
-            
-            Mesh* random_emitter = scene->pickMeshEmitter();
 
-            if(random_emitter) {
+            const Emitter* emitter = scene->pickEmitter();
+
+            if(emitter) {
                 // crucial to use the total emitters area and NOT the area of the selected mesh, as the PDF of the sampled points depends on the total area
                 EmitterQueryRecord record(its.mesh->getBSDF(), its.p, frame.n, -ray.d, its.uv);
                 float unused;
-                Color3f sampled_radiance = random_emitter->getEmitter()->sampleRadiance(record, *sampler, scene, unused);
+                Color3f sampled_radiance = emitter->sampleRadiance(record, *sampler, scene, unused);
 
                 return sampled_radiance;
             }

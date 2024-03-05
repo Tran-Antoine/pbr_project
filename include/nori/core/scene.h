@@ -59,12 +59,10 @@ public:
 
     /// Return a reference to an array containing all meshes
     const std::vector<Mesh *> &getMeshes() const { return m_meshes; }
-
-    const std::vector<Mesh *> &getMeshEmitters() const { return m_mesh_emitters; }
-
-    const std::vector<Emitter *> getEmitters() const { return m_emitters; }
     
-    Mesh* pickMeshEmitter() const;
+    const std::vector<Emitter *> &getEmitters() const { return m_emitters; }
+    
+    Emitter * pickEmitter() const;
 
     /**
      * \brief Intersect a ray against all triangles stored in the scene
@@ -131,7 +129,6 @@ protected:
     DiscretePDF* emitters_pdf = nullptr;
 private:
     std::vector<Mesh *> m_meshes;
-    std::vector<Mesh *> m_mesh_emitters;
     float emitters_total_area;
     std::vector<Emitter *> m_emitters;
 

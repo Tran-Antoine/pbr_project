@@ -37,23 +37,23 @@ public:
             Point3f x = its.p;
             Vector3f n = its.shFrame.n;
             Vector3f wi = -current_ray.d;
-            const Emitter* emitter = its.mesh->getEmitter();
+            const Emitter* hit_emitter = its.mesh->getEmitter();
             const BSDF* surface_bsdf = its.mesh->getBSDF();
             
-            if(emitter) {
+            if(hit_emitter) {
                 if(bounces == 0 || last_specular) {
-                    Le += beta * emitter->getEmittance(x, n, wi);
+                    Le += beta * hit_emitter->getEmittance(x, n, wi);
                 }
-                // seems more logic to break the indirect lighting loop whenever we hit an emitter,
+                // seems more logic to break the indirect lighting loop whenever we hit an hit_emitter,
                 // regardless of whether its contribution should be counted or not
                 break;
             }
             
             // Direct illumination component
-            for(Mesh* mesh : scene->getMeshEmitters()) {
+            for(Emitter* emitter : scene->getEmitters()) {
                 EmitterQueryRecord emitter_rec(surface_bsdf, x, n, wi, its.uv);
                 float unused;
-                Color3f direct_rad = mesh->getEmitter()->sampleRadiance(emitter_rec, *sampler, scene, unused);
+                Color3f direct_rad = emitter->sampleRadiance(emitter_rec, *sampler, scene, unused);
 
                 Ld += beta * direct_rad; 
             }

@@ -37,25 +37,25 @@ public:
             const Point3f x = its.p;
             const Vector3f n = its.shFrame.n;
             const Vector3f wi = -current_ray.d;
-            const Emitter* emitter = its.mesh->getEmitter();
+            const Emitter* hit_emitter = its.mesh->getEmitter();
             const BSDF* surface_bsdf = its.mesh->getBSDF(); 
             Frame frame(n);
             EmitterQueryRecord emitter_rec = EmitterQueryRecord(surface_bsdf, x, n, wi, its.uv);
 
 
-            if(emitter) {
+            if(hit_emitter) {
                 if(bounces == 0 || last_specular) {
-                    Le += beta * emitter->getEmittance(x, n, wi);
+                    Le += beta * hit_emitter->getEmittance(x, n, wi);
                 }
                 break;
             }
 
 
             // Direct illumination with Emitter Importance Sampling
-            for(Mesh* mesh : scene->getMeshEmitters()) {
+            for(Emitter* emitter : scene->getEmitters()) {
                 
                 float pdf_light;
-                Color3f direct_rad = mesh->getEmitter()->sampleRadiance(emitter_rec, *sampler, scene, pdf_light);
+                Color3f direct_rad = emitter->sampleRadiance(emitter_rec, *sampler, scene, pdf_light);
                 
                 if(direct_rad.isZero()) {
                     continue;

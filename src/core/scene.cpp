@@ -52,26 +52,26 @@ void Scene::activate() {
             NoriObjectFactory::createInstance("independent", PropertyList()));
     }
 
-    DiscretePDF* emitters_pdf = new DiscretePDF(m_mesh_emitters.size());
+    emitters_pdf = new DiscretePDF(m_emitters.size());
 
-    for(uint32_t i = 0; i < m_mesh_emitters.size(); i++) {
-        emitters_pdf->append(m_mesh_emitters[i]->getTotalArea());
+    for(uint32_t i = 0; i < m_emitters.size(); i++) {
+        // is this reasonable? TODO: get rid of
+        emitters_pdf->append(1.f);
     }
 
     this->emitters_total_area = emitters_pdf->normalize();
-    this->emitters_pdf = emitters_pdf;
 
     cout << endl;
     cout << "Configuration: " << toString() << endl;
     cout << endl;
 }
 
-Mesh* Scene::pickMeshEmitter() const {
-    if(m_mesh_emitters.size() == 0) {
+Emitter * Scene::pickEmitter() const {
+    if(m_emitters.size() == 0) {
         return nullptr;
     }
     size_t index = emitters_pdf->sample(m_sampler->next1D());
-    return m_mesh_emitters[index];
+    return m_emitters[index];
 }
 
 void Scene::addChild(NoriObject *obj) {
@@ -81,7 +81,7 @@ void Scene::addChild(NoriObject *obj) {
                 m_accel->addMesh(mesh);
                 m_meshes.push_back(mesh);
                 if(mesh->getEmitter()) {
-                    m_mesh_emitters.push_back(mesh);
+                    m_emitters.push_back(mesh->getEmitter());
                 }
             }
             break;
