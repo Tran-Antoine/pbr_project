@@ -109,8 +109,8 @@ Color3f EnvironmentEmitter::sampleRadiance(EmitterQueryRecord& rec, Sampler& sam
 
     Color3f color = map.color((int) point.x(), (int) point.y());
 
-    float angle = factor * M_PI * point.x() / (map.max_resolution() - 1);
-    float height = height * (2*point.y()/(map.max_resolution() - 1) - 1);
+    float angle = factor * M_PI * point.x() / (map.max_value());
+    float height = height * (2*point.y()/(map.max_value()) - 1);
 
     float dist = radius.norm();
     Point3f l = center + Point3f(dist*cos(angle), height, dist*sin(angle));
@@ -145,34 +145,36 @@ bool EnvironmentEmitter::is_on_map2(const Point3f &p) const{
 Point2i EnvironmentEmitter::world_to_map1(const Point3f &p) const{
     float ampl = radius;
 
-    float theta = acos(std::max(-1.f,-p.x() / ampl));
-    float x = theta / M_PI * (map1.max_resolution() - 1);
-    float y = (p.y() / height + 0.5f) * (map1.max_resolution() - 1);
-    x = clamp(x, 0.f, (float) map1.max_resolution() - 1);
-    y = clamp(y, 0.f, (float) map1.max_resolution() - 1);
+    float x_norm = clamp(p.x() / ampl, -1.f, 1.f);
+    float theta = acos(x_norm);
+    float x = theta / M_PI * (map1.max_value());
+    float y = (p.y() / height + 0.5f) * (map1.max_value());
+    x = clamp(x, 0.f, (float) map1.max_value());
+    y = clamp(y, 0.f, (float) map1.max_value());
 
 
-    return Point2i((int) x, (map1.max_resolution() - 1) - (int) y);
+    return Point2i((int) x, (int) map1.max_value() - (int) y);
 }
 
 Point2i EnvironmentEmitter::world_to_map2(const Point3f &p) const{
     float ampl = radius;
 
-    float theta = acos(std::min(1.f,p.x() / ampl));
-    float x = theta / M_PI * (map2.max_resolution() - 1);
-    float y = (p.y() / height + 0.5f) * (map2.max_resolution() - 1);
+    float x_norm = clamp(-p.x() / ampl, -1.f, 1.f);
+    float theta = acos(x_norm);
+    float x = theta / M_PI * (map2.max_value());
+    float y = (p.y() / height + 0.5f) * (map2.max_value());
 
-    x = clamp(x, 0.f, (float) map2.max_resolution() - 1);
-    y = clamp(y, 0.f, (float) map2.max_resolution() - 1);
+    x = clamp(x, 0.f, (float) map2.max_value());
+    y = clamp(y, 0.f, (float) map2.max_value());
 
 
-    return Point2i((int) x, (map2.max_resolution() - 1) - (int) y);
+    return Point2i((int) x, (int) map2.max_value() - (int) y);
 }
 
 Point3f EnvironmentEmitter::map1_to_world(const Point2f &coords) const{
 
-    float x_norm = coords.x() / (map1.max_resolution() - 1);
-    float y_norm = 1 - coords.y() / (map1.max_resolution() - 1);
+    float x_norm = coords.x() / (map1.max_value());
+    float y_norm = 1 - coords.y() / (map1.max_value());
 
     float theta = M_PI * x_norm;
     float ampl = radius;
@@ -184,8 +186,8 @@ Point3f EnvironmentEmitter::map1_to_world(const Point2f &coords) const{
 }
 
 Point3f EnvironmentEmitter::map2_to_world(const Point2f &coords) const{
-    float x_norm = coords.x() / (map1.max_resolution() - 1);
-    float y_norm = 1 - coords.y() / (map1.max_resolution() - 1);
+    float x_norm = coords.x() / (map1.max_value());
+    float y_norm = 1 - coords.y() / (map1.max_value());
 
     float angle = M_PI * x_norm;
     float ampl = radius;
