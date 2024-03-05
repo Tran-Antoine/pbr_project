@@ -58,7 +58,6 @@ public:
         }
 
         Emitter* emitter = scene->getEmitters()[0];
-
         return emitter->getEmittance(intersection, 0.f, 0.f);
     }
 
