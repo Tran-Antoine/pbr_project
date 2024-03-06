@@ -2,6 +2,7 @@
 #include <collection/mipmap.h>
 #include <parser/imageutil.h>
 #include <gui/bitmap.h>
+#include <math.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -101,18 +102,31 @@ float MipMap::grayscale(int x, int y) const {
     return map[y][x];
 }
 
-Color3f MipMap::color(int x, int y) const {
+static float cap(float f) {
+    if(isinf(f)) {
+        return 65504.f;
+    }
+    return f;
+}
 
-    if(x < 0 || y < 0 || x > (int) max_param() || y > (int) max_param()) {
+Color3f MipMap::color(float x, float y) const {
+
+    if(x < 0 || y < 0 || x > 1 || y > 1) {
         throw NoriException("Invalid color indices provided");
     }
 
-    const Imf::Rgba& pixel = original[y][x];
-    float r = std::min(pixel.r, std::numeric_limits<half>::max());
-    float g = std::min(pixel.g, std::numeric_limits<half>::max());
-    float b = std::min(pixel.b, std::numeric_limits<half>::max());
+    int x_index = (int) (x * max_param());
+    int y_index = (int) (y * max_param());
 
-    return Color3f(r, g, b);
+    const Imf::Rgba& pixel = original[y_index][x_index];
+
+
+    /*float r = std::max(0.f, (float) std::min(pixel.r, std::numeric_limits<half>::max()));
+    float g = std::max(0.f, (float) std::min(pixel.g, std::numeric_limits<half>::max()));
+    float b = std::max(0.f, (float)std::min(pixel.b, std::numeric_limits<half>::max()));*/
+    float r = pixel.r, g = pixel.g, b = pixel.b;
+
+    return Color3f(cap(r), cap(g), cap(b));
 }
 
 void MipMap::write_exr() const {

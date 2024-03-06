@@ -31,7 +31,7 @@ float MeshEmitter::pdf(const EmitterQueryRecord& rec) const {
     return to_angular(rec, 1 / area);
 }
 
-Color3f MeshEmitter::evalRadiance(EmitterQueryRecord& rec, const Scene* scene) const {
+Color3f MeshEmitter::evalRadiance(const EmitterQueryRecord &rec, const Scene* scene) const {
 
     Color3f emitted = getEmittance(rec);
     Color3f bsdf_term = evalBSDF(rec);

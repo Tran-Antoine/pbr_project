@@ -58,6 +58,8 @@ public:
      * provided by this instance
      * */
     EClassType getClassType() const { return EIntegrator; }
+
+
 };
 
 NORI_NAMESPACE_END

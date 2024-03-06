@@ -23,6 +23,7 @@
 #include <core/camera.h>
 #include <emitter/emitter.h>
 #include <stats/dpdf.h>
+#include <shape/implicit.h>
 
 
 NORI_NAMESPACE_BEGIN
@@ -89,6 +90,9 @@ void Scene::addChild(NoriObject *obj) {
         case EEmitter: {
                 Emitter *emitter = static_cast<Emitter *>(obj);
                 m_emitters.push_back(emitter);
+                if(ImplicitShape* shape = dynamic_cast<ImplicitShape*>(obj)) {
+                    m_implicit_shapes.push_back(shape);
+                }
             }
             break;
 

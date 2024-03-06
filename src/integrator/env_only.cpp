@@ -4,6 +4,7 @@
 
 NORI_NAMESPACE_BEGIN
 
+/// Integrator used mainly for debugging purposes. Only renders the environment map, nothing else
 class EnvOnlyIntegrator : public Integrator {
 public:
     EnvOnlyIntegrator(const PropertyList &props) {

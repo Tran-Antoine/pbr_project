@@ -242,32 +242,6 @@ static bool pick_reuse(float& sample, float p, float q) {
         return false;
     }
 }
-// TODO: implement pick_vertical instead, and pick_horizontal
-static MipMap::Quadrant pick_quadrant_reuse(Point2f& current_sample, float left, float right, float up, float down) {
-
-    //std::cout << "l:" << left << " r:" << right << " u:" << up << " d:" << down << "\n";
-    bool left_chosen, top_chosen;
-
-    if(current_sample.x() < left) {
-        left_chosen = true;
-        current_sample.x() /= left;
-    } else {
-        left_chosen = false;
-        current_sample.x() = (current_sample.x() - left) / right;
-    }
-
-    if(current_sample.y() < down) {
-        top_chosen = true;
-        current_sample.y() /= down;
-    } else {
-        top_chosen = false;
-        current_sample.y() = (current_sample.y() - down) / up;
-    }
-
-    //std::cout << "Chosen: " << top_chosen << " , " << left_chosen << "\n";
-
-    return MipMap::quadrant(top_chosen, left_chosen);
-}
 
 Point2f Warp::squareToGrayMap(const Point2f &sample, const MipMap &map) {
 
@@ -295,9 +269,7 @@ Point2f Warp::squareToGrayMap(const Point2f &sample, const MipMap &map) {
     float final_x = (float) current_corner.x() + current_sample.x();
     float final_y = (float) current_corner.y() + current_sample.y();
 
-    Point2f p = Point2f(final_x, final_y);
-
-    //std::cout << p.x() << " " << p.y() << "\n";
+    Point2f p = Point2f(final_x / (map.max_param() + 1), final_y / (map.max_param() + 1));
 
     return p;
 }
@@ -305,8 +277,8 @@ Point2f Warp::squareToGrayMap(const Point2f &sample, const MipMap &map) {
 float Warp::squareToGrayMapPdf(const Point2f &p, const MipMap &map) {
 
 
-    int x = (int) p.x();
-    int y = (int) p.y();
+    int x = (int) (p.x() * map.max_param());
+    int y = (int) (p.y() * map.max_param());
 
     float value = map.grayscale(x, y);
 
