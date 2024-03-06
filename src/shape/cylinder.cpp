@@ -47,6 +47,10 @@ bool Cylinder::rayIntersect(const nori::Ray3f &ray, nori::Intersection &its, boo
         t = t1;
     }
 
+    if(t > ray.maxt) {
+        return false;
+    }
+
     Point3f intersection = oi + t * di;
 
     if (intersection.y() > height / 2 || intersection.y() < -height / 2) {
