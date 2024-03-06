@@ -55,7 +55,7 @@ Color3f MeshEmitter::sampleRadiance(EmitterQueryRecord& rec, Sampler& sampler, c
     return evalRadiance(rec, scene) / pdf_light;
 }
 
-void MeshEmitter::samplePoint(Sampler &sampler, EmitterQueryRecord rec, float &pdf) const {
+void MeshEmitter::samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf) const {
     Point2f sample(sampler.next2D());
     Warp::squareToMeshPoint(sample, *mesh, rec.l, rec.n_l, pdf);
 }

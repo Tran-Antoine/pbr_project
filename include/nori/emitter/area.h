@@ -27,7 +27,7 @@ protected:
     Mesh* mesh;
     Color3f color;
 
-    void samplePoint(Sampler &sampler, EmitterQueryRecord rec, float &pdf) const override;
+    void samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf) const override;
 };
 
 NORI_REGISTER_CLASS(MeshEmitter, "area")

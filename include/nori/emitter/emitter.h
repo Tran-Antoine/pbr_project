@@ -77,7 +77,7 @@ public:
 
 protected:
 
-    virtual void samplePoint(Sampler &sampler, EmitterQueryRecord rec, float &pdf) const = 0;
+    virtual void samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf) const = 0;
 
     Color3f evalBSDF(const EmitterQueryRecord& rec) const;
     bool is_source_visible(const Scene* scene, const EmitterQueryRecord& rec) const;
