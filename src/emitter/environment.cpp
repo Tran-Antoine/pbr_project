@@ -3,6 +3,7 @@
 #include <emitter/environment.h>
 #include <stats/warp.h>
 #include <functional>
+#include <core/color.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -20,10 +21,14 @@ float EnvironmentEmitter::pdf(const EmitterQueryRecord& rec) const {
     float pdf;
 
     if(is_on_map1(rec)) {
-        pdf = weight_map1() * Warp::squareToGrayMapPdf(rec.uv, map1);
+        Point2f remapped_uv = Point2f(2.f * rec.uv.x(), 1.f - rec.uv.y());
+        pdf = weight_map1() * Warp::squareToGrayMapPdf(remapped_uv, map1);
     }
-    else {
-        pdf = weight_map2() * Warp::squareToGrayMapPdf(rec.uv - Vector2f(1.0f, 0.f), map2);
+    else if(is_on_map2(rec)){
+        Point2f remapped_uv = Point2f(2.f * (rec.uv.x() - 0.5f), 1.f - rec.uv.y());
+        pdf = weight_map2() * Warp::squareToGrayMapPdf(remapped_uv, map2);
+    } else {
+        return 0.f;
     }
 
     return to_angular(rec, pdf);
@@ -36,6 +41,10 @@ Color3f EnvironmentEmitter::evalRadiance(const EmitterQueryRecord &rec, const Sc
 
     Color3f emitted = getEmittance(rec);
     Color3f bsdf_term = evalBSDF(rec);
+
+    if(!emitted.isValid() || !bsdf_term.isValid()) {
+        throw NoriException("");
+    }
 
     return distortion_factor * (emitted * bsdf_term);
 }
@@ -50,6 +59,10 @@ Color3f EnvironmentEmitter::sampleRadiance(EmitterQueryRecord& rec, Sampler& sam
         return Color3f(0.f);
     }
 
+    Color3f radiance = evalRadiance(rec, scene);
+    if(!radiance.isValid() || pdf_light == 0) {
+        throw NoriException("");
+    }
     return evalRadiance(rec, scene) / pdf_light;
 }
 
@@ -72,13 +85,17 @@ void EnvironmentEmitter::samplePoint(Sampler &sampler, EmitterQueryRecord &rec, 
     float sample = sampler.next1D();
 
     if(sample < weight_map1()) {
-        rec.uv = Warp::squareToGrayMap(sampler.next2D(), map1);
+        Point2f uv = Warp::squareToGrayMap(sampler.next2D(), map1);
+        uv.x() *= 0.5f;
+        rec.uv = uv;
         rec.l = map1_to_world(rec.uv);
 
         Vector3f n_l = (center - rec.l); n_l.y() = 0; n_l = n_l.normalized();
         rec.n_l = n_l;
     } else {
-        rec.uv = Warp::squareToGrayMap(sampler.next2D(), map2) + Vector2f(1.0, 0.f);
+        Point2f uv = Warp::squareToGrayMap(sampler.next2D(), map2);
+        uv.x() = 0.5f*uv.x() + 0.5f;
+        rec.uv = uv;
         rec.l = map2_to_world(rec.uv);
         Vector3f n_l = (center - rec.l); n_l.y() = 0; n_l = n_l.normalized();
         rec.n_l = n_l;
