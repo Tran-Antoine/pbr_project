@@ -1,17 +1,17 @@
 <scene>
     <integrator type="path_mis">
-        <float name="radius" value="40.0"/>
+        <float name="radius" value="400.0"/>
         <float name="height" value="100.0"/>
     </integrator>
 
     <sampler type="independent">
-        <integer name="sampleCount" value="1"/>
+        <integer name="sampleCount" value="64"/>
     </sampler>
 
     <camera type="perspective">
         <!-- Camera-to-world coordinate system transformation -->
         <transform name="toWorld">
-            <lookat origin="0, 0, -1" target="0, 0.001, 1" up="0,1,0"/>
+            <lookat origin="0, 0, -1" target="-0.3, 0.3, 0" up="0,1,0"/>
         </transform>
 
         <float name="fov" value="120"/>
@@ -24,12 +24,15 @@
         <string name="half1" value="left.exr"/>
         <string name="half2" value="right.exr"/>
         <float name="radius" value="40.0"/>
-        <float name="height" value="100.0"/>
+        <float name="height" value="10.0"/>
         <point name="center" value="0,0,0"/>
     </emitter>
 
     <mesh type="obj">
         <string name="filename" value="sphere.obj"/>
-        <bsdf type="mirror"/>
+        <transform name="toWorld">
+            <translate value="0,0,0"/>
+        </transform>
+        <bsdf type="diffuse"/>
     </mesh>
 </scene>

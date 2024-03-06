@@ -45,7 +45,8 @@ public:
 
             if(hit_emitter) {
                 if(bounces == 0 || last_specular) {
-                    Le += beta * hit_emitter->getEmittance(x, n, wi);
+                    EmitterQueryRecord hit_emitter_rec = EmitterQueryRecord(nullptr, 0.f, 0.f, wi, x, n, its.uv);
+                    Le += beta * hit_emitter->getEmittance(hit_emitter_rec);
                 }
                 break;
             }
@@ -53,7 +54,12 @@ public:
 
             // Direct illumination with Emitter Importance Sampling
             for(Emitter* emitter : scene->getEmitters()) {
-                
+
+                if(!emitter) {
+                    std::cout << "issue\n";
+                    continue;
+                }
+
                 float pdf_light;
                 Color3f direct_rad = emitter->sampleRadiance(emitter_rec, *sampler, scene, pdf_light);
                 
@@ -88,9 +94,11 @@ public:
             if(found_intersection && its.mesh->getEmitter()) {
                 
                 const Emitter* emitter_hit = its.mesh->getEmitter();
-                Color3f emittance = emitter_hit->getEmittance(its.p, its.shFrame.n, -current_ray.d);
+                EmitterQueryRecord emitter_hit_record = EmitterQueryRecord(surface_bsdf, x, n, wi, its.p, its.shFrame.n, its.uv) ;
+
+                Color3f emittance = emitter_hit->getEmittance(emitter_hit_record);
   
-                float light_pdf = emitter_hit->pdf(EmitterQueryRecord(surface_bsdf, x, n, wi, its.p, its.shFrame.n, its.uv));
+                float light_pdf = emitter_hit->pdf(emitter_hit_record);
                 float brdf_pdf = surface_bsdf->pdf(bsdf_record);
                 float weight = balancedMIS(brdf_pdf, light_pdf);
 

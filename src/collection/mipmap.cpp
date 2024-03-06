@@ -6,7 +6,7 @@
 NORI_NAMESPACE_BEGIN
 
 static float gray(const Imf::Rgba& pixel) {
-    return (pixel.r + pixel.g + pixel.b) / 3.f;
+    return ((float)pixel.r + (float)pixel.g + (float)pixel.b) / 3.f;
 }
 
 void MipMap::shrink(Imf::Array2D<float>& array, int size_x, int size_y) {
@@ -40,9 +40,17 @@ MipMap::MipMap(const std::string &path, const std::string &ext, bool norm) : nor
     float total = 0;
     for(int y = 0; y < max_res; y++) {
         for(int x = 0; x < max_res; x++) {
-            float gray_value = gray(original[y][x]);
+            const Imf::Rgba& pixel = original[y][x];
+            float r = std::min(pixel.r, std::numeric_limits<half>::max());
+            float g = std::min(pixel.g, std::numeric_limits<half>::max());
+            float b = std::min(pixel.b, std::numeric_limits<half>::max());
+            float gray_value = (r + g + b) / 3.f;
+            //float gray_value = gray(pixel);
             map[y][x] = gray_value;
             temp[y][x] = gray_value;
+            if(gray_value > 200000.f) {
+                std::cout << "test";
+            }
             total += gray_value;
         }
     }
@@ -94,8 +102,17 @@ float MipMap::grayscale(int x, int y) const {
 }
 
 Color3f MipMap::color(int x, int y) const {
-    Imf::Rgba pixel = original[y][x];
-    return Color3f(pixel.r, pixel.g, pixel.b);
+
+    if(x < 0 || y < 0 || x > (int) max_param() || y > (int) max_param()) {
+        throw NoriException("Invalid color indices provided");
+    }
+
+    const Imf::Rgba& pixel = original[y][x];
+    float r = std::min(pixel.r, std::numeric_limits<half>::max());
+    float g = std::min(pixel.g, std::numeric_limits<half>::max());
+    float b = std::min(pixel.b, std::numeric_limits<half>::max());
+
+    return Color3f(r, g, b);
 }
 
 void MipMap::write_exr() const {

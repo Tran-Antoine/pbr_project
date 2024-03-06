@@ -22,6 +22,9 @@
 #include <stats/sampler.h>
 #include <core/scene.h>
 #include <bsdf/bsdf.h>
+#include <core/ray.h>
+
+#include <utility>
 
 NORI_NAMESPACE_BEGIN
 
@@ -29,7 +32,6 @@ struct EmitterQueryRecord {
 
     bool empty;
     Point3f p, l;
-    uint32_t triangle_index;
     Vector3f n_p, n_l, wi;
     Point2f uv;
     const BSDF* bsdf;
@@ -37,19 +39,19 @@ struct EmitterQueryRecord {
     EmitterQueryRecord() : empty(true) {}
 
     EmitterQueryRecord(const BSDF* bsdf, Point3f p, Vector3f n_p, Vector3f wi, Point2f uv) :
-        bsdf(bsdf), p(p), n_p(n_p), wi(wi), uv(std::move(uv)), empty(false) {}
-    EmitterQueryRecord(const BSDF* bsdf, Point3f p, Vector3f n_p, uint32_t t_index, Vector3f wi, Point2f uv) :
-        bsdf(bsdf), p(p), n_p(n_p), triangle_index(t_index), wi(wi), uv(uv), empty(false) {}
+        bsdf(bsdf), p(std::move(p)), n_p(std::move(n_p)), wi(std::move(wi)), uv(std::move(uv)), empty(false) {}
 
     EmitterQueryRecord(const BSDF* bsdf, Point3f p, Vector3f n_p, Vector3f wi, Point3f l, Vector3f n_l, Point2f uv) :
-        bsdf(bsdf), p(p), n_p(n_p), l(l), n_l(n_l), wi(wi), uv(uv), empty(false) {}
-    EmitterQueryRecord(const BSDF* bsdf, Point3f p, Vector3f n_p, uint32_t t_index, Vector3f wi, Point3f l, Vector3f n_l, Point2f uv) :
-        bsdf(bsdf), p(p), n_p(n_p), triangle_index(t_index), l(l), n_l(n_l), wi(wi), uv(uv), empty(false) {}
+        bsdf(bsdf), p(std::move(p)), n_p(std::move(n_p)), l(std::move(l)), n_l(std::move(n_l)), wi(std::move(wi)), uv(std::move(uv)), empty(false) {}
 
     bool isEmpty() const { return empty; }
 
     Vector3f wo() const {
         return (l-p).normalized();
+    }
+
+    float dist() const {
+        return (l-p).norm();
     }
 };
 
@@ -71,9 +73,17 @@ public:
 
     virtual Color3f sampleRadiance(EmitterQueryRecord& rec, Sampler& sampler, const Scene* scene, float& angular_pdf) const = 0;
 
-    virtual Color3f getEmittance(Point3f pos, Vector3f normal, Vector3f direction) const = 0;
-};
+    virtual Color3f getEmittance(const EmitterQueryRecord &rec) const = 0;
 
+protected:
+
+    virtual void samplePoint(Sampler &sampler, EmitterQueryRecord rec, float &pdf) const = 0;
+
+    Color3f evalBSDF(const EmitterQueryRecord& rec) const;
+    bool is_source_visible(const Scene* scene, const EmitterQueryRecord& rec) const;
+    float angular_distortion(const EmitterQueryRecord& rec) const;
+    float to_angular(const EmitterQueryRecord& rec, float pdf) const;
+};
 
 
 NORI_NAMESPACE_END

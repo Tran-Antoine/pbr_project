@@ -133,6 +133,7 @@ add_executable(nori
 
   src/emitter/area.cpp
   src/emitter/environment.cpp
+  src/emitter/emitter.cpp
 
   src/parser/obj.cpp
   src/parser/heightmap.cpp
