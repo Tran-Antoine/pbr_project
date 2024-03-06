@@ -7,7 +7,7 @@ NORI_NAMESPACE_BEGIN
 
 bool Emitter::is_source_visible(const Scene* scene, const EmitterQueryRecord& rec) const {
     Ray3f ray = Ray3f(rec.p, rec.wo(), Epsilon, (1 - Epsilon) * rec.dist());
-    return scene->rayIntersect(ray);
+    return !scene->rayIntersect(ray);
 }
 
 float Emitter::angular_distortion(const EmitterQueryRecord &rec) const {

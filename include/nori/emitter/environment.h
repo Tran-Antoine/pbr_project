@@ -32,7 +32,7 @@ protected:
     float weight_map1() const;
     float weight_map2() const { return 1 - weight_map1(); }
 
-    void samplePoint(Sampler &sampler, EmitterQueryRecord rec, float &pdf) const override;
+    void samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf) const override;
 
     MipMap map1, map2;
     Point3f center;

@@ -67,7 +67,7 @@ void Scene::activate() {
 }
 
 Emitter * Scene::pickEmitter() const {
-    if(m_emitters.size() == 0) {
+    if(m_emitters.empty()) {
         return nullptr;
     }
     size_t index = emitters_pdf->sample(m_sampler->next1D());

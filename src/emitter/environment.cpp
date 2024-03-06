@@ -67,7 +67,7 @@ Color3f EnvironmentEmitter::getEmittance(const EmitterQueryRecord &rec) const {
     }
 }
 
-void EnvironmentEmitter::samplePoint(Sampler &sampler, EmitterQueryRecord rec, float &pdf) const {
+void EnvironmentEmitter::samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf) const {
     float sample = sampler.next1D();
 
     if(sample < weight_map1()) {
