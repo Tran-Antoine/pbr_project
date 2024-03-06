@@ -37,7 +37,7 @@ public:
     float get_luminance() const { return total_luminance; }
     bool is_normalized() const { return norm; }
     int max_resolution() const { return max_res; }
-    float max_value() const { return (float) max_resolution() - 1.f; }
+    float max_param() const { return (float) max_resolution() - 1.f; }
     void write_exr() const;
     float grayscale(int x, int y) const;
 

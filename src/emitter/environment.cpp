@@ -7,7 +7,7 @@
 NORI_NAMESPACE_BEGIN
 
 EnvironmentEmitter::EnvironmentEmitter(const PropertyList& props) :
-    map1(props.getString("half1"), false), map2(props.getString("half2"), false) {
+    map1(props.getString("half1"), true), map2(props.getString("half2"), true) {
 
     radius = props.getFloat("radius");
     center = props.getPoint("center");
@@ -15,166 +15,127 @@ EnvironmentEmitter::EnvironmentEmitter(const PropertyList& props) :
 }
 
 float EnvironmentEmitter::pdf(const EmitterQueryRecord& rec) const {
-    
-    float d2 = (rec.l - rec.p).squaredNorm();
-    float cos_theta = rec.n_l.dot((rec.p - rec.l).normalized());
 
     float pdf;
 
-    if(is_on_map1(rec.l)) {
-        Point2i to_map1 = world_to_map1(rec.l);
-        pdf = weight_map1() * Warp::squareToGrayMapPdf(Point2f((float) to_map1.x(), (float) to_map1.y()), map1);
-    } else {
-        Point2i to_map2 = world_to_map2(rec.l);
-        pdf = weight_map2() * Warp::squareToGrayMapPdf(Point2f((float) to_map2.x(), (float) to_map2.y()), map2);
+    if(is_on_map1(rec)) {
+        pdf = weight_map1() * Warp::squareToGrayMapPdf(rec.uv, map1);
+    }
+    else {
+        pdf = weight_map2() * Warp::squareToGrayMapPdf(rec.uv, map2);
     }
 
-    return pdf * d2 / cos_theta;
+    return to_angular(rec, pdf);
 }
 
 Color3f EnvironmentEmitter::evalRadiance(EmitterQueryRecord& rec, const Scene* scene) const {
-    
-    Vector3f x_to_y = (rec.l - rec.p).normalized();
-    float distance = (rec.l - rec.p).norm();
 
     // determinant of the jacobian of the change of coordinates
-    float distortion_factor = abs(rec.n_p.dot(x_to_y) * (rec.n_l.dot(x_to_y))) / (distance*distance);
+    float distortion_factor = angular_distortion(rec);
 
-    Color3f emitted = getEmittance(rec.l, rec.n_l, -x_to_y);
-
-    Frame frame(rec.n_p); // BSDFQueryRecord expects local vectors
-    BSDFQueryRecord query(frame.toLocal(rec.wi), frame.toLocal(x_to_y), EMeasure::ESolidAngle);
-
-    Color3f bsdf_term = rec.bsdf->eval(query);
+    Color3f emitted = getEmittance(rec);
+    Color3f bsdf_term = evalBSDF(rec);
 
     return distortion_factor * (emitted * bsdf_term); 
 }
 
 Color3f EnvironmentEmitter::sampleRadiance(EmitterQueryRecord& rec, Sampler& sampler, const Scene* scene, float& angular_pdf) const {
-    
-    float sample = sampler.next1D();
 
-    Point2f uv;
-    Point3f l;
     float pdf_light;
+    samplePoint(sampler, rec, pdf_light);
+    angular_pdf = to_angular(rec, pdf_light);
 
-    if(sample < weight_map1()) {
-        uv = Warp::squareToGrayMap(sampler.next2D(), map1);
-        l = map1_to_world(uv);
-        pdf_light = Warp::squareToGrayMapPdf(uv, map1);
-    } else {
-        uv = Warp::squareToGrayMap(sampler.next2D(), map2);
-        l = map2_to_world(uv);
-        pdf_light = Warp::squareToGrayMapPdf(uv, map2);
-    }
-  
-    Vector3f n_l = (l - center); n_l.y() = 0;
-    Vector3f x_to_y = (l - rec.p).normalized();
-    float distance = (l - rec.p).norm();
-    Color3f emitted = getEmittance(l, n_l, -x_to_y);
-
-
-    // We stop the ray right before its intersection with the light source (which would be guaranteed to happen)
-    Ray3f ray = Ray3f(rec.p, x_to_y, Epsilon, (1 - Epsilon) * distance);
-
-    if(scene->rayIntersect(ray)) {
-        // meaning the ray hit an object BEFORE hitting the light source
-        return Color3f(0.0f);
+    if(!is_source_visible(scene, rec)) {
+        return Color3f(0.f);
     }
 
     // determinant of the jacobian of the change of coordinates
-    float distortion_factor = abs(rec.n_p.dot(x_to_y) * (n_l.dot(x_to_y))) / (distance*distance);
-
-    // Evaluate BSDF term
-    Frame frame(rec.n_p); // BSDFQueryRecord expects local vectors
-    BSDFQueryRecord query(frame.toLocal(rec.wi), frame.toLocal(x_to_y), EMeasure::ESolidAngle, rec.uv);
-    Color3f bsdf_term = rec.bsdf->eval(query);
-
-    // Provide angular version of PDF
-    angular_pdf = pdf_light * distance * distance / rec.n_p.dot(x_to_y);
-
-    // Set record parameters + return output color
-    rec.l = l;
-    rec.n_l = n_l;
-    return distortion_factor * (emitted * bsdf_term) / pdf_light; 
-
-    
-    /*float sample = sampler.next1D();
-    float w1 = map1.get_luminance() / (map1.get_luminance() + map2.get_luminance());
-
-    const MipMap& map = (sample < w1) ? map1 : map2;
-    float factor = (sample < w1) ? 1.f : -1.f;
-
-    Point2f point = Warp::squareToGrayMap(sampler.next2D(), map);
-
-    Color3f color = map.color((int) point.x(), (int) point.y());
-
-    float angle = factor * M_PI * point.x() / (map.max_value());
-    float height = height * (2*point.y()/(map.max_value()) - 1);
-
-    float dist = radius.norm();
-    Point3f l = center + Point3f(dist*cos(angle), height, dist*sin(angle));
-    Vector3f n = (l - (center + Point3f(0.f, height, 0.f))).normalized();
-
-    rec.l = l;
-    rec.n_l = l;
-    float pdf = Warp::squareToGrayMapPdf(point, map);
-    return color / pdf;*/
+    return evalRadiance(rec, scene) / pdf_light;
 }
 
-Color3f EnvironmentEmitter::getEmittance(Point3f pos, Vector3f normal, Vector3f direction) const {
-    if(is_on_map1(pos)) {
-        Point2i p = world_to_map1(pos);
-        return map1.color(p);
-    } else if(is_on_map2(pos)) {
-        Point2i p = world_to_map2(pos);
-        return map2.color(p);
-    } else {
-        return 0.f;
+Color3f EnvironmentEmitter::getEmittance(const EmitterQueryRecord &rec) const {
+
+    if(is_on_map1(rec)) {
+        return map1.color(rec.uv);
+    }
+    else if(is_on_map2(rec)) {
+        Point2f shifted_uv = rec.uv - Vector2f(map1.max_param());
+        return map2.color(shifted_uv);
+    }
+    else {
+        return Color3f(0.f);
     }
 }
 
-bool EnvironmentEmitter::is_on_map1(const Point3f &p) const{
-    return p.z() > 0;
+void EnvironmentEmitter::samplePoint(Sampler &sampler, EmitterQueryRecord rec, float &pdf) const {
+    float sample = sampler.next1D();
+
+    if(sample < weight_map1()) {
+        Vector3f n_l = (rec.l - center); n_l.y() = 0; n_l = n_l.normalized();
+        rec.uv = Warp::squareToGrayMap(sampler.next2D(), map1);
+        rec.l = map1_to_world(rec.uv);
+        rec.n_l = n_l;
+    } else {
+        Vector3f n_l = (rec.l - center); n_l.y() = 0; n_l = n_l.normalized();
+        rec.uv = Warp::squareToGrayMap(sampler.next2D(), map2);
+        rec.l = map2_to_world(rec.uv);
+        rec.n_l = n_l;
+    }
+
+    pdf = this->pdf(rec);
 }
 
-bool EnvironmentEmitter::is_on_map2(const Point3f &p) const{
-    return p.z() <= 0;
+bool EnvironmentEmitter::is_on_map1(const EmitterQueryRecord &rec) const{
+    float u = rec.uv.x();
+    if(u < 0 || u > map1.max_param() + map2.max_param()) {
+        return false;
+    }
+    return u <= map1.max_param();
 }
 
-Point2i EnvironmentEmitter::world_to_map1(const Point3f &p) const{
-    float ampl = radius;
+bool EnvironmentEmitter::is_on_map2(const EmitterQueryRecord &rec) const{
+    float u = rec.uv.x();
+    if(u < 0 || u > map1.max_param() + map2.max_param()) {
+        return false;
+    }
+    return u > map1.max_param();
+}
 
-    float x_norm = clamp(p.x() / ampl, -1.f, 1.f);
+Point2i EnvironmentEmitter::world_to_map1(const EmitterQueryRecord &rec) const{
+    throw NoriException("This should not be needed");
+    /*float ampl = radius;
+
+    float x_norm = clamp(rec.x() / ampl, -1.f, 1.f);
     float theta = acos(x_norm);
-    float x = theta / M_PI * (map1.max_value());
-    float y = (p.y() / height + 0.5f) * (map1.max_value());
-    x = clamp(x, 0.f, (float) map1.max_value());
-    y = clamp(y, 0.f, (float) map1.max_value());
+    float x = theta / M_PI * (map1.max_param());
+    float y = (rec.y() / height + 0.5f) * (map1.max_param());
+    x = clamp(x, 0.f, (float) map1.max_param());
+    y = clamp(y, 0.f, (float) map1.max_param());
 
 
-    return Point2i((int) x, (int) map1.max_value() - (int) y);
+    return Point2i((int) x, (int) map1.max_param() - (int) y);*/
 }
 
-Point2i EnvironmentEmitter::world_to_map2(const Point3f &p) const{
-    float ampl = radius;
+Point2i EnvironmentEmitter::world_to_map2(const EmitterQueryRecord &rec) const{
+    throw NoriException("This should not be needed");
+    /*float ampl = radius;
 
-    float x_norm = clamp(-p.x() / ampl, -1.f, 1.f);
+    float x_norm = clamp(-rec.x() / ampl, -1.f, 1.f);
     float theta = acos(x_norm);
-    float x = theta / M_PI * (map2.max_value());
-    float y = (p.y() / height + 0.5f) * (map2.max_value());
+    float x = theta / M_PI * (map2.max_param());
+    float y = (rec.y() / height + 0.5f) * (map2.max_param());
 
-    x = clamp(x, 0.f, (float) map2.max_value());
-    y = clamp(y, 0.f, (float) map2.max_value());
+    x = clamp(x, 0.f, (float) map2.max_param());
+    y = clamp(y, 0.f, (float) map2.max_param());
 
 
-    return Point2i((int) x, (int) map2.max_value() - (int) y);
+    return Point2i((int) x, (int) map2.max_param() - (int) y);*/
 }
 
 Point3f EnvironmentEmitter::map1_to_world(const Point2f &coords) const{
 
-    float x_norm = coords.x() / (map1.max_value());
-    float y_norm = 1 - coords.y() / (map1.max_value());
+    float x_norm = coords.x() / (map1.max_param());
+    float y_norm = 1 - coords.y() / (map1.max_param());
 
     float theta = M_PI * x_norm;
     float ampl = radius;
@@ -186,8 +147,8 @@ Point3f EnvironmentEmitter::map1_to_world(const Point2f &coords) const{
 }
 
 Point3f EnvironmentEmitter::map2_to_world(const Point2f &coords) const{
-    float x_norm = coords.x() / (map1.max_value());
-    float y_norm = 1 - coords.y() / (map1.max_value());
+    float x_norm = coords.x() / (map1.max_param());
+    float y_norm = 1 - coords.y() / (map1.max_param());
 
     float angle = M_PI * x_norm;
     float ampl = radius;
@@ -202,5 +163,7 @@ Point3f EnvironmentEmitter::map2_to_world(const Point2f &coords) const{
 float EnvironmentEmitter::weight_map1() const{
     return map1.get_luminance() / (map1.get_luminance() + map2.get_luminance());
 }
+
+
 
 NORI_NAMESPACE_END

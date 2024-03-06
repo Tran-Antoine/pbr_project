@@ -15,7 +15,7 @@ public:
     float pdf(const EmitterQueryRecord& rec) const override;
     Color3f evalRadiance(EmitterQueryRecord& rec, const Scene* scene) const override;
     Color3f sampleRadiance(EmitterQueryRecord& rec, Sampler& sampler, const Scene* scene, float& angular_pdf) const override;
-    Color3f getEmittance(Point3f pos, Vector3f normal, Vector3f direction) const override;
+    Color3f getEmittance(const EmitterQueryRecord &rec) const override;
 
     void setParent(NoriObject *parent) override;
 
@@ -26,6 +26,8 @@ public:
 protected:
     Mesh* mesh;
     Color3f color;
+
+    void samplePoint(Sampler &sampler, EmitterQueryRecord rec, float &pdf) const override;
 };
 
 NORI_REGISTER_CLASS(MeshEmitter, "area")

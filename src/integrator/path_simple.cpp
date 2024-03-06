@@ -42,7 +42,10 @@ public:
             
             if(hit_emitter) {
                 if(bounces == 0 || last_specular) {
-                    Le += beta * hit_emitter->getEmittance(x, n, wi);
+                    // here x and n are actually l and n_l
+                    // TODO: we need cylindrical intersection implemented for this to work with env maps
+                    EmitterQueryRecord emitter_rec = EmitterQueryRecord(nullptr, 0.f, 0.f, wi, x, n, its.uv);
+                    Le += beta * hit_emitter->getEmittance(emitter_rec);
                 }
                 // seems more logic to break the indirect lighting loop whenever we hit an hit_emitter,
                 // regardless of whether its contribution should be counted or not

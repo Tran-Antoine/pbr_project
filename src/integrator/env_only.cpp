@@ -58,7 +58,11 @@ public:
         }
 
         Emitter* emitter = scene->getEmitters()[0];
-        return emitter->getEmittance(intersection, 0.f, 0.f);
+
+        Point2f uv = 0.f;
+        throw NoriException("Finish this");
+        /*EmitterQueryRecord record = EmitterQueryRecord(nullptr, 0.f, 0.f, -ray.d.normalized(), intersection, n, its.uv);
+        return emitter->getEmittance(record);*/
     }
 
     std::string toString() const {
