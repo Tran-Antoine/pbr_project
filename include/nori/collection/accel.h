@@ -15,6 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
+#pragma once
 
 #if !defined(__NORI_BVH_H)
 #define __NORI_BVH_H

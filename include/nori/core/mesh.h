@@ -39,8 +39,6 @@ struct Intersection {
     Point3f p;
     /// Unoccluded distance along the ray
     float t;
-    /// Triangle index, if any
-    uint32_t triangle_index;
     /// UV coordinates, if any
     Point2f uv;
     /// Shading frame (based on the shading normal)
@@ -49,9 +47,11 @@ struct Intersection {
     Frame geoFrame;
     /// Pointer to the associated mesh
     const Mesh *mesh;
+    /// Pointer to the associated emitter
+    const Emitter* emitter;
 
     /// Create an uninitialized intersection record
-    Intersection() : mesh(nullptr) { }
+    Intersection() : mesh(nullptr), emitter(nullptr) { }
 
     /// Transform a direction vector into the local shading frame
     Vector3f toLocal(const Vector3f &d) const {
@@ -62,7 +62,6 @@ struct Intersection {
     Vector3f toWorld(const Vector3f &d) const {
         return shFrame.toWorld(d);
     }
-
     /// Return a human-readable summary of the intersection record
     std::string toString() const;
 };

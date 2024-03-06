@@ -21,6 +21,7 @@
 #include <collection/accel.h>
 #include <stats/dpdf.h>
 #include <emitter/emitter.h>
+#include <shape/implicit.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -61,9 +62,27 @@ public:
     const std::vector<Mesh *> &getMeshes() const { return m_meshes; }
     
     const std::vector<Emitter *> &getEmitters() const { return m_emitters; }
+
+    const std::vector<ImplicitShape *> &getImplicitShapes() const { return m_implicit_shapes; }
     
     Emitter * pickEmitter() const;
 
+    bool implicitRayIntersect(const Ray3f &ray, Intersection &its, bool shadow) const {
+        bool found = false;
+
+        Ray3f current_ray = ray;
+        for(auto shape : m_implicit_shapes) {
+            if (!shape) continue;
+
+            if(shape->rayIntersect(current_ray, its, shadow)) {
+                if(shadow) return true;
+                found = true;
+                current_ray.maxt = its.t;
+            }
+        }
+
+        return found;
+    }
     /**
      * \brief Intersect a ray against all triangles stored in the scene
      * and return detailed intersection information
@@ -79,7 +98,11 @@ public:
      * \return \c true if an intersection was found
      */
     bool rayIntersect(const Ray3f &ray, Intersection &its) const {
-        return m_accel->rayIntersect(ray, its, false);
+        bool found = m_accel->rayIntersect(ray, its, false);
+        if(!found) {
+            return implicitRayIntersect(ray, its, false);
+        }
+        return found;
     }
 
     /**
@@ -99,7 +122,11 @@ public:
      */
     bool rayIntersect(const Ray3f &ray) const {
         Intersection its; /* Unused */
-        return m_accel->rayIntersect(ray, its, true);
+        bool found = m_accel->rayIntersect(ray, its, true);
+        if(!found) {
+            return implicitRayIntersect(ray, its, true);
+        }
+        return found;
     }
 
     /// \brief Return an axis-aligned box that bounds the scene
@@ -131,6 +158,7 @@ private:
     std::vector<Mesh *> m_meshes;
     float emitters_total_area;
     std::vector<Emitter *> m_emitters;
+    std::vector<ImplicitShape *> m_implicit_shapes;
 
     Integrator *m_integrator = nullptr;
     Sampler *m_sampler = nullptr;

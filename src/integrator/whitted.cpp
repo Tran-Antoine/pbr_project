@@ -19,6 +19,11 @@ public:
             return Color3f(0.0f);
         }
 
+        if(its.emitter) {
+            EmitterQueryRecord record(nullptr, 0.f, 0.f, 0.f, its.uv);
+            return its.emitter->getEmittance(record);
+        }
+
         const BSDF* bsdf = its.mesh->getBSDF();
         Frame frame = its.shFrame;
 

@@ -37,8 +37,8 @@ public:
             Point3f x = its.p;
             Vector3f n = its.shFrame.n;
             Vector3f wi = -current_ray.d;
-            const Emitter* hit_emitter = its.mesh->getEmitter();
-            const BSDF* surface_bsdf = its.mesh->getBSDF();
+            const Emitter* hit_emitter = find_emitter(its);
+            const BSDF* surface_bsdf = its.mesh ? its.mesh->getBSDF() : nullptr;
             
             if(hit_emitter) {
                 if(bounces == 0 || last_specular) {
@@ -77,6 +77,16 @@ public:
             bounces++;
         }
         return (Le + Ld);
+    }
+
+    static const Emitter* find_emitter(const Intersection& its) {
+        if(its.emitter) {
+            return its.emitter;
+        }
+        if(its.mesh) {
+            return its.mesh->getEmitter();
+        }
+        return nullptr;
     }
 
     std::string toString() const {

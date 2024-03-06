@@ -37,14 +37,14 @@ public:
     float get_luminance() const { return total_luminance; }
     bool is_normalized() const { return norm; }
     int max_resolution() const { return max_res; }
+    int max_index() const { return max_res - 1; }
     float max_param() const { return (float) max_resolution() - 1.f; }
     void write_exr() const;
     float grayscale(int x, int y) const;
 
     int depth() const { return max_depth; }
-    Color3f color(int x, int y) const;
-    Color3f color(const Point2i& p) const { return color(p.x(), p.y()); }
-    Color3f color(const Point2f& p) const { return color((int) p.x(), (int) p.y()); }
+    Color3f color(float x, float y) const;
+    Color3f color(const Point2f& p) const { return color(p.x(), p.y()); }
 
 protected:
 

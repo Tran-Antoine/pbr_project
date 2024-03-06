@@ -69,7 +69,7 @@ public:
 
     virtual float pdf(const EmitterQueryRecord& rec) const = 0;
 
-    virtual Color3f evalRadiance(EmitterQueryRecord& rec, const Scene* scene) const = 0;
+    virtual Color3f evalRadiance(const EmitterQueryRecord &rec, const Scene* scene) const = 0;
 
     virtual Color3f sampleRadiance(EmitterQueryRecord& rec, Sampler& sampler, const Scene* scene, float& angular_pdf) const = 0;
 

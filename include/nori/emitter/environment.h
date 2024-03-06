@@ -3,16 +3,17 @@
 #include <core/common.h>
 #include <emitter/emitter.h>
 #include <collection/mipmap.h>
+#include <shape/cylinder.h>
 
 NORI_NAMESPACE_BEGIN
 
-class EnvironmentEmitter : public Emitter {
+class EnvironmentEmitter : public Emitter, public Cylinder {
 public:
 
-    EnvironmentEmitter(const PropertyList& props);
+    explicit EnvironmentEmitter(const PropertyList& props);
 
     float pdf(const EmitterQueryRecord& rec) const override;
-    Color3f evalRadiance(EmitterQueryRecord& rec, const Scene* scene) const override;
+    Color3f evalRadiance(const EmitterQueryRecord &rec, const Scene* scene) const override;
     Color3f sampleRadiance(EmitterQueryRecord& rec, Sampler& sampler, const Scene* scene, float& angular_pdf) const override;
     Color3f getEmittance(const EmitterQueryRecord &rec) const override;
 
@@ -25,8 +26,7 @@ protected:
 
     bool is_on_map1(const EmitterQueryRecord &rec) const;
     bool is_on_map2(const EmitterQueryRecord &rec) const;
-    Point2i world_to_map1(const EmitterQueryRecord &rec) const;
-    Point2i world_to_map2(const EmitterQueryRecord &rec) const;
+
     Point3f map1_to_world(const Point2f& coords) const;
     Point3f map2_to_world(const Point2f& coords) const;
     float weight_map1() const;

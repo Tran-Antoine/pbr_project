@@ -466,7 +466,6 @@ bool Accel::rayIntersect(const Ray3f &_ray, Intersection &its, bool shadowRay) c
         const MatrixXf &UV = mesh->getVertexTexCoords();
         const MatrixXu &F  = mesh->getIndices();
 
-        its.triangle_index = f;
         /* Vertex indices of the triangle */
         uint32_t idx0 = F(0, f), idx1 = F(1, f), idx2 = F(2, f);
 

@@ -34,6 +34,7 @@
 #include <filesystem/resolver.h>
 #include <ImathPlatform.h>
 #include <tinyformat.h>
+#include <half.h>
 
 /* Convenience definitions */
 #define NORI_NAMESPACE_BEGIN namespace nori {

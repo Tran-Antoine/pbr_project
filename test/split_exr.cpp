@@ -7,7 +7,7 @@
 
 using namespace nori;
 
-static std::string PATH = "./scenes/ibl/sky.exr";
+static std::string PATH = "./scenes/ibl/paris.exr";
 
 
 int main(int argc, char **argv) {
