@@ -249,9 +249,7 @@ Point2f Warp::squareToGrayMap(const Point2f &sample, const MipMap &map) {
     Point2i current_corner;
 
     for(int depth = 1; depth <= map.depth(); depth++) {
-        //std::cout << "Currently at position " << current_position.x() << ", " << current_position.y() << "\n";
-        //std::cout << "At depth " << depth << "\n";
-        //std::cout << current_sample.x() << ", " << current_sample.y() << "\n";
+        
         current_corner = map.next_corner(depth, current_corner);
 
         float up, down;
@@ -269,23 +267,23 @@ Point2f Warp::squareToGrayMap(const Point2f &sample, const MipMap &map) {
     float final_x = (float) current_corner.x() + current_sample.x();
     float final_y = (float) current_corner.y() + current_sample.y();
 
-    Point2f p = Point2f(final_x / (map.max_param() + 1), final_y / (map.max_param() + 1));
+    Point2f p = Point2f(final_x / (map.max_param() + 1.f), final_y / (map.max_param() + 1.f));
 
     return p;
 }
 
 float Warp::squareToGrayMapPdf(const Point2f &p, const MipMap &map) {
 
-
     int x = (int) (p.x() * map.max_param());
     int y = (int) (p.y() * map.max_param());
 
     float value = map.grayscale(x, y);
 
+    float max_res2 = (float) map.max_resolution() * map.max_resolution();
     if(map.is_normalized()) {
-        return value / ((float) map.max_resolution() * (float) map.max_resolution());
+        return value / max_res2;
     } else {
-        return value / map.get_luminance() / ((float) map.max_resolution() * (float) map.max_resolution());
+        return value / (map.get_luminance() * max_res2);
     }
 }
 

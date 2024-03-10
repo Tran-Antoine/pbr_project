@@ -129,9 +129,8 @@ Color3f MipMap::color(float x, float y) const {
     return Color3f(cap(r), cap(g), cap(b));
 }
 
-void MipMap::write_exr() const {
+void MipMap::write_exr(const std::string& path) const {
 
-    std::cout << map.width() << " " << map.height();
     Bitmap out(Vector2i(map.width(), map.height()));
 
     for(int y = 0; y < map.height(); ++y) {
@@ -139,10 +138,7 @@ void MipMap::write_exr() const {
             out.coeffRef(y, x) = map[y][x];
         }
     }
-
-    std::cout << "Bitmap ready to be written\n";
-    out.saveEXR("scenes/ibl/mipmap");
-    out.savePNG("scenes/ibl/mipmap");
+    out.saveEXR(path);
 }
 
 MipMap::Quadrant MipMap::quadrant(bool top, bool left) {

@@ -19,7 +19,6 @@ public:
     static Quadrant quadrant(bool top, bool left);
     static void move(Point2i& p, const Quadrant& quadrant);
 
-    //MipMap() {};
     MipMap(const std::string filename, bool norm) : 
         MipMap(getFileResolver()->resolve(filename).str(), 
         getFileResolver()->resolve(filename).extension(), 
@@ -32,14 +31,12 @@ public:
 
     Point2i next_corner(uint8_t next_depth, Point2i previous_pos) const;
 
-    void distribution(uint8_t depth, Point2i corner, float& left, float& right, float&up, float& down) const;
-
     float get_luminance() const { return total_luminance; }
     bool is_normalized() const { return norm; }
     int max_resolution() const { return max_res; }
     int max_index() const { return max_res - 1; }
     float max_param() const { return (float) max_resolution() - 1.f; }
-    void write_exr() const;
+    void write_exr(const std::string& path) const;
     float grayscale(int x, int y) const;
 
     int depth() const { return max_depth; }
