@@ -60,8 +60,13 @@ public:
                 return Color3f(0.0f);
             }
 
-            BSDFQueryRecord record(frame.toLocal(-ray.d));
+
+            BSDFQueryRecord record(frame.toLocal(-ray.d), its.uv);
             Color3f sampled_value = bsdf->sample(record, sampler->next2D());
+
+            if(sampled_value.isZero()) {
+                return Color3f(0.f);
+            }
 
             return (1.0 / 0.95) * sampled_value * Li(scene, sampler, Ray3f(its.p, frame.toWorld(record.wo))); 
         }

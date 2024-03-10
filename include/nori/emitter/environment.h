@@ -38,6 +38,8 @@ protected:
     Point3f center;
     float radius;
     float height;
+    float intensity;
+    bool lerp;
 };
 
 NORI_REGISTER_CLASS(EnvironmentEmitter, "env")

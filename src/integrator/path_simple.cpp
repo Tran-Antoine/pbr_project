@@ -51,6 +51,11 @@ public:
                 // regardless of whether its contribution should be counted or not
                 break;
             }
+
+            if(!surface_bsdf) {
+                // It should be impossible for a non-emitter hit to not have a surface BSDF
+                throw NoriException("Unreachable statement reached");
+            }
             
             // Direct illumination component
             for(Emitter* emitter : scene->getEmitters()) {
@@ -67,9 +72,6 @@ public:
 
             Color3f bsdf_term = surface_bsdf->sample(record, sampler->next2D()); 
 
-            if(!bsdf_term.isValid()) {
-                //std::cout << typeid(*surface_bsdf).name() << "\n";
-            }
             beta = beta * bsdf_term / (1-q);
 
             current_ray = Ray3f(x, frame.toWorld(record.wo));

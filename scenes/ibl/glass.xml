@@ -1,11 +1,9 @@
 <scene>
     <integrator type="whitted">
-        <float name="radius" value="4.0"/>
-        <float name="height" value="1.0"/>
     </integrator>
 
     <sampler type="independent">
-        <integer name="sampleCount" value="128"/>
+        <integer name="sampleCount" value="1024"/>
     </sampler>
 
     <camera type="perspective">
@@ -21,11 +19,12 @@
     </camera>
 
     <emitter type="env">
-        <string name="half1" value="left.exr"/>
-        <string name="half2" value="right.exr"/>
-        <float name="radius" value="4000.0"/>
-        <float name="height" value="12000.0"/>
+        <string name="half1" value="left_i.exr"/>
+        <string name="half2" value="right_i.exr"/>
+        <float name="radius" value="80000.0"/>
+        <float name="height" value="240000.0"/>
         <point name="center" value="0,0,0"/>
+        <float name="intensity" value="100"/>
     </emitter>
 
     <mesh type="obj">
@@ -33,7 +32,7 @@
         <transform name="toWorld">
             <translate value="0,0,0"/>
         </transform>
-        <bsdf type="diffuse"/>
+        <bsdf type="dielectric"/>
     </mesh>
 
 </scene>

@@ -40,8 +40,8 @@ public:
     float grayscale(int x, int y) const;
 
     int depth() const { return max_depth; }
-    Color3f color(float x, float y) const;
-    Color3f color(const Point2f& p) const { return color(p.x(), p.y()); }
+    Color3f color(float x, float y, bool lerp) const;
+    Color3f color(const Point2f &p, bool lerp) const { return color(p.x(), p.y(), lerp); }
 
 protected:
 

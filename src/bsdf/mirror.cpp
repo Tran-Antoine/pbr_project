@@ -37,8 +37,9 @@ public:
     }
 
     Color3f sample(BSDFQueryRecord &bRec, const Point2f &) const {
-        if (Frame::cosTheta(bRec.wi) <= 0) 
+        if (Frame::cosTheta(bRec.wi) <= 0) {
             return Color3f(0.0f);
+        }
 
         // Reflection in local coordinates
         bRec.wo = Vector3f(

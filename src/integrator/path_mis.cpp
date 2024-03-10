@@ -37,8 +37,8 @@ public:
             const Point3f x = its.p;
             const Vector3f n = its.shFrame.n;
             const Vector3f wi = -current_ray.d;
-            const Emitter* hit_emitter = its.mesh->getEmitter();
-            const BSDF* surface_bsdf = its.mesh->getBSDF(); 
+            const Emitter* hit_emitter = find_emitter(its);
+            const BSDF* surface_bsdf = its.mesh ? its.mesh->getBSDF() : nullptr;
             Frame frame(n);
             EmitterQueryRecord emitter_rec = EmitterQueryRecord(surface_bsdf, x, n, wi, its.uv);
 
@@ -51,13 +51,16 @@ public:
                 break;
             }
 
+            if(!surface_bsdf) {
+                // It should be impossible for a non-emitter hit to not have a surface BSDF
+                throw NoriException("Unreachable statement reached");
+            }
 
             // Direct illumination with Emitter Importance Sampling
             for(Emitter* emitter : scene->getEmitters()) {
 
                 if(!emitter) {
-                    std::cout << "issue\n";
-                    continue;
+                    throw NoriException("Null emitter found in the scene");
                 }
 
                 float pdf_light;
@@ -91,9 +94,9 @@ public:
 
             // Direct illumination with BRDF Importance Sampling
             // Done late as we need the collision result from the next step first
-            if(found_intersection && its.mesh->getEmitter()) {
+            if(found_intersection && find_emitter(its)) {
                 
-                const Emitter* emitter_hit = its.mesh->getEmitter();
+                const Emitter* emitter_hit = find_emitter(its);
                 EmitterQueryRecord emitter_hit_record = EmitterQueryRecord(surface_bsdf, x, n, wi, its.p, its.shFrame.n, its.uv) ;
 
                 Color3f emittance = emitter_hit->getEmittance(emitter_hit_record);
@@ -107,6 +110,16 @@ public:
         }
 
         return Le + Ld;
+    }
+
+    static const Emitter* find_emitter(const Intersection& its) {
+        if(its.emitter) {
+            return its.emitter;
+        }
+        if(its.mesh) {
+            return its.mesh->getEmitter();
+        }
+        return nullptr;
     }
 
     std::string toString() const {
