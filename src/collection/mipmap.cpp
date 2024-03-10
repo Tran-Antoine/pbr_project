@@ -109,14 +109,35 @@ static float cap(float f) {
     return f;
 }
 
-Color3f MipMap::color(float x, float y) const {
+static Color3f toColor(const Imf::Rgba& pixel) {
+    float r = pixel.r, g = pixel.g, b = pixel.b;
+    return Color3f(cap(r), cap(g), cap(b));
+}
+
+static Color3f lerp(float dx, float dy, const Color3f& current, const Color3f& right, const Color3f& below) {
+    Color3f h_lerp = dx * current + (1 - dx) * right;
+    return h_lerp * dy + (1 - dy) * below;
+}
+
+Color3f MipMap::color(float x, float y, bool do_lerp) const {
 
     if(x < 0 || y < 0 || x > 1 || y > 1) {
         throw NoriException("Invalid color indices provided");
     }
 
-    int x_index = (int) (x * max_param());
-    int y_index = (int) (y * max_param());
+    float x_mapped = x * max_param();
+    float y_mapped = y * max_param();
+    int x_index = (int) x_mapped;
+    int y_index = (int) y_mapped;
+    float dx = x_mapped - (float) x_index, dy = y_mapped - (float) y_index;
+
+    if(do_lerp && x_index < max_index() && y_index < max_index()) {
+        Color3f current = toColor(original[y_index][x_index]);
+        Color3f right = toColor(original[y_index][x_index+1]);
+        Color3f below = toColor(original[y_index+1][x_index]);
+
+        return lerp(dx, dy, current, right, below);
+    }
 
     const Imf::Rgba& pixel = original[y_index][x_index];
 

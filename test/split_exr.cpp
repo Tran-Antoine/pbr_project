@@ -7,7 +7,7 @@
 
 using namespace nori;
 
-static std::string PATH = "./scenes/ibl/paris.exr";
+static std::string PATH = "./scenes/ibl/interior.exr";
 
 
 int main(int argc, char **argv) {
@@ -31,11 +31,11 @@ int main(int argc, char **argv) {
         }
     }
 
-    Imf::RgbaOutputFile fileLeft("scenes/ibl/left.exr", width / 2, height, Imf::WRITE_RGBA);
+    Imf::RgbaOutputFile fileLeft("scenes/ibl/left_i.exr", width / 2, height, Imf::WRITE_RGBA);
     fileLeft.setFrameBuffer(&left[0][0], 1, width / 2);
     fileLeft.writePixels(height);
 
-    Imf::RgbaOutputFile fileRight("scenes/ibl/right.exr", width / 2, height, Imf::WRITE_RGBA);
+    Imf::RgbaOutputFile fileRight("scenes/ibl/right_i.exr", width / 2, height, Imf::WRITE_RGBA);
     fileRight.setFrameBuffer(&right[0][0], 1, width / 2);
     fileRight.writePixels(height);
 }

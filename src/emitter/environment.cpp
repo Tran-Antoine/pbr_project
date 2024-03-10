@@ -14,6 +14,8 @@ EnvironmentEmitter::EnvironmentEmitter(const PropertyList& props) :
     radius = props.getFloat("radius");
     center = props.getPoint("center");
     height = props.getFloat("height");
+    intensity = props.getFloat("intensity");
+    lerp = props.getFloat("lerp-transition", false);
 }
 
 float EnvironmentEmitter::pdf(const EmitterQueryRecord& rec) const {
@@ -42,7 +44,7 @@ Color3f EnvironmentEmitter::evalRadiance(const EmitterQueryRecord &rec, const Sc
     Color3f emitted = getEmittance(rec);
     Color3f bsdf_term = evalBSDF(rec);
 
-    return distortion_factor * (emitted * bsdf_term);
+    return intensity * distortion_factor * (emitted * bsdf_term);
 }
 
 Color3f EnvironmentEmitter::sampleRadiance(EmitterQueryRecord& rec, Sampler& sampler, const Scene* scene, float& angular_pdf) const {
@@ -66,7 +68,7 @@ Color3f EnvironmentEmitter::getEmittance(const EmitterQueryRecord &rec) const {
 
     const MipMap& map = is_on_map1(rec) ? map1 : map2;
 
-    return map.color(uv);    
+    return map.color(uv, lerp);
 }
 
 void EnvironmentEmitter::samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf) const {
