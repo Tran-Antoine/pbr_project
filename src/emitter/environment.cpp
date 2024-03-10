@@ -9,13 +9,13 @@ NORI_NAMESPACE_BEGIN
 
 EnvironmentEmitter::EnvironmentEmitter(const PropertyList& props) :
     map1(props.getString("half1"), true), map2(props.getString("half2"), true),
-    Cylinder(props.getFloat("radius"), props.getFloat("height")){
+    Sphere(props.getFloat("radius")){
 
     radius = props.getFloat("radius");
     center = props.getPoint("center");
-    height = props.getFloat("height");
+    height = props.getFloat("height", 0.f);
     intensity = props.getFloat("intensity");
-    lerp = props.getFloat("lerp-transition", false);
+    lerp = props.getBoolean("lerp-transition", false);
 }
 
 float EnvironmentEmitter::pdf(const EmitterQueryRecord& rec) const {
@@ -33,7 +33,10 @@ float EnvironmentEmitter::pdf(const EmitterQueryRecord& rec) const {
         return 0.f;
     }
 
-    return to_angular(rec, pdf);
+    // Warp::pdf assumes the surface is of length 1, which is not the case after spherical mapping
+    float area = 4 * M_PI * radius * radius;
+
+    return to_angular(rec, pdf / area);
 }
 
 Color3f EnvironmentEmitter::evalRadiance(const EmitterQueryRecord &rec, const Scene* scene) const {
@@ -63,8 +66,8 @@ Color3f EnvironmentEmitter::sampleRadiance(EmitterQueryRecord& rec, Sampler& sam
 Color3f EnvironmentEmitter::getEmittance(const EmitterQueryRecord &rec) const {
 
     Point2f uv = is_on_map1(rec)
-        ? Point2f(2.f * rec.uv.x(), 1.f - rec.uv.y())
-        : Point2f(2.f * (rec.uv.x() - 0.5), 1 - rec.uv.y());
+        ? Point2f(2.f * rec.uv.x(), rec.uv.y())
+        : Point2f(2.f * (rec.uv.x() - 0.5f), rec.uv.y());
 
     const MipMap& map = is_on_map1(rec) ? map1 : map2;
 
@@ -115,19 +118,25 @@ Point3f EnvironmentEmitter::map1_to_world(const Point2f &coords) const{
     float x_norm = coords.x();
     float y_norm = 1 - coords.y();
 
-    float theta = M_PI * x_norm;
+    float theta = y_norm * M_PI;
+    float phi = x_norm * 2 * M_PI;
+    /*float theta = M_PI * x_norm;
     float ampl = radius;
     float x = -ampl * cos(theta);
     float z = ampl * sin(theta);
     float y = 0.5f * height * (2*y_norm - 1);
 
-    return center + Point3f(x, y, z);
+    return center + Point3f(x, y, z);*/
+    return center + radius * sphericalDirection(theta, phi);
 }
 
 Point3f EnvironmentEmitter::map2_to_world(const Point2f &coords) const{
     float x_norm = coords.x();
     float y_norm = 1 - coords.y();
 
+    float theta = y_norm * M_PI;
+    float phi = x_norm * 2 * M_PI;
+    /*
     float angle = M_PI * x_norm;
     float ampl = radius;
 
@@ -135,7 +144,8 @@ Point3f EnvironmentEmitter::map2_to_world(const Point2f &coords) const{
     float z = -ampl * sin(angle);
     float y = 0.5f * height * (2*y_norm - 1);
 
-    return center + Point3f(x, y, z);
+    return center + Point3f(x, y, z);*/
+    return center + radius * sphericalDirection(theta, phi);
 }
 
 float EnvironmentEmitter::weight_map1() const{

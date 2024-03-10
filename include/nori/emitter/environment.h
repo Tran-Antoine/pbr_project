@@ -3,11 +3,11 @@
 #include <core/common.h>
 #include <emitter/emitter.h>
 #include <collection/mipmap.h>
-#include <shape/cylinder.h>
+#include <shape/sphere.h>
 
 NORI_NAMESPACE_BEGIN
 
-class EnvironmentEmitter : public Emitter, public Cylinder {
+class EnvironmentEmitter : public Emitter, public Sphere {
 public:
 
     explicit EnvironmentEmitter(const PropertyList& props);

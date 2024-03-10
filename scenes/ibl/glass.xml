@@ -1,5 +1,5 @@
 <scene>
-    <integrator type="whitted">
+    <integrator type="path_mis">
     </integrator>
 
     <sampler type="independent">
@@ -9,7 +9,7 @@
     <camera type="perspective">
         <!-- Camera-to-world coordinate system transformation -->
         <transform name="toWorld">
-            <lookat origin="-1.5, 1, 1.5" target="-0.5, 0.5, 0" up="0,1,0"/>
+            <lookat origin="2, 0.5, 2" target="0, 0.5, 0" up="0,1,0"/>
         </transform>
 
         <float name="fov" value="60"/>
@@ -21,10 +21,9 @@
     <emitter type="env">
         <string name="half1" value="left_i.exr"/>
         <string name="half2" value="right_i.exr"/>
-        <float name="radius" value="80000.0"/>
-        <float name="height" value="240000.0"/>
+        <float name="radius" value="5000.0"/>
         <point name="center" value="0,0,0"/>
-        <float name="intensity" value="100"/>
+        <float name="intensity" value="1"/>
     </emitter>
 
     <mesh type="obj">
@@ -32,7 +31,11 @@
         <transform name="toWorld">
             <translate value="0,0,0"/>
         </transform>
-        <bsdf type="dielectric"/>
+        <bsdf type="microfacet">
+            <float name="intIOR" value="1.7"/>
+            <color name="kd" value="0.2 0.2 0.4"/>
+            <float name="alpha" value="0.01"/>
+        </bsdf>
     </mesh>
 
 </scene>

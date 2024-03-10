@@ -43,7 +43,6 @@ public:
             if(hit_emitter) {
                 if(bounces == 0 || last_specular) {
                     // here x and n are actually l and n_l
-                    // TODO: we need cylindrical intersection implemented for this to work with env maps
                     EmitterQueryRecord emitter_rec = EmitterQueryRecord(nullptr, 0.f, 0.f, wi, x, n, its.uv);
                     Le += beta * hit_emitter->getEmittance(emitter_rec);
                 }

@@ -1,17 +1,15 @@
 <scene>
-    <integrator type="env_only">
-        <float name="radius" value="40.0"/>
-        <float name="height" value="100.0"/>
+    <integrator type="path_mis">
     </integrator>
 
     <sampler type="independent">
-        <integer name="sampleCount" value="1"/>
+        <integer name="sampleCount" value="4"/>
     </sampler>
 
     <camera type="perspective">
         <!-- Camera-to-world coordinate system transformation -->
         <transform name="toWorld">
-            <lookat origin="0, 0, 0" target="1.001, 0.001, 1" up="0,1,0"/>
+            <lookat origin="0, 0, 0" target="-1, 0, 1" up="0,1,0"/>
         </transform>
 
         <float name="fov" value="120"/>
@@ -21,10 +19,10 @@
     </camera>
 
     <emitter type="env">
-            <string name="half1" value="left.exr"/>
-            <string name="half2" value="right.exr"/>
-            <float name="radius" value="40.0"/>
-            <float name="height" value="100.0"/>
+            <string name="half1" value="left_i.exr"/>
+            <string name="half2" value="right_i.exr"/>
+            <float name="radius" value="5000"/>
             <point name="center" value="0,0,0"/>
+            <float name="intensity" value="1"/>
     </emitter>
 </scene>
