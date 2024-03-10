@@ -68,6 +68,7 @@ public:
     Emitter * pickEmitter() const;
 
     bool implicitRayIntersect(const Ray3f &ray, Intersection &its, bool shadow) const {
+
         bool found = false;
 
         Ray3f current_ray = ray;

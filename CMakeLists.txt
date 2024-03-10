@@ -61,6 +61,7 @@ add_executable(nori
 
   include/nori/shape/implicit.h
   include/nori/shape/cylinder.h
+  include/nori/shape/sphere.h
 
   include/nori/gui/bitmap.h
   include/nori/gui/block.h
@@ -103,6 +104,7 @@ add_executable(nori
   src/core/scene.cpp
 
   src/shape/cylinder.cpp
+  src/shape/sphere.cpp
 
   src/gui/bitmap.cpp
   src/gui/block.cpp

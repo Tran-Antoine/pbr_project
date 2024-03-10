@@ -49,9 +49,7 @@ MipMap::MipMap(const std::string &path, const std::string &ext, bool norm) : nor
             //float gray_value = gray(pixel);
             map[y][x] = gray_value;
             temp[y][x] = gray_value;
-            if(gray_value > 200000.f) {
-                std::cout << "test";
-            }
+
             total += gray_value;
         }
     }

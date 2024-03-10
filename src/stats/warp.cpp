@@ -279,11 +279,10 @@ float Warp::squareToGrayMapPdf(const Point2f &p, const MipMap &map) {
 
     float value = map.grayscale(x, y);
 
-    float max_res2 = (float) map.max_resolution() * map.max_resolution();
     if(map.is_normalized()) {
-        return value / max_res2;
+        return value;
     } else {
-        return value / (map.get_luminance() * max_res2);
+        return value / map.get_luminance();
     }
 }
 
