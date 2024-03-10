@@ -42,10 +42,6 @@ Color3f EnvironmentEmitter::evalRadiance(const EmitterQueryRecord &rec, const Sc
     Color3f emitted = getEmittance(rec);
     Color3f bsdf_term = evalBSDF(rec);
 
-    if(!emitted.isValid() || !bsdf_term.isValid()) {
-        throw NoriException("");
-    }
-
     return distortion_factor * (emitted * bsdf_term);
 }
 
@@ -59,26 +55,18 @@ Color3f EnvironmentEmitter::sampleRadiance(EmitterQueryRecord& rec, Sampler& sam
         return Color3f(0.f);
     }
 
-    Color3f radiance = evalRadiance(rec, scene);
-    if(!radiance.isValid() || pdf_light == 0) {
-        throw NoriException("");
-    }
     return evalRadiance(rec, scene) / pdf_light;
 }
 
 Color3f EnvironmentEmitter::getEmittance(const EmitterQueryRecord &rec) const {
 
-    if(is_on_map1(rec)) {
-        Point2f inverted_uv = Point2f(2.f * rec.uv.x(), 1.f - rec.uv.y());
-        return map1.color(inverted_uv);
-    }
-    else if(is_on_map2(rec)) {
-        Point2f inverted_uv = Point2f(2.f * (rec.uv.x() - 0.5f), 1 - rec.uv.y());
-        return map2.color(inverted_uv);
-    }
-    else {
-        return Color3f(0.f);
-    }
+    Point2f uv = is_on_map1(rec)
+        ? Point2f(2.f * rec.uv.x(), 1.f - rec.uv.y())
+        : Point2f(2.f * (rec.uv.x() - 0.5), 1 - rec.uv.y());
+
+    const MipMap& map = is_on_map1(rec) ? map1 : map2;
+
+    return map.color(uv);    
 }
 
 void EnvironmentEmitter::samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf) const {
@@ -151,7 +139,5 @@ Point3f EnvironmentEmitter::map2_to_world(const Point2f &coords) const{
 float EnvironmentEmitter::weight_map1() const{
     return map1.get_luminance() / (map1.get_luminance() + map2.get_luminance());
 }
-
-
 
 NORI_NAMESPACE_END
