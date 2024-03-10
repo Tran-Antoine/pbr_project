@@ -67,7 +67,7 @@ public:
      * */
     EClassType getClassType() const { return EEmitter; }
 
-    virtual float pdf(const EmitterQueryRecord& rec) const = 0;
+    virtual float pdf(const EmitterQueryRecord &rec, EMeasure unit) const = 0;
 
     virtual Color3f evalRadiance(const EmitterQueryRecord &rec, const Scene* scene) const = 0;
 

@@ -10,6 +10,18 @@ static float gray(const Imf::Rgba& pixel) {
     return ((float)pixel.r + (float)pixel.g + (float)pixel.b) / 3.f;
 }
 
+static float cap(float f) {
+    if(isinf(f)) {
+        return 65504.f;
+    }
+    return f;
+}
+
+static Color3f toColor(const Imf::Rgba& pixel) {
+    float r = pixel.r, g = pixel.g, b = pixel.b;
+    return Color3f(cap(r), cap(g), cap(b));
+}
+
 void MipMap::shrink(Imf::Array2D<float>& array, int size_x, int size_y) {
     for(int y = 0; y < size_y; y += 2) {
         for(int x = 0; x < size_x; x += 2) {
@@ -42,11 +54,8 @@ MipMap::MipMap(const std::string &path, const std::string &ext, bool norm) : nor
     for(int y = 0; y < max_res; y++) {
         for(int x = 0; x < max_res; x++) {
             const Imf::Rgba& pixel = original[y][x];
-            float r = std::min(pixel.r, std::numeric_limits<half>::max());
-            float g = std::min(pixel.g, std::numeric_limits<half>::max());
-            float b = std::min(pixel.b, std::numeric_limits<half>::max());
-            float gray_value = (r + g + b) / 3.f;
-            //float gray_value = gray(pixel);
+            Color3f color = toColor(pixel);
+            float gray_value = (color.r() + color.g() + color.b()) / 3.f;
             map[y][x] = gray_value;
             temp[y][x] = gray_value;
 
@@ -98,18 +107,6 @@ float MipMap::grayscale(int x, int y) const {
         throw NoriException("Grayscale indices out of range");
     }
     return map[y][x];
-}
-
-static float cap(float f) {
-    if(isinf(f)) {
-        return 65504.f;
-    }
-    return f;
-}
-
-static Color3f toColor(const Imf::Rgba& pixel) {
-    float r = pixel.r, g = pixel.g, b = pixel.b;
-    return Color3f(cap(r), cap(g), cap(b));
 }
 
 static Color3f lerp(float dx, float dy, const Color3f& current, const Color3f& right, const Color3f& below) {

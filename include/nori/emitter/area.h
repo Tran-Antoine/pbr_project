@@ -12,7 +12,7 @@ public:
 
     MeshEmitter(const PropertyList& props);
 
-    float pdf(const EmitterQueryRecord& rec) const override;
+    float pdf(const EmitterQueryRecord &rec, EMeasure unit) const override;
     Color3f evalRadiance(const EmitterQueryRecord &rec, const Scene* scene) const override;
     Color3f sampleRadiance(EmitterQueryRecord& rec, Sampler& sampler, const Scene* scene, float& angular_pdf) const override;
     Color3f getEmittance(const EmitterQueryRecord &rec) const override;

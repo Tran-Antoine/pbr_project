@@ -3,7 +3,7 @@
     </integrator>
 
     <sampler type="independent">
-        <integer name="sampleCount" value="1024"/>
+        <integer name="sampleCount" value="256"/>
     </sampler>
 
     <camera type="perspective">
@@ -31,7 +31,7 @@
         <transform name="toWorld">
             <translate value="0,0,0"/>
         </transform>
-        <bsdf type="microfacet">
+        <bsdf type="diffuse">
             <float name="intIOR" value="1.7"/>
             <color name="kd" value="0.2 0.2 0.4"/>
             <float name="alpha" value="0.01"/>

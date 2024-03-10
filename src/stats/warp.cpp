@@ -279,6 +279,10 @@ float Warp::squareToGrayMapPdf(const Point2f &p, const MipMap &map) {
 
     float value = map.grayscale(x, y);
 
+    if(map.get_luminance() < 0.00001) {
+        std::cout << map.get_luminance();
+    }
+
     if(map.is_normalized()) {
         return value;
     } else {

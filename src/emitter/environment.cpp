@@ -2,7 +2,6 @@
 #include <emitter/emitter.h>
 #include <emitter/environment.h>
 #include <stats/warp.h>
-#include <functional>
 #include <core/color.h>
 
 NORI_NAMESPACE_BEGIN
@@ -18,9 +17,9 @@ EnvironmentEmitter::EnvironmentEmitter(const PropertyList& props) :
     lerp = props.getBoolean("lerp-transition", false);
 }
 
-float EnvironmentEmitter::pdf(const EmitterQueryRecord& rec) const {
+float EnvironmentEmitter::pdf(const EmitterQueryRecord &rec, EMeasure unit) const {
 
-    float pdf;
+    float pdf = 0.f;
 
     if(is_on_map1(rec)) {
         Point2f remapped_uv = Point2f(2.f * rec.uv.x(), 1.f - rec.uv.y());
@@ -30,13 +29,17 @@ float EnvironmentEmitter::pdf(const EmitterQueryRecord& rec) const {
         Point2f remapped_uv = Point2f(2.f * (rec.uv.x() - 0.5f), 1.f - rec.uv.y());
         pdf = weight_map2() * Warp::squareToGrayMapPdf(remapped_uv, map2);
     } else {
-        return 0.f;
+        return pdf;
     }
 
     // Warp::pdf assumes the surface is of length 1, which is not the case after spherical mapping
-    float area = 4 * M_PI * radius * radius;
+    pdf /= 4 * M_PI * radius * radius;
 
-    return to_angular(rec, pdf / area);
+    switch(unit) {
+        case EMeasure::ESurfaceArea: return pdf;
+        case EMeasure::ESolidAngle: return to_angular(rec, pdf);
+        default: throw NoriException("Unsupported unit");
+    }
 }
 
 Color3f EnvironmentEmitter::evalRadiance(const EmitterQueryRecord &rec, const Scene* scene) const {
@@ -54,9 +57,10 @@ Color3f EnvironmentEmitter::sampleRadiance(EmitterQueryRecord& rec, Sampler& sam
 
     float pdf_light;
     samplePoint(sampler, rec, pdf_light);
-    angular_pdf = to_angular(rec, pdf_light);
 
-    if(!is_source_visible(scene, rec)) {
+    angular_pdf = pdf_light;
+
+    if(pdf_light == 0 || !is_source_visible(scene, rec)) {
         return Color3f(0.f);
     }
 
@@ -83,18 +87,18 @@ void EnvironmentEmitter::samplePoint(Sampler &sampler, EmitterQueryRecord &rec, 
         rec.uv = uv;
         rec.l = map1_to_world(rec.uv);
 
-        Vector3f n_l = (center - rec.l); n_l.y() = 0; n_l = n_l.normalized();
+        Vector3f n_l = (center - rec.l).normalized();;
         rec.n_l = n_l;
     } else {
         Point2f uv = Warp::squareToGrayMap(sampler.next2D(), map2);
         uv.x() = 0.5f*uv.x() + 0.5f;
         rec.uv = uv;
         rec.l = map2_to_world(rec.uv);
-        Vector3f n_l = (center - rec.l); n_l.y() = 0; n_l = n_l.normalized();
+        Vector3f n_l = (center - rec.l).normalized();
         rec.n_l = n_l;
     }
 
-    pdf = this->pdf(rec);
+    pdf = this->pdf(rec, ESolidAngle);
 }
 
 bool EnvironmentEmitter::is_on_map1(const EmitterQueryRecord &rec) const{
@@ -120,14 +124,8 @@ Point3f EnvironmentEmitter::map1_to_world(const Point2f &coords) const{
 
     float theta = y_norm * M_PI;
     float phi = x_norm * 2 * M_PI;
-    /*float theta = M_PI * x_norm;
-    float ampl = radius;
-    float x = -ampl * cos(theta);
-    float z = ampl * sin(theta);
-    float y = 0.5f * height * (2*y_norm - 1);
 
-    return center + Point3f(x, y, z);*/
-    return center + radius * sphericalDirection(theta, phi);
+    return center + radius * sphericalDirection(theta, phi).normalized();
 }
 
 Point3f EnvironmentEmitter::map2_to_world(const Point2f &coords) const{
@@ -136,16 +134,8 @@ Point3f EnvironmentEmitter::map2_to_world(const Point2f &coords) const{
 
     float theta = y_norm * M_PI;
     float phi = x_norm * 2 * M_PI;
-    /*
-    float angle = M_PI * x_norm;
-    float ampl = radius;
 
-    float x = ampl * cos(angle);
-    float z = -ampl * sin(angle);
-    float y = 0.5f * height * (2*y_norm - 1);
-
-    return center + Point3f(x, y, z);*/
-    return center + radius * sphericalDirection(theta, phi);
+    return center + radius * sphericalDirection(theta, phi).normalized();
 }
 
 float EnvironmentEmitter::weight_map1() const{

@@ -24,7 +24,9 @@ Color3f Emitter::evalBSDF(const EmitterQueryRecord &rec) const {
 
 float Emitter::to_angular(const EmitterQueryRecord &rec, float pdf) const {
     float dist = rec.dist();
-    return pdf * dist * dist / rec.n_p.dot(rec.wo());
+    Vector3f wo = rec.wo();
+    float dot = rec.n_p.dot(wo);
+    return std::max(0.f, pdf * dist * dist / dot);
 }
 
 NORI_NAMESPACE_END

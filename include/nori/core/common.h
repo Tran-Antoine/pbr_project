@@ -194,6 +194,7 @@ extern std::string memString(size_t size, bool precise = false);
 enum EMeasure {
     EUnknownMeasure = 0,
     ESolidAngle,
+    ESurfaceArea,
     EDiscrete
 };
 
