@@ -44,7 +44,8 @@ public:
                 if(bounces == 0 || last_specular) {
                     // here x and n are actually l and n_l
                     EmitterQueryRecord emitter_rec = EmitterQueryRecord(nullptr, 0.f, 0.f, wi, x, n, its.uv);
-                    Le += beta * hit_emitter->getEmittance(emitter_rec);
+                    Color3f emittance = hit_emitter->getEmittance(emitter_rec);
+                    Le += beta * emittance;
                 }
                 // seems more logic to break the indirect lighting loop whenever we hit an hit_emitter,
                 // regardless of whether its contribution should be counted or not
@@ -59,17 +60,24 @@ public:
             // Direct illumination component
             for(Emitter* emitter : scene->getEmitters()) {
                 EmitterQueryRecord emitter_rec(surface_bsdf, x, n, wi, its.uv);
-                float unused;
-                Color3f direct_rad = emitter->sampleRadiance(emitter_rec, *sampler, scene, unused);
+                float pdf;
+                Color3f direct_rad = emitter->sampleRadiance(emitter_rec, *sampler, scene, pdf, ESurfaceArea);
 
-                Ld += beta * direct_rad; 
+                if (pdf != 0) {
+                    Color3f weighted_rad = direct_rad / pdf;
+                    Ld += beta * direct_rad / pdf;
+                }
             }
 
 
             Frame frame(n);
             BSDFQueryRecord record(frame.toLocal(wi));
 
-            Color3f bsdf_term = surface_bsdf->sample(record, sampler->next2D()); 
+            Color3f bsdf_term = surface_bsdf->sample(record, sampler->next2D());
+
+            if(bsdf_term.isZero()){
+                break;
+            }
 
             beta = beta * bsdf_term / (1-q);
 

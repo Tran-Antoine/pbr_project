@@ -20,20 +20,24 @@ EnvironmentEmitter::EnvironmentEmitter(const PropertyList& props) :
 float EnvironmentEmitter::pdf(const EmitterQueryRecord &rec, EMeasure unit) const {
 
     float pdf = 0.f;
+    float map_area_2;
 
     if(is_on_map1(rec)) {
-        Point2f remapped_uv = Point2f(2.f * rec.uv.x(), 1.f - rec.uv.y());
+        Point2f remapped_uv = Point2f(2.f * rec.uv.x(), rec.uv.y());
+        map_area_2 = map1.max_resolution() * map1.max_resolution();
         pdf = weight_map1() * Warp::squareToGrayMapPdf(remapped_uv, map1);
     }
     else if(is_on_map2(rec)){
-        Point2f remapped_uv = Point2f(2.f * (rec.uv.x() - 0.5f), 1.f - rec.uv.y());
+        Point2f remapped_uv = Point2f(2.f * (rec.uv.x() - 0.5f), rec.uv.y());
+        map_area_2 = map2.max_resolution() * map2.max_resolution();
         pdf = weight_map2() * Warp::squareToGrayMapPdf(remapped_uv, map2);
     } else {
         return pdf;
     }
 
     // Warp::pdf assumes the surface is of length 1, which is not the case after spherical mapping
-    pdf /= 4 * M_PI * radius * radius;
+    // Hence we divide by the area of a half sphere
+    pdf /= (2 * M_PI * radius * radius / map_area_2);
 
     switch(unit) {
         case EMeasure::ESurfaceArea: return pdf;
@@ -53,21 +57,23 @@ Color3f EnvironmentEmitter::evalRadiance(const EmitterQueryRecord &rec, const Sc
     return intensity * distortion_factor * (emitted * bsdf_term);
 }
 
-Color3f EnvironmentEmitter::sampleRadiance(EmitterQueryRecord& rec, Sampler& sampler, const Scene* scene, float& angular_pdf) const {
+Color3f EnvironmentEmitter::sampleRadiance(EmitterQueryRecord &rec, Sampler &sampler, const Scene *scene, float &pdf,
+                                   EMeasure unit) const {
 
-    float pdf_light;
-    samplePoint(sampler, rec, pdf_light);
+    samplePoint(sampler, rec, pdf, unit);
 
-    angular_pdf = pdf_light;
-
-    if(pdf_light == 0 || !is_source_visible(scene, rec)) {
+    if(pdf == 0 || !is_source_visible(scene, rec)) {
         return Color3f(0.f);
     }
 
-    return evalRadiance(rec, scene) / pdf_light;
+    return evalRadiance(rec, scene);
 }
 
 Color3f EnvironmentEmitter::getEmittance(const EmitterQueryRecord &rec) const {
+
+    if(rec.n_l.dot(-rec.wo()) < 0) {
+        return Color3f(0.0f);
+    }
 
     Point2f uv = is_on_map1(rec)
         ? Point2f(2.f * rec.uv.x(), rec.uv.y())
@@ -78,7 +84,7 @@ Color3f EnvironmentEmitter::getEmittance(const EmitterQueryRecord &rec) const {
     return map.color(uv, lerp);
 }
 
-void EnvironmentEmitter::samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf) const {
+void EnvironmentEmitter::samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf, EMeasure unit) const {
     float sample = sampler.next1D();
 
     if(sample < weight_map1()) {
@@ -86,7 +92,6 @@ void EnvironmentEmitter::samplePoint(Sampler &sampler, EmitterQueryRecord &rec, 
         uv.x() *= 0.5f;
         rec.uv = uv;
         rec.l = map1_to_world(rec.uv);
-
         Vector3f n_l = (center - rec.l).normalized();;
         rec.n_l = n_l;
     } else {
@@ -98,7 +103,7 @@ void EnvironmentEmitter::samplePoint(Sampler &sampler, EmitterQueryRecord &rec, 
         rec.n_l = n_l;
     }
 
-    pdf = this->pdf(rec, ESolidAngle);
+    pdf = this->pdf(rec, unit);
 }
 
 bool EnvironmentEmitter::is_on_map1(const EmitterQueryRecord &rec) const{
@@ -125,17 +130,32 @@ Point3f EnvironmentEmitter::map1_to_world(const Point2f &coords) const{
     float theta = y_norm * M_PI;
     float phi = x_norm * 2 * M_PI;
 
-    return center + radius * sphericalDirection(theta, phi).normalized();
+    /*Point3f s = radius * sphericalDirection(theta, phi).normalized();
+    std::swap(s.y(), s.z());
+    s.x() *= -1;
+    s.y() *= -1;
+    s.z() *= -1;*/
+    float x = -radius * sin(theta) * cos(phi);
+    float y = -radius * cos(theta);
+    float z = -radius * sin(theta) * sin(phi);
+    //
+    //std::cout << "P: " << x << ", " << y << ", " << z << "\n";
+
+    return center + Point3f(x, y, z);
 }
 
 Point3f EnvironmentEmitter::map2_to_world(const Point2f &coords) const{
+
     float x_norm = coords.x();
     float y_norm = 1 - coords.y();
 
     float theta = y_norm * M_PI;
     float phi = x_norm * 2 * M_PI;
 
-    return center + radius * sphericalDirection(theta, phi).normalized();
+    float x = -radius * sin(theta) * cos(phi);
+    float y = -radius * cos(theta);
+    float z = -radius * sin(theta) * sin(phi);
+    return center + Point3f(x, y, z);
 }
 
 float EnvironmentEmitter::weight_map1() const{

@@ -104,7 +104,6 @@ void Warp::squareToMeshPoint(const Point2f &sample0, const Mesh &mesh, Point3f &
 }
 
 float Warp::squareToMeshPointPdf(const Vector3f &v, const Mesh &mesh) {
-    // TODO: add detection, maybe add a find_triangle(position) in the octree file?
     return 1 / mesh.getTotalArea();
 }
 
@@ -278,10 +277,6 @@ float Warp::squareToGrayMapPdf(const Point2f &p, const MipMap &map) {
     int y = (int) (p.y() * map.max_param());
 
     float value = map.grayscale(x, y);
-
-    if(map.get_luminance() < 0.00001) {
-        std::cout << map.get_luminance();
-    }
 
     if(map.is_normalized()) {
         return value;

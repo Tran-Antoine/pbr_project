@@ -12,7 +12,7 @@ public:
         q = props.getFloat("q", 0.05f);
     }
 
-    static Color3f direct(Color3f beta, float weight, Color3f emittance) {
+    static Color3f direct(const Color3f& beta, float weight, const Color3f& emittance) {
         Color3f out = weight * (beta * emittance);
         return out;
     }
@@ -47,9 +47,7 @@ public:
                 if(bounces == 0 || last_specular) {
                     EmitterQueryRecord hit_emitter_rec = EmitterQueryRecord(nullptr, 0.f, 0.f, wi, x, n, its.uv);
                     Color3f emittance = hit_emitter->getEmittance(hit_emitter_rec);
-                    if(!emittance.isValid()) {
-                        std::cout << "t";
-                    }
+
                     Le += beta * emittance;
                 }
                 break;
@@ -68,10 +66,8 @@ public:
                 }
 
                 float pdf_light;
-                Color3f direct_rad = emitter->sampleRadiance(emitter_rec, *sampler, scene, pdf_light);
-                if(!direct_rad.isValid()) {
-                    std::cout << "t";
-                }
+                Color3f direct_rad = emitter->sampleRadiance(emitter_rec, *sampler, scene, pdf_light, EMeasure::ESolidAngle);
+
                 if(direct_rad.isZero()) {
                     continue;
                 }
@@ -113,8 +109,11 @@ public:
                 float light_pdf = emitter_hit->pdf(emitter_hit_record, ESolidAngle);
                 float brdf_pdf = surface_bsdf->pdf(bsdf_record);
 
-                float weight = balancedMIS(brdf_pdf, light_pdf);
+                if(light_pdf + brdf_pdf == 0) {
+                    continue;
+                }
 
+                float weight = balancedMIS(brdf_pdf, light_pdf);
                 Ld += direct(beta, weight, emittance);
             }
         }

@@ -14,7 +14,8 @@ public:
 
     float pdf(const EmitterQueryRecord &rec, EMeasure unit) const override;
     Color3f evalRadiance(const EmitterQueryRecord &rec, const Scene* scene) const override;
-    Color3f sampleRadiance(EmitterQueryRecord& rec, Sampler& sampler, const Scene* scene, float& angular_pdf) const override;
+    Color3f sampleRadiance(EmitterQueryRecord &rec, Sampler &sampler, const Scene *scene, float &pdf,
+                           EMeasure unit) const override;
     Color3f getEmittance(const EmitterQueryRecord &rec) const override;
 
     std::string toString() const {
@@ -32,7 +33,7 @@ protected:
     float weight_map1() const;
     float weight_map2() const { return 1 - weight_map1(); }
 
-    void samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf) const override;
+    void samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf, EMeasure unit) const override;
 
     MipMap map1, map2;
     Point3f center;

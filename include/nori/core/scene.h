@@ -101,8 +101,9 @@ public:
     bool rayIntersect(const Ray3f &ray, Intersection &its) const {
         bool found = m_accel->rayIntersect(ray, its, false);
         if(!found) {
-            return implicitRayIntersect(ray, its, false);
+            found = implicitRayIntersect(ray, its, false);
         }
+
         return found;
     }
 

@@ -44,22 +44,27 @@ Color3f MeshEmitter::evalRadiance(const EmitterQueryRecord &rec, const Scene* sc
     return angular_distortion(rec) * (emitted * bsdf_term);
 }
 
-Color3f MeshEmitter::sampleRadiance(EmitterQueryRecord& rec, Sampler& sampler, const Scene* scene, float& angular_pdf) const {
+Color3f MeshEmitter::sampleRadiance(EmitterQueryRecord &rec, Sampler &sampler, const Scene *scene, float &pdf,
+                                    EMeasure unit) const {
 
-    // TODO: get rid of duplication with evalRadiance
     float pdf_light;
-    samplePoint(sampler, rec, pdf_light);
-    angular_pdf = to_angular(rec, pdf_light);
+    samplePoint(sampler, rec, pdf_light, EMeasure::ESurfaceArea);
+
+    if (unit == EMeasure::ESolidAngle) {
+        pdf = to_angular(rec, pdf_light);
+    } else {
+        pdf = pdf_light;
+    }
 
     if(!is_source_visible(scene, rec)) {
         return Color3f(0.f);
     }
 
     // determinant of the jacobian of the change of coordinates
-    return evalRadiance(rec, scene) / pdf_light;
+    return evalRadiance(rec, scene);
 }
 
-void MeshEmitter::samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf) const {
+void MeshEmitter::samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf, EMeasure unit) const {
     Point2f sample(sampler.next2D());
     Warp::squareToMeshPoint(sample, *mesh, rec.l, rec.n_l, pdf);
 }

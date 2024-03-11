@@ -30,7 +30,6 @@ bool Sphere::rayIntersect(const nori::Ray3f &ray, nori::Intersection &its, bool 
     float b = 2 * (di.x() * oi.x() + di.y() * oi.y() + di.z() * oi.z());
     float c = Sqr(oi.x()) + Sqr(oi.y()) + Sqr(oi.z()) - Sqr(radius);
 
-
     Vector3f vec(oi - b / (2 * a) * di);
     float length = vec.norm();
     float discrim = 4 * a * (float(radius) + length) * (float(radius) - length);
@@ -58,9 +57,9 @@ bool Sphere::rayIntersect(const nori::Ray3f &ray, nori::Intersection &its, bool 
     }
 
     float t = t0;
-    if (t <= 0) {
+    if (t <= 0 || t != t) {
         t = t1;
-        if (t > ray.maxt) {
+        if (t > ray.maxt || t != t) {
             return false;
         }
     }
@@ -68,6 +67,8 @@ bool Sphere::rayIntersect(const nori::Ray3f &ray, nori::Intersection &its, bool 
     if (shadow) {
         return true;
     }
+
+
 
     intersection = oi + t * di;
 

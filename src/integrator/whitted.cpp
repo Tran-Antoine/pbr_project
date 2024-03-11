@@ -35,7 +35,7 @@ public:
                 // crucial to use the total emitters area and NOT the area of the selected mesh, as the PDF of the sampled points depends on the total area
                 EmitterQueryRecord record(its.mesh->getBSDF(), its.p, frame.n, -ray.d, its.uv);
                 float unused;
-                Color3f sampled_radiance = emitter->sampleRadiance(record, *sampler, scene, unused);
+                Color3f sampled_radiance = emitter->sampleRadiance(record, *sampler, scene, unused, EDiscrete);
 
                 return sampled_radiance;
             }

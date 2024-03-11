@@ -71,13 +71,14 @@ public:
 
     virtual Color3f evalRadiance(const EmitterQueryRecord &rec, const Scene* scene) const = 0;
 
-    virtual Color3f sampleRadiance(EmitterQueryRecord& rec, Sampler& sampler, const Scene* scene, float& angular_pdf) const = 0;
+    virtual Color3f sampleRadiance(EmitterQueryRecord &rec, Sampler &sampler, const Scene *scene, float &angular_pdf,
+                                   EMeasure unit) const = 0;
 
     virtual Color3f getEmittance(const EmitterQueryRecord &rec) const = 0;
 
 protected:
 
-    virtual void samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf) const = 0;
+    virtual void samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf, EMeasure unit) const = 0;
 
     Color3f evalBSDF(const EmitterQueryRecord& rec) const;
     bool is_source_visible(const Scene* scene, const EmitterQueryRecord& rec) const;
