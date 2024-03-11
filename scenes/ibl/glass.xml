@@ -9,10 +9,10 @@
     <camera type="perspective">
         <!-- Camera-to-world coordinate system transformation -->
         <transform name="toWorld">
-            <lookat origin="2, 0, 2" target="1, 0.5, -1" up="0,1,0"/>
+            <lookat origin="0.2, 0, 0.2" target="-0.5, 0.5, -1" up="0,1,0"/>
         </transform>
 
-        <float name="fov" value="150"/>
+        <float name="fov" value="120"/>
 
         <integer name="width" value="768"/>
         <integer name="height" value="384"/>
@@ -31,10 +31,10 @@
         <transform name="toWorld">
             <translate value="0,0,0"/>
         </transform>
-        <bsdf type="diffuse">
+        <bsdf type="microfacet">
             <float name="intIOR" value="1.7"/>
             <color name="kd" value="0.2 0.2 0.4"/>
-            <float name="alpha" value="0.001"/>
+            <float name="alpha" value="0.01"/>
         </bsdf>
     </mesh>
 
