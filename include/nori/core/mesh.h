@@ -23,6 +23,7 @@
 #include <core/bbox.h>
 #include <stats/dpdf.h>
 #include <bsdf/diffusemap.h>
+#include <volume/medium.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -49,6 +50,8 @@ struct Intersection {
     const Mesh *mesh;
     /// Pointer to the associated emitter
     const Emitter* emitter;
+    /// Medium interaction, if any
+    MediumInteraction medium;
 
     /// Create an uninitialized intersection record
     Intersection() : mesh(nullptr), emitter(nullptr) { }
@@ -202,6 +205,9 @@ public:
         return Vector3f(color.x(), color.y(), color.z());
     }
 
+    virtual bool isMedium() const { return false; }
+
+    Medium* getMedium() const { return nullptr; }
 
 protected:
     /// Create an empty mesh

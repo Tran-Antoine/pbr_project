@@ -94,6 +94,9 @@ add_executable(nori
   include/nori/parser/imageutil.h
 
   include/nori/postprocessing/rfilter.h
+
+  include/nori/volume/medium.h
+  include/nori/volume/phase.h
   
   
   # Source code files
