@@ -133,6 +133,11 @@ void Mesh::addChild(NoriObject *obj) {
             }
             break;
 
+        case EMedium:
+            if(medium) {
+                throw NoriException("Mesh: tried to register multiple Medium instances!");
+            }
+            medium = static_cast<Medium *>(obj);
         default:
             throw NoriException("Mesh::addChild(<%s>) is not supported!",
                                 classTypeName(obj->getClassType()));

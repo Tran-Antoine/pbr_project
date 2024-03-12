@@ -205,9 +205,9 @@ public:
         return Vector3f(color.x(), color.y(), color.z());
     }
 
-    virtual bool isMedium() const { return false; }
+    virtual bool isMedium() const { return medium != nullptr; }
 
-    Medium* getMedium() const { return nullptr; }
+    Medium* getMedium() const { return medium; }
 
 protected:
     /// Create an empty mesh
@@ -224,6 +224,7 @@ protected:
     BoundingBox3f m_bbox;                ///< Bounding box of the mesh
     DiscretePDF *triangle_pdf = nullptr;
     DiffuseMap *normal_map = nullptr;
+    Medium* medium = nullptr;
     float bump_increase_factor = 1.f;
     float total_area;
 

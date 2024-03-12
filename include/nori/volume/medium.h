@@ -32,6 +32,21 @@ public:
     float emission(const Point3f& p, const Vector3f& v) { return (*absorption)(p, v); }
     void samplePhase(const Vector3f& in, Vector3f& out, float& pdf) { phase->eval(in, out, pdf); }
 
+    /// Register a child object (e.g. a BSDF) with the mesh
+    void addChild(NoriObject *obj) override {
+        switch (obj->getClassType()) {
+            case NoriObject::EPhaseFunction:
+                if(phase) {
+                    throw NoriException("Medium: tried to register multiple Phase instances!");
+                }
+                phase = static_cast<PhaseFunction *>(obj);
+                break;
+            default:
+                throw NoriException("Mesh::addChild(<%s>) is not supported!",
+                                    classTypeName(obj->getClassType()));
+        }
+    }
+
 protected:
     PhaseFunction* phase = nullptr;
     DirecFun* absorption = nullptr;
