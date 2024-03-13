@@ -285,4 +285,12 @@ float Warp::squareToGrayMapPdf(const Point2f &p, const MipMap &map) {
     }
 }
 
+float Warp::lineToHomogeneousPath(float s, float omega_t) {
+    return - log(1 - s) / omega_t;
+}
+
+float Warp::lineToHomogeneousPathPdf(float t, float omega_t) {
+    return omega_t * exp(-omega_t * t);
+}
+
 NORI_NAMESPACE_END

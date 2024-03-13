@@ -87,6 +87,11 @@ public:
 
     /// Probability density of \ref squareToGrayMap()
     static float squareToGrayMapPdf(const Point2f &p, const MipMap& map);
+
+    static float lineToHomogeneousPath(float s, float omega_t);
+
+    static float lineToHomogeneousPathPdf(float t, float omega_t);
+
 };
 
 NORI_NAMESPACE_END

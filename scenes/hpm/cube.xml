@@ -1,9 +1,9 @@
 <scene>
-    <integrator type="path_mis">
+    <integrator type="volumetric">
     </integrator>
 
     <sampler type="independent">
-        <integer name="sampleCount" value="32"/>
+        <integer name="sampleCount" value="16"/>
     </sampler>
 
     <camera type="perspective">
