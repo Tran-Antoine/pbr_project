@@ -66,16 +66,20 @@ public:
                 }
 
                 float pdf_light;
-                Color3f direct_rad = emitter->sampleRadiance(emitter_rec, *sampler, scene, pdf_light, EMeasure::ESolidAngle);
+                float pdf_light_angular;
+
+                Color3f direct_rad = emitter->sampleRadiance(emitter_rec, *sampler, scene, pdf_light, EMeasure::ESurfaceArea);
 
                 if(direct_rad.isZero()) {
                     continue;
                 }
+                direct_rad /= pdf_light;
+                pdf_light_angular = emitter->to_angular(emitter_rec, pdf_light);
 
                 Vector3f wo = emitter_rec.wo();
 
                 float pdf_brdf  = surface_bsdf->pdf(BSDFQueryRecord(wi, wo, frame, EMeasure::ESolidAngle));
-                float weight = balancedMIS(pdf_light, pdf_brdf);
+                float weight = balancedMIS(pdf_light_angular, pdf_brdf);
 
                 Ld += direct(beta, weight, direct_rad);
             }

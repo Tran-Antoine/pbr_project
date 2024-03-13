@@ -75,7 +75,7 @@ public:
                                    EMeasure unit) const = 0;
 
     virtual Color3f getEmittance(const EmitterQueryRecord &rec) const = 0;
-
+    float to_angular(const EmitterQueryRecord& rec, float pdf) const;
 protected:
 
     virtual void samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf, EMeasure unit) const = 0;
@@ -83,7 +83,7 @@ protected:
     Color3f evalBSDF(const EmitterQueryRecord& rec) const;
     bool is_source_visible(const Scene* scene, const EmitterQueryRecord& rec) const;
     float angular_distortion(const EmitterQueryRecord& rec) const;
-    float to_angular(const EmitterQueryRecord& rec, float pdf) const;
+
 };
 
 
