@@ -7,7 +7,7 @@
 
 NORI_NAMESPACE_BEGIN
 
-using DirecFun = float (*)(const Point3f&, const Vector3f&);
+class Medium;
 
 struct MediumInteraction {
 
@@ -21,9 +21,12 @@ struct MediumInteraction {
     bool is_present() const { return medium != nullptr; }
 };
 
+using DirecFun = float (*)(const Point3f&, const Vector3f&);
+
 class Medium : public NoriObject {
 
 public:
+
     EClassType getClassType() const override { return EMedium; }
 
     float attenuation(const Point3f& p, const Vector3f& v) { return (*absorption)(p, v) + (*scattering)(p, v); }
