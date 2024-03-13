@@ -10,7 +10,16 @@ NORI_NAMESPACE_BEGIN
 class MediumCoefficient {
 
 public:
-    float eval(const Point3f& p, const Vector3f& v) { return 0.f; }
+    virtual float eval(const Point3f& p, const Vector3f& v) const { return 0.f; }
+};
+
+class ConstantCoefficient : public MediumCoefficient {
+public:
+    explicit ConstantCoefficient(float coeff) : coeff(coeff) {}
+
+    float eval(const Point3f& p, const Vector3f& v) const { return coeff; }
+private:
+    float coeff;
 };
 
 NORI_NAMESPACE_END

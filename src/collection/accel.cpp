@@ -440,7 +440,7 @@ bool Accel::rayIntersect(const Ray3f &_ray, Intersection &its, bool shadowRay) c
                 if (mesh->rayIntersect(idx, ray, u, v, t)) {
 
                     if(mesh->isMedium()) {
-                        its.medium.medium = its.mesh->getMedium();
+                        its.medium.medium = mesh->getMedium();
                         its.medium.mint = std::min(its.medium.mint, its.t);
                         its.medium.maxt = std::max(its.medium.maxt, its.t);
                         continue;

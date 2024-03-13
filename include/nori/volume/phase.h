@@ -11,10 +11,13 @@ public:
 
     EClassType getClassType() const override { return EPhaseFunction; }
 
-    virtual void eval(const Vector3f& in, Vector3f& out, float& pdf) = 0;
+    virtual void eval(Sampler *sampler, const Vector3f &in, Vector3f &out, float &pdf) const = 0;
 
-protected:
+};
 
+class UniformPhase : public PhaseFunction {
+    void eval(Sampler *sampler, const Vector3f &in, Vector3f &out, float &pdf) const override;
+    std::string toString() const override;
 };
 
 NORI_NAMESPACE_END
