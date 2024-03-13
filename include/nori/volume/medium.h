@@ -4,6 +4,7 @@
 #include <core/object.h>
 #include <core/vector.h>
 #include <volume/phase.h>
+#include <volume/coefficient.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -21,19 +22,17 @@ struct MediumInteraction {
     bool is_present() const { return medium != nullptr; }
 };
 
-using DirecFun = float (*)(const Point3f&, const Vector3f&);
-
 class Medium : public NoriObject {
 
 public:
 
     EClassType getClassType() const override { return EMedium; }
 
-    float attenuation(const Point3f& p, const Vector3f& v) { return (*absorption)(p, v) + (*scattering)(p, v); }
-    float in_scattering(const Point3f& p, const Vector3f& v) { return (*scattering)(p, v); }
-    float out_scattering(const Point3f& p, const Vector3f& v) { return (*scattering)(p, v); }
-    float emission(const Point3f& p, const Vector3f& v) { return (*absorption)(p, v); }
-    void samplePhase(const Vector3f& in, Vector3f& out, float& pdf) { phase->eval(in, out, pdf); }
+    float attenuation(const Point3f& p, const Vector3f& v) { return absorption->eval(p, v) + scattering->eval(p, v); }
+    float in_scattering(const Point3f& p, const Vector3f& v) { return scattering->eval(p, v); }
+    float out_scattering(const Point3f& p, const Vector3f& v) { return scattering->eval(p, v); }
+    float emission(const Point3f& p, const Vector3f& v) { return absorption->eval(p, v); }
+    void samplePhase(const Vector3f& in, Vector3f& out, float& pdf) { phase->eval(nullptr, in, out, pdf); }
 
     /// Register a child object (e.g. a BSDF) with the mesh
     void addChild(NoriObject *obj) override {
@@ -52,8 +51,8 @@ public:
 
 protected:
     PhaseFunction* phase = nullptr;
-    DirecFun* absorption = nullptr;
-    DirecFun* scattering = nullptr;
+    MediumCoefficient* absorption = nullptr;
+    MediumCoefficient* scattering = nullptr;
 };
 
 NORI_NAMESPACE_END

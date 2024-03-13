@@ -97,6 +97,7 @@ add_executable(nori
 
   include/nori/volume/medium.h
   include/nori/volume/phase.h
+  include/nori/volume/coefficient.h
   
   
   # Source code files
@@ -152,6 +153,9 @@ add_executable(nori
   src/parser/imageutil.cpp
 
   src/postprocessing/rfilter.cpp
+
+  src/volume/homogeneous.cpp
+  src/volume/uniformphase.cpp
 
   src/main.cpp
   #test/perlin_test.cpp

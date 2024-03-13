@@ -37,6 +37,11 @@
             <translate value="0,2,0"/>
         </transform>
         <string name="filename" value="flatcube.obj"/>
+
+        <medium type="homogeneous">
+            <float name="absorption" value="0.1"/>
+            <float name="scattering" value="0.5"/>
+        </medium>
     </mesh>
 
     <!-- Background cube -->
