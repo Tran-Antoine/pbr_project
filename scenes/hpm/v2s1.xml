@@ -1,0 +1,49 @@
+<scene>
+    <boolean name="save" value="false"/>
+    <integrator type="volum2">
+    </integrator>
+
+    <sampler type="independent">
+        <integer name="sampleCount" value="32"/>
+    </sampler>
+
+    <camera type="perspective">
+        <!-- Camera-to-world coordinate system transformation -->
+        <transform name="toWorld">
+            <lookat origin="0, 2.3, -9" target="0, 1.5, 1" up="0,1,0"/>
+        </transform>
+
+        <float name="fov" value="90"/>
+
+        <integer name="width" value="768"/>
+        <integer name="height" value="384"/>
+    </camera>
+
+    <!-- Volume -->
+    <mesh type="obj">
+        <transform name="toWorld">
+            <scale value="1, 1, 1"/>
+            <translate value="0,2,0"/>
+        </transform>
+        <string name="filename" value="flatcube.obj"/>
+
+        <medium type="homogeneous">
+            <float name="absorption" value="0.4"/>
+            <float name="scattering" value="0.0"/>
+        </medium>
+    </mesh>
+
+    <!-- Background cube -->
+    <mesh type="obj">
+        <transform name="toWorld">
+            <scale value="8, 8, 2.5"/>
+            <translate value="0,2,6"/>
+        </transform>
+        <string name="filename" value="flatcube.obj"/>
+
+        <emitter type="area">
+            <color name="radiance" value="0.7 0.3 0.6"/>
+        </emitter>
+    </mesh>
+
+</scene>

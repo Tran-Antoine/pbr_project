@@ -440,9 +440,10 @@ bool Accel::rayIntersect(const Ray3f &_ray, Intersection &its, bool shadowRay) c
                 if (mesh->rayIntersect(idx, ray, u, v, t)) {
 
                     if(mesh->isMedium()) {
-                        its.medium.medium = mesh->getMedium();
-                        its.medium.mint = std::min(its.medium.mint, its.t);
-                        its.medium.maxt = std::max(its.medium.maxt, its.t);
+                        MediumInteraction& me = its.medium;
+                        me.medium = mesh->getMedium();
+                        me.mint = std::min(me.mint, t);
+                        me.maxt = std::max(me.maxt, t);
                         continue;
                     }
 
@@ -460,6 +461,11 @@ bool Accel::rayIntersect(const Ray3f &_ray, Intersection &its, bool shadowRay) c
             node_idx = stack[--stack_idx];
             continue;
         }
+    }
+
+    if(its.medium.is_present() && its.medium.mint >= its.medium.maxt) {
+        // if true, it means the ray started inside the medium
+        its.medium.mint = 0.f;
     }
 
     if (foundIntersection) {

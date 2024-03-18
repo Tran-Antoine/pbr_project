@@ -32,7 +32,7 @@ public:
     float in_scattering(const Point3f& p, const Vector3f& v) const { return scattering->eval(p, v); }
     float out_scattering(const Point3f& p, const Vector3f& v) const { return scattering->eval(p, v); }
     float emission(const Point3f& p, const Vector3f& v) const { return absorption->eval(p, v); }
-    void samplePhase(const Vector3f& in, Vector3f& out, float& pdf) const { phase->eval(nullptr, in, out, pdf); }
+    void samplePhase(Sampler* sampler, const Vector3f& in, Vector3f& out, float& pdf) const { phase->eval(sampler, in, out, pdf); }
 
     /// Register a child object (e.g. a BSDF) with the mesh
     void addChild(NoriObject *obj) override {

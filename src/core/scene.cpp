@@ -28,8 +28,9 @@
 
 NORI_NAMESPACE_BEGIN
 
-Scene::Scene(const PropertyList &) {
+Scene::Scene(const PropertyList &p) {
     m_accel = new Accel();
+    save = p.getBoolean("save", true);
 }
 
 Scene::~Scene() {
