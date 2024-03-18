@@ -1,10 +1,10 @@
 <scene>
-    <boolean name="save" value="false"/>
+    <boolean name="save" value="true"/>
     <integrator type="volum2">
     </integrator>
 
     <sampler type="independent">
-        <integer name="sampleCount" value="32"/>
+        <integer name="sampleCount" value="2048"/>
     </sampler>
 
     <camera type="perspective">
@@ -22,27 +22,26 @@
     <!-- Volume -->
     <mesh type="obj">
         <transform name="toWorld">
-            <scale value="1, 1, 1"/>
-            <translate value="0,2,0"/>
+            <scale value="5, 5, 5"/>
+            <translate value="0,2,3"/>
         </transform>
         <string name="filename" value="flatcube.obj"/>
 
         <medium type="homogeneous">
-            <float name="absorption" value="0.4"/>
-            <float name="scattering" value="0.0"/>
+            <float name="absorption" value="0.0"/>
+            <float name="scattering" value="0.8"/>
         </medium>
     </mesh>
 
-    <!-- Background cube -->
     <mesh type="obj">
         <transform name="toWorld">
-            <scale value="8, 8, 2.5"/>
-            <translate value="0,2,6"/>
+            <scale value="2, 2, 0.1"/>
+            <translate value="0,2,3"/>
         </transform>
         <string name="filename" value="flatcube.obj"/>
 
         <emitter type="area">
-            <color name="radiance" value="0.7 0.3 0.6"/>
+            <color name="radiance" value="8.6 2.3 70"/>
         </emitter>
     </mesh>
 

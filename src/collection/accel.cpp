@@ -454,6 +454,12 @@ bool Accel::rayIntersect(const Ray3f &_ray, Intersection &its, bool shadowRay) c
                     its.uv = Point2f(u, v);
                     its.mesh = mesh;
                     f = idx;
+
+                    if(its.medium.is_present()) {
+                        // still update the max parameter
+                        MediumInteraction& me = its.medium;
+                        me.maxt = std::max(me.maxt, t);
+                    }
                 }
             }
             if (stack_idx == 0)

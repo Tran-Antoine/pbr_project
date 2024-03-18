@@ -18,6 +18,8 @@ public:
                            EMeasure unit) const override;
     Color3f getEmittance(const EmitterQueryRecord &rec) const override;
 
+    void samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf, EMeasure unit) const override;
+
     std::string toString() const {
         return "EnvironmentEmitter[]";
     }
@@ -33,7 +35,6 @@ protected:
     float weight_map1() const;
     float weight_map2() const { return 1 - weight_map1(); }
 
-    void samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf, EMeasure unit) const override;
 
     MipMap map1, map2;
     Point3f center;

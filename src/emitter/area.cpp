@@ -66,7 +66,13 @@ Color3f MeshEmitter::sampleRadiance(EmitterQueryRecord &rec, Sampler &sampler, c
 
 void MeshEmitter::samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf, EMeasure unit) const {
     Point2f sample(sampler.next2D());
-    Warp::squareToMeshPoint(sample, *mesh, rec.l, rec.n_l, pdf);
+    float temp;
+    Warp::squareToMeshPoint(sample, *mesh, rec.l, rec.n_l, temp);
+    switch(unit) {
+        case EMeasure::ESurfaceArea: pdf = temp; break;
+        case EMeasure::ESolidAngle: pdf = to_angular(rec, temp); break;
+        default: throw NoriException("Unsupported unit");
+    }
 }
 
 NORI_NAMESPACE_END

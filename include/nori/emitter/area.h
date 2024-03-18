@@ -20,6 +20,8 @@ public:
 
     void setParent(NoriObject *parent) override;
 
+    void samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf, EMeasure unit) const override;
+
     std::string toString() const {
         return "MeshEmitter[]";
     }
@@ -28,7 +30,6 @@ protected:
     Mesh* mesh;
     Color3f color;
 
-    void samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf, EMeasure unit) const override;
 };
 
 NORI_REGISTER_CLASS(MeshEmitter, "area")
