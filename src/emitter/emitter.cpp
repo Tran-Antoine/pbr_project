@@ -25,7 +25,7 @@ Color3f Emitter::evalBSDF(const EmitterQueryRecord &rec) const {
 float Emitter::to_angular(const EmitterQueryRecord &rec, float pdf) const {
     float dist = rec.dist();
     Vector3f wo = rec.wo();
-    float dot = rec.n_p.dot(wo);
+    float dot = abs(rec.n_l.dot(wo));
     return std::max(0.f, pdf * dist * dist / dot);
 }
 
