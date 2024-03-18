@@ -17,18 +17,56 @@ public:
         Intersection its;
         bool found_intersection = scene->rayIntersect(ray, its);
 
+        if(found_intersection && its.mesh->getEmitter()) {
+            EmitterQueryRecord emitter_rec = EmitterQueryRecord(nullptr, 0.f, 0.f, -ray.d, its.p, its.shFrame.n, its.uv);
+            return its.mesh->getEmitter()->getEmittance(emitter_rec);
+        }
+
         if(its.medium.is_present()) {
             const Medium* medium = its.medium.medium;
+            float omega_t = medium->attenuation(0.f, 0.f);
+            float omega_s = medium->in_scattering(0.f, 0.f);
 
-            float maxt = found_intersection ? its.t : std::numeric_limits<float>::infinity();
-            float t = Warp::lineToHomogeneousPath(sampler->next1D(), medium->attenuation(0.f, 0.f));
+            float maxt = its.medium.maxt;
+            float t = Warp::lineToHomogeneousPath(sampler->next1D(), omega_t);
 
             if(t < maxt) {
+                Point3f p = ray.o + t * ray.d;
+                Vector3f direction;
+                float new_direction_pdf;
+                medium->samplePhase(sampler, ray.d, direction, new_direction_pdf);
 
+                return omega_s / omega_t * Li(scene, sampler, Ray3f(p, ray.d));
+
+            } else if (found_intersection) {
+
+                if(its.mesh->getEmitter()) {
+                    EmitterQueryRecord emitter_rec = EmitterQueryRecord(nullptr, 0.f, 0.f, -ray.d, its.p, its.shFrame.n, its.uv);
+                    return its.mesh->getEmitter()->getEmittance(emitter_rec);
+                }
+
+                BSDFQueryRecord rec(its.shFrame.toLocal(-ray.d), its.uv);
+                Color3f bsdf_term = its.mesh->getBSDF()->sample(rec, sampler->next2D());
+                Vector3f next_direction = its.shFrame.toWorld(rec.wo);
+
+                return bsdf_term * Li(scene, sampler, Ray3f(its.p, next_direction));
             }
+
             return Color3f(0.f);
+
+
         } else if(found_intersection) {
-            return Color3f(0.f); // TODO: sample BRDF
+            if(its.mesh->getEmitter()) {
+                EmitterQueryRecord emitter_rec = EmitterQueryRecord(nullptr, 0.f, 0.f, -ray.d, its.p, its.shFrame.n, its.uv);
+                return its.mesh->getEmitter()->getEmittance(emitter_rec);
+            }
+
+            BSDFQueryRecord rec(its.shFrame.toLocal(-ray.d), its.uv);
+            Color3f bsdf_term = its.mesh->getBSDF()->sample(rec, sampler->next2D());
+            Vector3f next_direction = its.shFrame.toWorld(rec.wo);
+
+            return bsdf_term * Li(scene, sampler, Ray3f(its.p, next_direction));
+
         } else {
             return Color3f(0.f);
 

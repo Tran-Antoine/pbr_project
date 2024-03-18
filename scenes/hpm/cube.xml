@@ -3,7 +3,7 @@
     </integrator>
 
     <sampler type="independent">
-        <integer name="sampleCount" value="16"/>
+        <integer name="sampleCount" value="256"/>
     </sampler>
 
     <camera type="perspective">
@@ -22,32 +22,32 @@
     <mesh type="obj">
         <string name="filename" value="flatcube.obj"/>
         <transform name="toWorld">
-            <scale value="1, 0.2, 1"/>
-            <translate value="0,7,0"/>
+            <scale value="10, 0.2, 10"/>
+            <translate value="0,15,0"/>
         </transform>
         <emitter type="area">
-            <color name="radiance" value="40 38 36"/>
+            <color name="radiance" value="4 3 3"/>
         </emitter>
     </mesh>
 
     <!-- Volume -->
     <mesh type="obj">
         <transform name="toWorld">
-            <scale value="1, 1, 1"/>
+            <scale value="1, 5, 1"/>
             <translate value="0,2,0"/>
         </transform>
         <string name="filename" value="flatcube.obj"/>
 
         <medium type="homogeneous">
-            <float name="absorption" value="0.1"/>
-            <float name="scattering" value="0.5"/>
+            <float name="absorption" value="0.0"/>
+            <float name="scattering" value="0.4"/>
         </medium>
     </mesh>
 
     <!-- Background cube -->
     <mesh type="obj">
         <transform name="toWorld">
-            <scale value="2.5, 2.5, 2.5"/>
+            <scale value="80, 80, 2.5"/>
             <translate value="0,2,6"/>
         </transform>
         <string name="filename" value="flatcube.obj"/>
@@ -61,7 +61,7 @@
     <mesh type="obj">
         <transform name="toWorld">
             <scale value="7, 0.2, 7"/>
-            <translate value="0,0,0"/>
+            <translate value="0,100,0"/>
         </transform>
         <string name="filename" value="flatcube.obj"/>
 

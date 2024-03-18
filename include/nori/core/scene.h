@@ -154,6 +154,8 @@ public:
 
     float getEmittersArea() const { return emitters_total_area; }
 
+    bool saveResult() const { return save; }
+
 protected:
     DiscretePDF* emitters_pdf = nullptr;
 private:
@@ -166,6 +168,8 @@ private:
     Sampler *m_sampler = nullptr;
     Camera *m_camera = nullptr;
     Accel *m_accel = nullptr;
+
+    bool save;
 };
 
 NORI_NAMESPACE_END
