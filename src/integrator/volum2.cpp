@@ -38,8 +38,6 @@ public:
 
         if(t_traveled < t_max) {
 
-            float travel_pdf = Warp::lineToHomogeneousPathPdf(t_through_media, omega_t); // pdf of going to that distance (continuous PDF)
-            float transmittance = exp(-omega_t * t_through_media);
             Point3f scattering_point = ray.o + t_traveled * ray.d;
 
             // sample directly on the emitters

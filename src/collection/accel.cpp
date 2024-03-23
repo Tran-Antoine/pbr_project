@@ -406,6 +406,10 @@ bool Accel::rayIntersect(const Ray3f &_ray, Intersection &its, bool shadowRay) c
 
     its.t = std::numeric_limits<float>::infinity();
 
+    if(_ray.starting_medium) {
+        its.medium.medium = _ray.starting_medium;
+        its.medium.mint = 0;
+    }
     /* Use an adaptive ray epsilon */
     Ray3f ray(_ray);
     if (ray.mint == Epsilon)
@@ -455,10 +459,10 @@ bool Accel::rayIntersect(const Ray3f &_ray, Intersection &its, bool shadowRay) c
                     its.mesh = mesh;
                     f = idx;
 
-                    if(its.medium.is_present()) {
+                    MediumInteraction& me = its.medium;
+                    if(me.is_present() && me.mint > me.maxt) {
                         // still update the max parameter
-                        MediumInteraction& me = its.medium;
-                        me.maxt = std::max(me.maxt, t);
+                        me.maxt = t;
                     }
                 }
             }
@@ -467,11 +471,6 @@ bool Accel::rayIntersect(const Ray3f &_ray, Intersection &its, bool shadowRay) c
             node_idx = stack[--stack_idx];
             continue;
         }
-    }
-
-    if(its.medium.is_present() && its.medium.mint >= its.medium.maxt) {
-        // if true, it means the ray started inside the medium
-        its.medium.mint = 0.f;
     }
 
     if (foundIntersection) {

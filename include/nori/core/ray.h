@@ -44,6 +44,7 @@ template <typename _PointType, typename _VectorType> struct TRay {
     VectorType dRcp; ///< Componentwise reciprocals of the ray direction
     Scalar mint;     ///< Minimum position on the ray segment
     Scalar maxt;     ///< Maximum position on the ray segment
+    const Medium* starting_medium = nullptr;
 
     /// Construct a new ray
     TRay() : mint(Epsilon), 
