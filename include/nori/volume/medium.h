@@ -8,8 +8,6 @@
 
 NORI_NAMESPACE_BEGIN
 
-class Medium;
-
 struct MediumInteraction {
 
     /// Interval of interaction
