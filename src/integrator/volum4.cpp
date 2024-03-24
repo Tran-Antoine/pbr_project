@@ -5,6 +5,10 @@
 
 NORI_NAMESPACE_BEGIN
 
+/// Volumetric integrator. Supports:
+/// - Homogeneous medium absorption and scattering
+/// - NEE + Indirect scattering (no MIS)
+/// - Only Emitters surfaces
 class Volum4Integrator : public Integrator {
 public:
     explicit Volum4Integrator(const PropertyList &props) {
@@ -13,9 +17,6 @@ public:
 
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const {
 
-        if(ray.d.isApprox(Vector3f(0.0223538522, -0.0804889798, 0.996504902))) {
-            std::cout << "y";
-        }
         float q = 0.1;
 
         Color3f Le(0.f), Li(0.f);
