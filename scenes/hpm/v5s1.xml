@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<scene>
+    <integrator type="volum5"/>
+
+    <camera type="perspective">
+        <float name="fov" value="70"/>
+        <transform name="toWorld">
+            <scale value="-1,1,1"/>
+            <lookat target="0, 0.8, 0" origin="-2, 0.94, 0" up="0, 1, 0"/>
+        </transform>
+
+        <integer name="height" value="600"/>
+        <integer name="width" value="800"/>
+    </camera>
+
+    <sampler type="independent">
+        <integer name="sampleCount" value="16"/>
+    </sampler>
+
+    <!-- Volume -->
+    <mesh type="obj">
+        <transform name="toWorld">
+            <scale value="0.1, 0.1, 0.1"/>
+            <translate value="-2,1,0"/>
+        </transform>
+        <string name="filename" value="flatcube.obj"/>
+
+        <medium type="homogeneous">
+            <float name="absorption" value="0.1"/>
+            <float name="scattering" value="0.5"/>
+        </medium>
+    </mesh>
+
+    <mesh type="obj">
+        <string name="filename" value="meshes/walltest.obj"/>
+
+        <bsdf type="diffuse">
+            <color name="albedo" value="0.725 0.71 0.68"/>
+        </bsdf>
+    </mesh>
+
+    <mesh type="obj">
+        <string name="filename" value="meshes/sphere1.obj"/>
+        <transform name="toWorld">
+            <scale value="0.5, 0.5, 0.5"/>
+            <translate value="0,-0.1,0"/>
+        </transform>
+        <bsdf type="diffuse">
+            <color name="albedo" value="0.325 0.21 0.28"/>
+        </bsdf>
+    </mesh>
+
+    <mesh type="obj">
+        <string name="filename" value="meshes/light.obj"/>
+        <transform name="toWorld">
+            <scale value="1.2,1,1.2"/>
+            <translate value="0,1,0"/>
+        </transform>
+        <emitter type="area">
+            <color name="radiance" value="40 40 40"/>
+        </emitter>
+    </mesh>
+</scene>

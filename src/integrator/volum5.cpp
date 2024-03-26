@@ -18,6 +18,7 @@ public:
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const {
 
         float q = 0.1;
+        int max_bounces = 10;
 
         Color3f Le(0.f), Li(0.f);
         Color3f beta(1.f);
@@ -25,7 +26,7 @@ public:
 
         int bounces = 0; bool last_specular = false;
 
-        while(sampler->next1D() > q) {
+        while(sampler->next1D() > q && bounces <= max_bounces) {
 
             // short circuit to avoid computation if the contribution is zero
             if(beta.isZero()) {
@@ -105,7 +106,7 @@ public:
             const BSDF* bsdf = its.mesh->getBSDF();
             BSDFQueryRecord record(its.shFrame.toLocal(-in));
             beta *= bsdf->sample(record, sampler->next2D());
-            next = record.wo;
+            next = its.shFrame.toWorld(record.wo);
         }
 
         return next;
