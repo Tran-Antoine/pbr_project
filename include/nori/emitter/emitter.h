@@ -82,7 +82,6 @@ public:
 protected:
     Color3f evalBSDF(const EmitterQueryRecord& rec) const;
     float angular_distortion(const EmitterQueryRecord& rec) const;
-
 };
 
 
