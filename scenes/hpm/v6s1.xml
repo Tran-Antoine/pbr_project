@@ -15,7 +15,7 @@
     </camera>
 
     <sampler type="independent">
-        <integer name="sampleCount" value="128"/>
+        <integer name="sampleCount" value="512"/>
     </sampler>
 
     <!-- Volume -->
@@ -58,7 +58,7 @@
             <translate value="0,1,0"/>
         </transform>
         <emitter type="area">
-            <color name="radiance" value="40 40 40"/>
+            <color name="radiance" value="10 20 60"/>
         </emitter>
     </mesh>
 </scene>
