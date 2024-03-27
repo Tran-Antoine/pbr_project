@@ -32,6 +32,7 @@ public:
     float emission(const Point3f& p, const Vector3f& v) const { return absorption->eval(p, v); }
     void samplePhase(Sampler* sampler, const Vector3f& in, Vector3f& out, float& pdf) const { phase->sample(sampler, in, out, pdf); }
     Color3f evalPhase(const Vector3f& in, const Vector3f& out) const { return phase->eval(in, out); }
+    float phasePdf(const Vector3f& in, const Vector3f& out) const { return phase->pdf(in, out); }
 
     /// Register a child object (e.g. a BSDF) with the mesh
     void addChild(NoriObject *obj) override {
