@@ -1,0 +1,43 @@
+<scene>
+    <!-- Use the simple point light integrator -->
+    <integrator type="path_mis"/>
+    <!-- Independent sample generator, 32 samples per pixel -->
+    <sampler type="independent">
+        <integer name="sampleCount" value="2"/>
+    </sampler>
+
+    <emitter type="env">
+        <string name="half1" value="env_left.exr"/>
+        <string name="half2" value="env_right.exr"/>
+        <float name="radius" value="5000.0"/>
+        <point name="center" value="0,0,0"/>
+        <float name="intensity" value="5"/>
+    </emitter>
+
+    <mesh type="hmap">
+        <string name="filename" value="valleymapsave.exr"/>
+        <string name="nmap" value="bump.jpg"/>
+        <float name="bump_accentuate" value="4"/>
+        <float name="minh" value="0"/>
+        <float name="maxh" value="1600"/>
+        <float name="xratio" value ="1.5"/>
+        <float name="zratio" value ="1.5"/>
+        <bsdf type="diffuse">
+            <string name="texturemap" value="greengrass.jpg"/>
+        </bsdf>
+    </mesh>
+
+    <!-- Render the scene viewed by a perspective camera -->
+    <camera type="perspective">
+        <float name="fov" value="35"/>
+        <transform name="toWorld">
+            <scale value="-1,1,1"/>
+            <!-- <lookat target="500, 200, 0" origin="300, 140, -800" up="0, 1, 0"/> -->
+            <lookat target="-200, 300, 0" origin="680, 650, 1500" up="0, 1, 0"/>
+        </transform>
+
+        <integer name="height" value="600"/>
+        <integer name="width" value="800"/>
+    </camera>
+
+</scene>

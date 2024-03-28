@@ -32,3 +32,4 @@ x64
 .idea
 ext/opencv
 /scenes/ibl/**/*.exr
+/scenes/ptextures/**/*.exr
