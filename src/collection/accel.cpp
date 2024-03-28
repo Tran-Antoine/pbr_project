@@ -526,7 +526,15 @@ bool Accel::rayIntersect(const Ray3f &_ray, Intersection &its, bool shadowRay) c
             }
 
         } else {
-            its.shFrame = its.geoFrame;
+            if(mesh->has_normal_map()) {
+                Vector3f bump_normal = 2 * mesh->get_normal_bump(its.uv) - Vector3f(1.f);
+                bump_normal.z() = bump_normal.z() / mesh->bump_accentuate_factor();
+                bump_normal = its.geoFrame.toWorld(bump_normal.normalized());
+                its.shFrame = Frame(bump_normal);
+            } else {
+                its.shFrame = its.geoFrame;
+            }
+            //std::cout << its.shFrame.n << "\n";
         }
     }
 

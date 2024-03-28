@@ -170,6 +170,7 @@ add_executable(nori
   #test/mipmap_test.cpp
   #src/warptest.cpp
   #test/split_exr.cpp
+  #test/grass_test.cpp
 )
 
 # Link OpenCV libraries

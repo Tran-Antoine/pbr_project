@@ -96,7 +96,7 @@ public:
 
             for (int z = 0; z < res_z; ++z) {
                 for (int x = 0; x < res_x; ++x) {
-                    const Rgba &pixel = pixels[z][x];
+                    const Rgba &pixel = pixels[res_z - z - 1][x];
 
                     float gray = clamp(pixel.r, 0.f, 1.f);
 
@@ -143,18 +143,19 @@ public:
                 // Always include the highest point in the diagonal
                 if((c0 > c1 && c0 > c3) || (c2 > c1 && c2 > c3)) {
                     indices[face_index++] = i0;
+                    indices[face_index++] = i2;
                     indices[face_index++] = i1;
-                    indices[face_index++] = i2;
                     indices[face_index++] = i0;
-                    indices[face_index++] = i2;
                     indices[face_index++] = i3;
+                    indices[face_index++] = i2;
                 } else {
                     indices[face_index++] = i1;
+                    indices[face_index++] = i3;
                     indices[face_index++] = i2;
-                    indices[face_index++] = i3;
+
                     indices[face_index++] = i1;
-                    indices[face_index++] = i3;
                     indices[face_index++] = i0;
+                    indices[face_index++] = i3;
                 }
             }
                  
@@ -180,11 +181,12 @@ public:
             m_V.col(i) = positions[i];
         }
 
-        if (!normals.empty()) {
+        // TODO: there is some issue with the normals
+        /*if (!normals.empty()) {
             m_N.resize(3, normals.size());
             for (uint32_t i=0; i<normals.size(); ++i)
                 m_N.col(i) = normals[i];
-        }
+        }*/
 
         m_UV.resize(2, positions.size());
         for(int z = 0; z < res_z; z++) {
