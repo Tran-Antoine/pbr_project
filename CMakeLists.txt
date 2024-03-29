@@ -171,6 +171,8 @@ add_executable(nori
   #src/warptest.cpp
   #test/split_exr.cpp
   #test/grass_test.cpp
+  #test/grass_alias.cpp
+  #test/smallterraintest.cpp
 )
 
 # Link OpenCV libraries

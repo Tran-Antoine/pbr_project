@@ -18,7 +18,7 @@ def process_pixels(image_path, x1, x2, y1, y2):
     return modified_image_path
 
 # Set the intervals for the operation
-x1, x2, y1, y2 = 600, 850, 1450, 1700  # Example values
+x1, x2, y1, y2 = 1200, 1450, 350, 550
 
 # Call the function with the image path and intervals
 modified_image_path = process_pixels('valleymap.png', x1, x2, y1, y2)

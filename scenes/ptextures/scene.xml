@@ -15,25 +15,25 @@
     </emitter>
 
     <mesh type="hmap">
-        <string name="filename" value="valleymapsave.exr"/>
-        <string name="nmap" value="bump.jpg"/>
-        <float name="bump_accentuate" value="4"/>
+        <string name="filename" value="valleymap.exr"/>
+
         <float name="minh" value="0"/>
         <float name="maxh" value="1600"/>
-        <float name="xratio" value ="1.5"/>
-        <float name="zratio" value ="1.5"/>
+        <float name="xratio" value ="1"/>
+        <float name="zratio" value ="1"/>
         <bsdf type="diffuse">
-            <string name="texturemap" value="greengrass.jpg"/>
+            <string name="texturemap" value="grass_alias.exr"/>
         </bsdf>
     </mesh>
 
     <!-- Render the scene viewed by a perspective camera -->
     <camera type="perspective">
-        <float name="fov" value="35"/>
+        <float name="fov" value="65"/>
         <transform name="toWorld">
             <scale value="-1,1,1"/>
-            <!-- <lookat target="500, 200, 0" origin="300, 140, -800" up="0, 1, 0"/> -->
-            <lookat target="-200, 300, 0" origin="680, 650, 1500" up="0, 1, 0"/>
+
+            <lookat target="508.0592, 100, 467.78" origin="107.0592, 500, 467.78368" up="0, 1, 0"/>
+
         </transform>
 
         <integer name="height" value="600"/>

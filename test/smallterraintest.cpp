@@ -7,12 +7,12 @@ using namespace nori;
 static uint64_t SEED_STATE = 32211714;
 static uint64_t SEED_SEQ = 109519213;
 
-static int IMAGE_SIZE = 2048;
-static int BASE_RES  = 6;
+static int IMAGE_SIZE = 128;
+static int BASE_RES  = 4;
 
 int main(int argc, char **argv) {
 
-    FBM gen(BASE_RES, BASE_RES, 10, 0.3, 2.0f, SEED_STATE, SEED_SEQ);
+    FBM gen(BASE_RES, BASE_RES, 8, 0.3, 2.0f, SEED_STATE, SEED_SEQ);
     gen.init_generators();
 
     Bitmap out(Vector2i(IMAGE_SIZE, IMAGE_SIZE));
@@ -41,19 +41,14 @@ int main(int argc, char **argv) {
         for(int x = 0; x < IMAGE_SIZE; ++x) {
 
             float y_mapped = ((out.coeffRef(z, x) - min_y) / (max_y - min_y)).x();
-            float y_flattened = std::max(y_mapped - 0.5f, std::max(y_mapped / 5.f, 0.f));
-
-            float y_manual = 1200 <= x && x <= 1450 && 350 <= z && z <= 550 && y_flattened > 0.15
-                    ? y_flattened / (1.f + 1.5f * (pow(y_flattened - 0.15, 0.7)))
-                    : y_flattened;
+            //float y_flattened = std::max(y_mapped - 0.5f, std::max(y_mapped / 5.f, 0.f));
             // manually add flat valleys
-            out.coeffRef(z, x) = y_manual;
+            out.coeffRef(z, x) = y_mapped;
         }
     }
 
     std::cout << "Bitmap ready to be written\n";
-    out.saveEXR("scenes/ptextures/valleymap");
-    out.savePNG("scenes/ptextures/valleymap");
+    out.saveEXR("scenes/ptextures/smallhmap");
 
     return 0;
 }

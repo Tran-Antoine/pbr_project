@@ -1,0 +1,58 @@
+<scene>
+    <integrator type="volum6"/>
+    <sampler type="independent">
+        <integer name="sampleCount" value="1024"/>
+    </sampler>
+
+    <mesh type="obj">
+        <transform name="toWorld">
+            <scale value="512, 100, 512"/>
+        </transform>
+        <string name="filename" value="cube.obj"/>
+
+        <medium type="homogeneous">
+            <float name="absorption" value="0.001"/>
+            <float name="scattering" value="0.0004"/>
+        </medium>
+    </mesh>
+
+    <mesh type="obj">
+        <transform name="toWorld">
+            <!-- Any sequence of the following operations: -->
+            <translate value="0, 1000, 0"/>
+            <scale value="1, 1, 1"/>
+        </transform>
+        <string name="filename" value="sphere.obj"/>
+
+        <emitter type="area">
+            <color name="radiance" value="4500000 4500000 4500000"/>
+        </emitter>
+    </mesh>
+
+    <mesh type="hmap">
+        <string name="filename" value="smallhmap.exr"/>
+
+        <float name="minh" value="0"/>
+        <float name="maxh" value="65"/>
+        <float name="xratio" value ="4"/>
+        <float name="zratio" value ="4"/>
+        <bsdf type="diffuse">
+            <string name="texturemap" value="multi_texture.exr"/>
+        </bsdf>
+    </mesh>
+
+    <!-- Render the scene viewed by a perspective camera -->
+    <camera type="perspective">
+        <float name="fov" value="65"/>
+        <transform name="toWorld">
+            <scale value="-1,1,1"/>
+
+            <lookat target="0, 40, 0" origin="-150, 115, 0" up="0, 1, 0"/>
+
+        </transform>
+
+        <integer name="height" value="600"/>
+        <integer name="width" value="800"/>
+    </camera>
+
+</scene>
