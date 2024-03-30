@@ -34,17 +34,24 @@ class Diffuse : public BSDF {
 public:
     Diffuse(const PropertyList &propList) {
 
-        std::string texture_map = propList.getString("texturemap", "");
-        if(!texture_map.empty()) {
-            m_albedo = new TextureDiffuseMap(texture_map);
-        } else {
-            std::string gray_map = propList.getString("graymap", "");
-            if(!gray_map.empty()) {
-                m_albedo = new MountainMap(new TextureDiffuseMap(gray_map), 0.08f, 0.4f);
-            } else {
-                Color3f constant = propList.getColor("albedo", Color3f(0.5f));
-                m_albedo = new UniformDiffuseMap(constant);
-            }
+        Color3f albedo = propList.getColor("albedo", -1.f);
+
+        if(albedo.isValid()) {
+            m_albedo = new UniformDiffuseMap(albedo);
+        }
+    }
+
+    void addChild(nori::NoriObject *obj) override {
+        switch (obj->getClassType()) {
+            case NoriObject::EDiffuseMap:
+                if(m_albedo) {
+                    throw NoriException("Both albedo and diffuse maps were defined");
+                }
+                m_albedo = static_cast<DiffuseMap *>(obj);
+                break;
+            default:
+                throw NoriException("Mesh::addChild(<%s>) is not supported!",
+                                    classTypeName(obj->getClassType()));
         }
     }
 

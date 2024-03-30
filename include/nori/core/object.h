@@ -102,6 +102,7 @@ public:
             case ETest:              return "test";
             case EMedium:            return "medium";
             case EPhaseFunction:     return "phase";
+            case EDiffuseMap:        return "diffusemap";
             default:                 return "<unknown>";
         }
     }

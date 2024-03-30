@@ -37,13 +37,10 @@ public:
         /* Exterior IOR (default: air) */
         m_extIOR = propList.getFloat("extIOR", 1.000277f);
 
-        /* Albedo of the diffuse base material (a.k.a "kd") */
-        std::string texture_map = propList.getString("texturemap", "");
-        if(!texture_map.empty()) {
-            m_albedo = new TextureDiffuseMap(texture_map);
-        } else {
-            Color3f constant = propList.getColor("albedo", Color3f(0.5f));
-            m_albedo = new UniformDiffuseMap(constant);
+        Color3f albedo = propList.getColor("albedo", Color3f(-1.f));
+
+        if(albedo.isValid()) {
+            m_albedo = new UniformDiffuseMap(albedo);
         }
 
         /* To ensure energy conservation, we must scale the 
@@ -56,9 +53,23 @@ public:
            of this BRDF. */
     }
 
+    void addChild(nori::NoriObject *obj) override {
+        switch (obj->getClassType()) {
+            case NoriObject::EDiffuseMap:
+                if(m_albedo) {
+                    throw NoriException("Both albedo and diffuse maps were defined");
+                }
+                m_albedo = static_cast<DiffuseMap *>(obj);
+                break;
+            default:
+                throw NoriException("Mesh::addChild(<%s>) is not supported!",
+                                    classTypeName(obj->getClassType()));
+        }
+    }
+
     Color3f G(Vector3f wi, Vector3f wo, Vector3f wh) const {
         auto G1 = [this](Vector3f wv, Vector3f wh) -> float {
-            float cos_theta_v = Frame::cosTheta(wv);
+
             float b = 1 / (m_alpha * Frame::tanTheta(wv));
 
             float coeff = b < 1.6f ? (3.535f*b + 2.181f*b*b) / (1.0f + 2.276f*b + 2.577f*b*b) : 1.0f;

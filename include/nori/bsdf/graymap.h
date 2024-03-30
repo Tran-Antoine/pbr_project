@@ -11,7 +11,7 @@ NORI_NAMESPACE_BEGIN
 class GrayMap : public DiffuseMap {
 
 public:
-    explicit GrayMap(const DiffuseMap* child) : child(child) {}
+    explicit GrayMap(const DiffuseMap* child) : child(child), DiffuseMap("graymap") {}
 
     virtual Color3f map(float gray) const = 0;
 

@@ -63,12 +63,6 @@ public:
         float z_ratio = propList.getFloat("zratio", 1.f);
         bump_increase_factor = propList.getFloat("bump_accentuate", 1.f);
 
-        std::string normal_map_name = propList.getString("nmap", "");
-
-        if(!normal_map_name.empty()) {
-            normal_map = new TextureDiffuseMap(normal_map_name);
-        }
-
         Timer timer;
         std::vector<Vector3f>   positions;
         std::vector<Vector2f>   texcoords;
@@ -203,6 +197,20 @@ public:
              << memString(m_F.size() * sizeof(uint32_t) +
                           sizeof(float) * (m_V.size() + m_N.size() + m_UV.size()))
              << ")" << endl;
+    }
+
+    void addChild(nori::NoriObject *obj) override {
+        DiffuseMap* map;
+        switch (obj->getClassType()) {
+            case NoriObject::EDiffuseMap:
+                map = static_cast<DiffuseMap *>(obj);
+                if(map->getId() == "normal") normal_map = map;
+                else throw NoriException("Heightmap only supports normal maps");
+                break;
+            default:
+                Mesh::addChild(obj);
+                break;
+        }
     }
 
 protected:

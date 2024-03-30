@@ -1,3 +1,5 @@
+#pragma once
+
 #include <core/object.h>
 #include <stats/sampler.h>
 #include <core/scene.h>

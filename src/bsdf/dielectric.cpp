@@ -95,7 +95,7 @@ public:
         }
     }
 
-    std::string toString() const {
+    std::string toString() const override {
         return tfm::format(
             "Dielectric[\n"
             "  intIOR = %f,\n"

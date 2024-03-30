@@ -1,3 +1,5 @@
+#pragma once
+
 #include <core/common.h>
 #include <ImfArray.h>
 #include <ImfRgbaFile.h>

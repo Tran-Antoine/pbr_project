@@ -3,6 +3,9 @@
 #include <core/common.h>
 #include <core/color.h>
 #include <core/vector.h>
+#include <core/object.h>
+
+#include <utility>
 
 NORI_NAMESPACE_BEGIN
 
@@ -10,7 +13,8 @@ class DiffuseMap : public NoriObject {
 
 public:
 
-    DiffuseMap(const PropertyList& propList) : id(propList.getString("id", "no-id")) {}
+    explicit DiffuseMap(std::string  id) : id(std::move(id)) {}
+    explicit DiffuseMap(const PropertyList& propList) : id(propList.getString("id", "no-id")) {}
 
     virtual Color3f T(float s, float t) const = 0;
 
@@ -21,6 +25,7 @@ public:
     EClassType getClassType() const override { return EDiffuseMap; }
 
     std::string getId() const { return id; }
+
 private:
     std::string id;
 };
