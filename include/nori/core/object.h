@@ -37,6 +37,7 @@ public:
         EPhaseFunction,
         EEmitter,
         EMedium,
+        EDiffuseMap,
         EMediumCoefficient,
         ECamera,
         EIntegrator,

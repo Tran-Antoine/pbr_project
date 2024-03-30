@@ -6,9 +6,11 @@
 
 NORI_NAMESPACE_BEGIN
 
-class DiffuseMap {
+class DiffuseMap : public NoriObject {
 
 public:
+
+    DiffuseMap(const PropertyList& propList) : id(propList.getString("id", "no-id")) {}
 
     virtual Color3f T(float s, float t) const = 0;
 
@@ -16,6 +18,11 @@ public:
         return T(p.x(), p.y());
     }
 
+    EClassType getClassType() const override { return EDiffuseMap; }
+
+    std::string getId() const { return id; }
+private:
+    std::string id;
 };
 
 NORI_NAMESPACE_END
