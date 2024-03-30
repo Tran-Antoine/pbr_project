@@ -72,6 +72,7 @@ add_executable(nori
   include/nori/bsdf/texturemap.h
   include/nori/bsdf/graymap.h
   include/nori/bsdf/mountainmap.h
+  include/nori/bsdf/blendmap.h
 
   include/nori/collection/accel.h
   include/nori/collection/octree.h
@@ -121,6 +122,7 @@ add_executable(nori
   src/bsdf/uniformmap.cpp
   src/bsdf/texturemap.cpp
   src/bsdf/mountainmap.cpp
+  src/bsdf/blendmap.cpp
 
   src/collection/accel.cpp
   src/collection/octree.cpp

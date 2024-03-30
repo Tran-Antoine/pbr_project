@@ -3,14 +3,13 @@
 #include <bsdf/texturemap.h>
 #include <ImfRgbaFile.h>
 #include <algorithm>
-#include <opencv2/opencv.hpp>
 #include <parser/imageutil.h>
 
 NORI_NAMESPACE_BEGIN
 
-TextureDiffuseMap::TextureDiffuseMap(const std::string& filename) {
+TextureDiffuseMap::TextureDiffuseMap(const PropertyList &propList) : DiffuseMap(propList) {
 
-    load_from_file(filename, pixels);
+    load_from_file(propList.getString("filename"), pixels);
     width = pixels.width();
     height = pixels.height();
 }
@@ -26,6 +25,10 @@ Color3f TextureDiffuseMap::T(float s, float t) const {
     const Imf::Rgba &pixel = pixels[h_index][w_index];
 
     return Color3f(pixel.r, pixel.g, pixel.b).toLinearRGB();
+}
+
+std::string TextureDiffuseMap::toString() const {
+    return "texturemap";
 }
 
 NORI_NAMESPACE_END

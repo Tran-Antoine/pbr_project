@@ -14,6 +14,7 @@ void UniformPhase::sample(nori::Sampler *sampler, const nori::Vector3f &in, nori
 Color3f nori::UniformPhase::eval(const nori::Vector3f &in, const nori::Vector3f &out) const {
     return Color3f(1.0f / (4*M_PI));
 }
+
 std::string UniformPhase::toString() const {
     return "uniform";
 }
