@@ -23,4 +23,5 @@ Color3f MountainMap::map(float gray) const {
     }
 }
 
+NORI_REGISTER_CLASS(MountainMap, "mountain_map")
 NORI_NAMESPACE_END

@@ -21,5 +21,4 @@ private:
     Imf::Array2D<Imf::Rgba> pixels;
 };
 
-NORI_REGISTER_CLASS(TextureDiffuseMap, "texture");
 NORI_NAMESPACE_END

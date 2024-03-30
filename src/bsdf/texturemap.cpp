@@ -31,4 +31,5 @@ std::string TextureDiffuseMap::toString() const {
     return "texturemap";
 }
 
+NORI_REGISTER_CLASS(TextureDiffuseMap, "texture");
 NORI_NAMESPACE_END

@@ -56,4 +56,5 @@ void BlendMap::addChild(nori::NoriObject *obj) {
     }
 }
 
+NORI_REGISTER_CLASS(BlendMap, "blend");
 NORI_NAMESPACE_END

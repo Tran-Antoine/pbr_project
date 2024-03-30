@@ -37,7 +37,9 @@
         <float name="xratio" value ="4"/>
         <float name="zratio" value ="4"/>
         <bsdf type="diffuse">
-            <string name="texturemap" value="multi_texture.exr"/>
+            <diffusemap type="texture">
+                <string name="filename" value="multi_texture.exr"/>
+            </diffusemap>
         </bsdf>
     </mesh>
 

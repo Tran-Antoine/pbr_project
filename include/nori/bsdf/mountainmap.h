@@ -1,3 +1,5 @@
+#pragma once
+
 #include <core/common.h>
 #include <bsdf/graymap.h>
 #include <bsdf/diffusemap.h>

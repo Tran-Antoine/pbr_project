@@ -26,5 +26,4 @@ private:
     DiffuseMap* blue_map = nullptr;
 };
 
-NORI_REGISTER_CLASS(BlendMap, "uniform");
 NORI_NAMESPACE_END

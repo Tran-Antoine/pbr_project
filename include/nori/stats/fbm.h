@@ -1,3 +1,5 @@
+#pragma once
+
 #include <core/common.h>
 #include <stats/perlin.h>
 
