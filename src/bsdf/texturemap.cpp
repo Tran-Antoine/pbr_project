@@ -12,6 +12,7 @@ TextureDiffuseMap::TextureDiffuseMap(const PropertyList &propList) : DiffuseMap(
     load_from_file(propList.getString("filename"), pixels);
     width = pixels.width();
     height = pixels.height();
+    repeat = propList.getFloat("repeat", 1.0f);
 }
 
 Color3f TextureDiffuseMap::T(float s, float t) const {
@@ -19,6 +20,9 @@ Color3f TextureDiffuseMap::T(float s, float t) const {
     if(s > 1 || t > 1 || s < 0 || t < 0) {
         throw NoriException("Texture coordinates out of range [0, 1]");
     }
+
+    s -= ((int) (s / repeat)) * repeat;
+    t -= ((int) (t / repeat)) * repeat;
 
     int h_index = std::min(height - 1, (int) (t * height));
     int w_index = std::min(width - 1, (int) (s * width));
