@@ -17,6 +17,7 @@ public:
     std::string toString() const override;
 
 private:
+    float repeat;
     int width, height;
     Imf::Array2D<Imf::Rgba> pixels;
 };
