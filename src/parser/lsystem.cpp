@@ -79,12 +79,21 @@ public:
             m_V.col(i) = positions[i];
         }
 
-        // TODO: there is some issue with the normals
-        /*if (!normals.empty()) {
+        Vector3f a = Vector3f(0, 1, 0);
+        Vector3f b = Vector3f(0, 2, 2);
+        Vector3f c = Vector3f(0, 2, 4);
+
+        Vector3f a_n = (b-a).normalized();
+        Vector3f b_n = (b-a).normalized();
+
+        connect(a, b, a_n, 0.2f, 0.2f, 5, positions, indices);
+        connect(b, c, b_n, 0.2f, 0.3f, 5, positions, indices);
+
+        if (!normals.empty()) {
             m_N.resize(3, normals.size());
             for (uint32_t i=0; i<normals.size(); ++i)
                 m_N.col(i) = normals[i];
-        }*/
+        }
 
         cout << "done. (V=" << m_V.cols() << ", F=" << m_F.cols() << ", took "
              << timer.elapsedString() << " and "
@@ -94,17 +103,17 @@ public:
     }
 private:
 
-    static void connect(const Point3f& a, const Point3f& b, const Vector3f& a_n, float thickness, int smoothness,
-                        std::vector<Vector3f>& positions, std::vector<Vector3f>& normals, std::vector<uint32_t>& indices) {
+    static void connect(const Point3f& a, const Point3f& b, const Vector3f& a_n, float in_thickness, float out_thickness, int smoothness,
+                        std::vector<Vector3f>& positions, std::vector<uint32_t>& indices) {
 
         Vector3f b_n = (b-a).normalized(); // normal of b must be according to the cylinder's direction
 
-        std::vector<Vector3f> from_circle = circle(a, a_n, thickness, smoothness);
-        std::vector<Vector3f> to_circle   = circle(b, b_n, thickness, smoothness);
+        std::vector<Vector3f> from_circle = circle(a, a_n, in_thickness, smoothness);
+        std::vector<Vector3f> to_circle   = circle(b, b_n, out_thickness, smoothness);
 
         int index_pointer = positions.size(); // save pointer before adding new vertices
-        push_circle(from_circle, a, a_n, positions, normals, indices);
-        push_circle(to_circle,   b, b_n, positions, normals, indices);
+        push_circle(from_circle, a, a_n, positions, indices);
+        push_circle(to_circle,   b, b_n, positions, indices);
 
         int n_points = from_circle.size();
 
@@ -152,23 +161,20 @@ private:
     }
 
     static void push_circle(std::vector<Vector3f>& circle_positions, const Vector3f& p, const Vector3f& p_n,
-                            std::vector<Vector3f>& positions, std::vector<Vector3f>& normals, std::vector<uint32_t>& indices) {
+                            std::vector<Vector3f>& positions, std::vector<uint32_t>& indices) {
 
         int center_pointer = positions.size();
         int edge_pointer = positions.size() + 1;
 
         positions.push_back(p);
-        normals.push_back(p_n);
 
         Vector3f edge0 = circle_positions[0];
         positions.push_back(edge0);
-        normals.push_back(p_n);
 
         for(int i = 1; i <= circle_positions.size() - 1; i++) {
 
             Vector3f edge1 = circle_positions[i];
             positions.push_back(edge1);
-            normals.push_back(p_n);
 
             indices.push_back(center_pointer);
             indices.push_back(edge_pointer);
