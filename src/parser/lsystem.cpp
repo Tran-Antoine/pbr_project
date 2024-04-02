@@ -75,6 +75,17 @@ public:
         std::vector<Vector3f>   normals;
         std::vector<uint32_t>   indices;
 
+        Vector3f a = Vector3f(0, 1, 0);
+        Vector3f b = Vector3f(0, 2, 2);
+        Vector3f c = Vector3f(0, 2, 4);
+
+        Vector3f a_n = (b-a).normalized();
+        Vector3f b_n = (b-a).normalized();
+
+        connect(a, b, a_n, 0.2f, 0.2f, 5, positions, indices);
+        connect(b, c, b_n, 0.2f, 0.3f, 5, positions, indices);
+
+
         m_F.resize(3, indices.size()/3);
 
         for (uint32_t i=0; i<indices.size()/3; ++i) {
@@ -87,16 +98,6 @@ public:
         for (uint32_t i = 0; i < positions.size(); ++i) {
             m_V.col(i) = positions[i];
         }
-
-        Vector3f a = Vector3f(0, 1, 0);
-        Vector3f b = Vector3f(0, 2, 2);
-        Vector3f c = Vector3f(0, 2, 4);
-
-        Vector3f a_n = (b-a).normalized();
-        Vector3f b_n = (b-a).normalized();
-
-        connect(a, b, a_n, 0.2f, 0.2f, 5, positions, indices);
-        connect(b, c, b_n, 0.2f, 0.3f, 5, positions, indices);
 
         if (!normals.empty()) {
             m_N.resize(3, normals.size());
@@ -155,6 +156,8 @@ private:
                 case 'U':
                     rotateUp(current_state.dir, y_displacement);
                     break;
+                case 'D':
+                    rotateUp(current_state.dir, -y_displacement);
                 case 'S':
                     rotateXZ(current_state.dir, flat_angle);
                     break;
