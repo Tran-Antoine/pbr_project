@@ -157,6 +157,7 @@ add_executable(nori
   src/parser/parser.cpp
   src/parser/proplist.cpp
   src/parser/imageutil.cpp
+  src/parser/lsystem.cpp
 
   src/postprocessing/rfilter.cpp
 
