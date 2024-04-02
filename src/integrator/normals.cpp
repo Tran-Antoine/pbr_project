@@ -19,7 +19,7 @@ public:
         /* Return the component-wise absolute
            value of the shading normal as a color */
         Normal3f n = its.shFrame.n.cwiseAbs();
-        return Color3f(n.x(), n.y(), n.z());
+        return Color3f(n.x()/2, n.y()/2, n.z()/2);
     }
 
     std::string toString() const {

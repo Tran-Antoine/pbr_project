@@ -75,15 +75,15 @@ public:
         std::vector<Vector3f>   normals;
         std::vector<uint32_t>   indices;
 
-        Vector3f a = Vector3f(0, 1, 0);
-        Vector3f b = Vector3f(0, 2, 2);
-        Vector3f c = Vector3f(0, 2, 4);
+        Vector3f a = Vector3f(0, 0, 0);
+        Vector3f b = Vector3f(0, 1, 0);
+        //Vector3f c = Vector3f(0, 2, 4);
 
         Vector3f a_n = (b-a).normalized();
-        Vector3f b_n = (b-a).normalized();
+        //Vector3f b_n = (b-a).normalized();
 
-        connect(a, b, a_n, 0.2f, 0.2f, 5, positions, indices);
-        connect(b, c, b_n, 0.2f, 0.3f, 5, positions, indices);
+        connect(a, b, a_n, 1.f, 1.f, 0, positions, indices);
+        //connect(b, c, b_n, 0.2f, 0.3f, 5, positions, indices);
 
 
         m_F.resize(3, indices.size()/3);
@@ -237,7 +237,8 @@ private:
                             std::vector<Vector3f>& positions, std::vector<uint32_t>& indices) {
 
         int center_pointer = positions.size();
-        int edge_pointer = positions.size() + 1;
+        int head = positions.size() + 1;
+        int edge_pointer = head;
 
         positions.push_back(p);
 
@@ -255,6 +256,10 @@ private:
 
             edge_pointer++;
         }
+
+        indices.push_back(center_pointer);
+        indices.push_back(edge_pointer);
+        indices.push_back(head);
     }
 };
 
