@@ -12,14 +12,14 @@
     </mesh>
 
     <mesh type="hmap">
-        <string name="filename" value="flat.jpg"/>
+        <string name="filename" value="flat.exr"/>
 
-        <float name="minh" value="0"/>
+        <float name="minh" value="-5"/>
         <float name="maxh" value="1"/>
         <float name="xratio" value ="1"/>
         <float name="zratio" value ="1"/>
         <bsdf type="diffuse">
-            <color name="albedo" value="0.2 0.2 0.2"/>
+            <color name="albedo" value="0.5 0.5 0.5"/>
         </bsdf>
     </mesh>
 
@@ -28,7 +28,7 @@
         <float name="fov" value="65"/>
         <transform name="toWorld">
             <scale value="-1,1,1"/>
-            <lookat target="0.01, 0.6, 0.0" origin="0, 0, -0.5" up="0, 1, 0"/>
+            <lookat target="0.01, 0.01, 0.01" origin="0, 1, -2" up="0, 1, 0"/>
         </transform>
 
         <integer name="height" value="600"/>
