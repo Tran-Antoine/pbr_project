@@ -2,13 +2,12 @@
 
 #include <core/common.h>
 #include <core/mesh.h>
-#include <core/mesh.h>
 #include <core/timer.h>
 #include <filesystem/resolver.h>
 #include <unordered_map>
 #include <fstream>
 #include <ImfRgbaFile.h>
-#include <ImfArray.h>
+#include <stack>
 
 NORI_NAMESPACE_BEGIN
 
@@ -38,6 +37,16 @@ public:
 private:
     std::string premise;
     std::vector<std::string> rules;
+};
+
+struct TurtleState {
+
+    Vector3f p;
+    Vector3f dir;
+    Vector3f p_n;
+    float thickness;
+    float length;
+
 };
 
 class LSystemMesh : public Mesh {
@@ -102,6 +111,67 @@ public:
              << ")" << endl;
     }
 private:
+
+
+    static void drawTree(const std::string& seq,
+                         std::vector<Vector3f>& positions, std::vector<uint32_t>& indices) {
+
+        float thickness = 0.5f;
+        float length = 0.7f;
+        int smoothness = 5;
+        float y_displacement = 0.2f;
+        float flat_angle = 0.2 * M_PI;
+
+        std::stack<TurtleState> turtle_states;
+
+        TurtleState current_state = {
+                Vector3f(0.f), Vector3f (0.f, 1.f, 0.f), Vector3f(0.f, 1.f, 0.f),
+                thickness, length
+        };
+
+        TurtleState copy;
+        Vector3f a, b, a_n, b_n; // C++ being a pain in the butt
+        // states also needs to store the current normal
+        for(char instr : seq) {
+            switch(instr) {
+                case '[':
+                    copy = current_state;
+                    turtle_states.push(copy);
+                    break;
+                case ']':
+                    current_state = turtle_states.top();
+                    turtle_states.pop();
+                    break;
+                case 'F': break;
+                    a = current_state.p;
+                    b = a + current_state.length * current_state.dir;
+                    a_n = current_state.p_n;
+                    b_n = (b-a).normalized();
+                    connect(a, b, a_n, current_state.thickness, current_state.thickness, smoothness,
+                            positions, indices);
+                    current_state.p = b;
+                    current_state.p_n = b_n;
+                    break;
+                case 'U':
+                    rotateUp(current_state.dir, y_displacement);
+                    break;
+                case 'S':
+                    rotateXZ(current_state.dir, flat_angle);
+                    break;
+                default: break;
+            }
+        }
+    }
+
+    static void rotateUp(Vector3f& current, float y_displacement) {
+        current.y() += y_displacement;
+    }
+
+    static void rotateXZ(Vector3f& current, float angle) {
+        current = Vector3f(current.x() * cos(angle) - current.y() * sin(angle),
+                           current.x() * sin(angle) - current.y() * cos(angle),
+                           current.z());
+    }
 
     static void connect(const Point3f& a, const Point3f& b, const Vector3f& a_n, float in_thickness, float out_thickness, int smoothness,
                         std::vector<Vector3f>& positions, std::vector<uint32_t>& indices) {
