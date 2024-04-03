@@ -77,13 +77,13 @@ public:
 
         Vector3f a = Vector3f(0, 0, 0);
         Vector3f b = Vector3f(0, 1, 0);
-        //Vector3f c = Vector3f(0, 2, 4);
+        Vector3f c = Vector3f(0.5, 2, 0);
 
         Vector3f a_n = (b-a).normalized();
-        //Vector3f b_n = (b-a).normalized();
+        Vector3f b_n = (b-a).normalized();
 
-        connect(a, b, a_n, 1.f, 1.f, 0, positions, indices);
-        //connect(b, c, b_n, 0.2f, 0.3f, 5, positions, indices);
+        connect(a, b, a_n, 0.2f, 0.3f, 0, positions, indices);
+        connect(b, c, b_n, 0.3f, 0.2f, 0, positions, indices);
 
 
         m_F.resize(3, indices.size()/3);
@@ -188,11 +188,11 @@ private:
         push_circle(from_circle, a, a_n, positions, indices);
         push_circle(to_circle,   b, b_n, positions, indices);
 
-        int n_points = from_circle.size();
+        int n_points = from_circle.size() + 1; // +1 due to the center point
 
         // goal: form two triangles to shape the rectangle of points (a0, a1, b0, b1)
-        int i0 = index_pointer;
-        int j0 = index_pointer + n_points;
+        int i0 = index_pointer + 1;
+        int j0 = i0 + n_points;
 
         // For now we only allow smoothness to control the number of points, not the "length" resolution
         for(int i = 1; i <= n_points - 1; i++) {
@@ -208,6 +208,13 @@ private:
             indices.push_back(i0);
             indices.push_back(j1);
             indices.push_back(j0);
+
+            i0++;
+            j0++;
+
+            //std::cout << "Face 1: " << i0 << "," << i1 << "," << j1 << "\n";
+            //std::cout << "Face 2: " << i0 << "," << j1 << "," << j0 << "\n";
+
         }
     }
 
