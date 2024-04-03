@@ -75,7 +75,8 @@ public:
         std::vector<Vector3f>   normals;
         std::vector<uint32_t>   indices;
 
-        Vector3f a = Vector3f(0, 0, 0);
+        drawTree(mesh_string, positions, indices);
+        /*Vector3f a = Vector3f(0, 0, 0);
         Vector3f b = Vector3f(-0.1, 1, 0);
         Vector3f c = Vector3f(0.5, 2, 0);
 
@@ -83,16 +84,8 @@ public:
         Vector3f b_n = (b-a).normalized();
 
         connect(a, b, a_n, 0.3f, 0.3f, 50, positions, indices);
-        connect(b, c, b_n, 0.3f, 0.2f, 50, positions, indices);
+        connect(b, c, b_n, 0.3f, 0.2f, 50, positions, indices);*/
 
-        std::cout << positions.size() << " positions\n";
-        for(auto t : positions) {
-            std::cout << t.x() << "," << t.y() << "," << t.z() << "\n";
-        }
-
-        for(auto t : indices) {
-            std::cout << t << "\n";
-        }
         m_F.resize(3, indices.size()/3);
 
         for (uint32_t i=0; i<indices.size()/3; ++i) {
@@ -124,16 +117,16 @@ private:
     static void drawTree(const std::string& seq,
                          std::vector<Vector3f>& positions, std::vector<uint32_t>& indices) {
 
-        float thickness = 0.5f;
-        float length = 0.7f;
+        float thickness = 0.1f;
+        float length = 0.4f;
         int smoothness = 5;
-        float y_displacement = 0.2f;
-        float flat_angle = 0.2 * M_PI;
+        float angle = M_PI / 4;
+
 
         std::stack<TurtleState> turtle_states;
 
         TurtleState current_state = {
-                Vector3f(0.f), Vector3f (0.f, 1.f, 0.f), Vector3f(0.f, 1.f, 0.f),
+                Vector3f(0.f), Vector3f (0.f, 1.f, 0.f), Vector3f(0.f, 1.f, 0.f).normalized(),
                 thickness, length
         };
 
@@ -150,9 +143,13 @@ private:
                     current_state = turtle_states.top();
                     turtle_states.pop();
                     break;
-                case 'F': break;
+                case 'F':
+                case 'G':
                     a = current_state.p;
+                    std::cout << "From: " << a.x() << "," << a.z() << "\n";
                     b = a + current_state.length * current_state.dir;
+                    std::cout << "Direction: " << current_state.length << "/" << current_state.dir.x() << "," << current_state.dir.y() << "," << current_state.dir.z() << "\n";
+                    
                     a_n = current_state.p_n;
                     b_n = (b-a).normalized();
                     connect(a, b, a_n, current_state.thickness, current_state.thickness, smoothness,
@@ -161,26 +158,29 @@ private:
                     current_state.p_n = b_n;
                     break;
                 case 'U':
-                    rotateUp(current_state.dir, y_displacement);
+                    rotateXY(current_state.dir, angle);
                     break;
                 case 'D':
-                    rotateUp(current_state.dir, -y_displacement);
+                    rotateXY(current_state.dir, -angle);
+                    break;
                 case 'S':
-                    rotateXZ(current_state.dir, flat_angle);
+                    rotateXZ(current_state.dir, angle);
                     break;
                 default: break;
             }
         }
     }
 
-    static void rotateUp(Vector3f& current, float y_displacement) {
-        current.y() += y_displacement;
+    static void rotateXY(Vector3f& current, float angle) {
+        current = Vector3f(current.x() * cos(angle) - current.y() * sin(angle),
+                           -current.x() * sin(angle) + current.y() * cos(angle),
+                           current.z());
     }
 
     static void rotateXZ(Vector3f& current, float angle) {
-        current = Vector3f(current.x() * cos(angle) - current.y() * sin(angle),
-                           current.x() * sin(angle) - current.y() * cos(angle),
-                           current.z());
+        current = Vector3f(current.x() * cos(angle) - current.z() * sin(angle),
+                           current.y(),
+                           current.x() * sin(angle) - current.z() * cos(angle));
     }
 
     static void connect(const Point3f& a, const Point3f& b, const Vector3f& a_n, float in_thickness, float out_thickness, int smoothness,
