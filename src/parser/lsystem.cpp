@@ -44,7 +44,8 @@ struct TurtleState {
     Vector3f p;
     Vector3f dir;
     Vector3f p_n;
-    float thickness;
+    float in_thickness;
+    float out_thickness;
     float length;
 
 };
@@ -71,20 +72,9 @@ public:
         Transform trafo = propList.getTransform("toWorld", Transform());
         Timer timer;
         std::vector<Vector3f>   positions;
-        std::vector<Vector2f>   texcoords;
-        std::vector<Vector3f>   normals;
         std::vector<uint32_t>   indices;
 
         drawTree(mesh_string, positions, indices);
-        /*Vector3f a = Vector3f(0, 0, 0);
-        Vector3f b = Vector3f(-0.1, 1, 0);
-        Vector3f c = Vector3f(0.5, 2, 0);
-
-        Vector3f a_n = (b-a).normalized();
-        Vector3f b_n = (b-a).normalized();
-
-        connect(a, b, a_n, 0.3f, 0.3f, 50, positions, indices);
-        connect(b, c, b_n, 0.3f, 0.2f, 50, positions, indices);*/
 
         m_F.resize(3, indices.size()/3);
 
@@ -96,13 +86,7 @@ public:
 
         m_V.resize(3, positions.size());
         for (uint32_t i = 0; i < positions.size(); ++i) {
-            m_V.col(i) = positions[i];
-        }
-
-        if (!normals.empty()) {
-            m_N.resize(3, normals.size());
-            for (uint32_t i=0; i<normals.size(); ++i)
-                m_N.col(i) = normals[i];
+            m_V.col(i) = trafo * positions[i];
         }
 
         cout << "done. (V=" << m_V.cols() << ", F=" << m_F.cols() << ", took "
@@ -117,22 +101,22 @@ private:
     static void drawTree(const std::string& seq,
                          std::vector<Vector3f>& positions, std::vector<uint32_t>& indices) {
 
-        float thickness = 0.1f;
-        float length = 0.4f;
-        int smoothness = 5;
+        float thickness = 0.01f;
+        float length = 0.2f;
+        int smoothness = 50;
         float angle = M_PI / 4;
 
 
         std::stack<TurtleState> turtle_states;
 
         TurtleState current_state = {
-                Vector3f(0.f), Vector3f (0.f, 1.f, 0.f), Vector3f(0.f, 1.f, 0.f).normalized(),
-                thickness, length
+                Vector3f(0.f), Vector3f (0.f, 1.f, 0.f), Vector3f(0.f, 1.f, 0.f),
+                thickness, thickness, length
         };
 
         TurtleState copy;
         Vector3f a, b, a_n, b_n; // C++ being a pain in the butt
-        // states also needs to store the current normal
+
         for(char instr : seq) {
             switch(instr) {
                 case '[':
@@ -146,25 +130,26 @@ private:
                 case 'F':
                 case 'G':
                     a = current_state.p;
-                    std::cout << "From: " << a.x() << "," << a.z() << "\n";
                     b = a + current_state.length * current_state.dir;
-                    std::cout << "Direction: " << current_state.length << "/" << current_state.dir.x() << "," << current_state.dir.y() << "," << current_state.dir.z() << "\n";
-                    
+
                     a_n = current_state.p_n;
                     b_n = (b-a).normalized();
-                    connect(a, b, a_n, current_state.thickness, current_state.thickness, smoothness,
+                    connect(a, b, a_n, current_state.in_thickness, current_state.out_thickness, smoothness,
                             positions, indices);
                     current_state.p = b;
                     current_state.p_n = b_n;
                     break;
-                case 'U':
+                case '+':
                     rotateXY(current_state.dir, angle);
                     break;
-                case 'D':
+                case '-':
                     rotateXY(current_state.dir, -angle);
                     break;
-                case 'S':
+                case '>':
                     rotateXZ(current_state.dir, angle);
+                    break;
+                case '<':
+                    rotateXZ(current_state.dir, -angle);
                     break;
                 default: break;
             }
@@ -172,9 +157,14 @@ private:
     }
 
     static void rotateXY(Vector3f& current, float angle) {
-        current = Vector3f(current.x() * cos(angle) - current.y() * sin(angle),
-                           -current.x() * sin(angle) + current.y() * cos(angle),
-                           current.z());
+        float x = current.x(), y = current.y(), z = current.z();
+        float cosTheta = cos(angle), sinTheta = sin(angle);
+
+        current = Vector3f(
+                    x*cosTheta - y*sinTheta,
+                    x*sinTheta + y*cosTheta,
+                    z
+                );
     }
 
     static void rotateXZ(Vector3f& current, float angle) {
