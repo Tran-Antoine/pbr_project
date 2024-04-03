@@ -76,16 +76,23 @@ public:
         std::vector<uint32_t>   indices;
 
         Vector3f a = Vector3f(0, 0, 0);
-        Vector3f b = Vector3f(0, 1, 0);
+        Vector3f b = Vector3f(-0.1, 1, 0);
         Vector3f c = Vector3f(0.5, 2, 0);
 
         Vector3f a_n = (b-a).normalized();
         Vector3f b_n = (b-a).normalized();
 
-        connect(a, b, a_n, 0.2f, 0.3f, 0, positions, indices);
-        connect(b, c, b_n, 0.3f, 0.2f, 0, positions, indices);
+        connect(a, b, a_n, 0.3f, 0.3f, 50, positions, indices);
+        connect(b, c, b_n, 0.3f, 0.2f, 50, positions, indices);
 
+        std::cout << positions.size() << " positions\n";
+        for(auto t : positions) {
+            std::cout << t.x() << "," << t.y() << "," << t.z() << "\n";
+        }
 
+        for(auto t : indices) {
+            std::cout << t << "\n";
+        }
         m_F.resize(3, indices.size()/3);
 
         for (uint32_t i=0; i<indices.size()/3; ++i) {
@@ -195,7 +202,7 @@ private:
         int j0 = i0 + n_points;
 
         // For now we only allow smoothness to control the number of points, not the "length" resolution
-        for(int i = 1; i <= n_points - 1; i++) {
+        for(int i = 1; i < n_points - 1; i++) {
 
             int i1 = i0 + 1;
             int j1 = j0 + 1;
@@ -216,6 +223,14 @@ private:
             //std::cout << "Face 2: " << i0 << "," << j1 << "," << j0 << "\n";
 
         }
+
+        indices.push_back(i0);
+        indices.push_back(index_pointer + 1);
+        indices.push_back(index_pointer + 1 + n_points);
+
+        indices.push_back(i0);
+        indices.push_back(index_pointer + 1 + n_points);
+        indices.push_back(j0);
     }
 
     static std::vector<Vector3f> circle(const Vector3f& p, const Vector3f& p_n, float radius, int smoothness) {
