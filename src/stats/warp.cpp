@@ -293,4 +293,12 @@ float Warp::lineToHomogeneousPathPdf(float t, float omega_t) {
     return omega_t * exp(-omega_t * t);
 }
 
+float Warp::lineToLogistic(float s, float std) {
+    return -std * std::log(1 / s - 1);
+}
+
+float Warp::lineToLogisticPdf(float t, float std) {
+    throw NoriException("Not implemented yet");
+}
+
 NORI_NAMESPACE_END

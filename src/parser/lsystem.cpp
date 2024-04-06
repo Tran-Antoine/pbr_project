@@ -8,6 +8,9 @@
 #include <fstream>
 #include <ImfRgbaFile.h>
 #include <stack>
+#include <pcg32.h>
+#include <stats/warp.h>
+#include <parser/lconfig.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -24,18 +27,18 @@ public:
      * <,>: Rotate in the XZ plane
      * s,S: Shrink/Increase width
      * l,L: Shrink/Increase length
-     *
+     * r,d: Add/Remove noise feature to all values
      *
      * @param premise initial string
      * @param rules evolutionary rules
      */
-    LSystemGrammar(std::string premise, std::vector<std::string> rules) : premise(std::move(premise)), rules(std::move(rules)){}
+    LSystemGrammar(std::string premise, std::vector<std::string> rules, pcg32& random) : premise(std::move(premise)), rules(std::move(rules)), random(random){}
 
     std::string evolve(int n=1) {
         std::string current = premise;
         for(int i = 0; i < n; i++) {
-            std::string temp;
             for(auto rule : rules) {
+                std::string temp;
                 for(auto c : current) {
                     if(rule.at(0) == c) {
                         temp += rule.substr(2, rule.size());
@@ -53,6 +56,7 @@ public:
 private:
     std::string premise;
     std::vector<std::string> rules;
+    pcg32& random;
 };
 
 struct TurtleState {
@@ -63,6 +67,7 @@ struct TurtleState {
     float in_thickness;
     float out_thickness;
     float length;
+    bool random = false;
 
 };
 
@@ -82,8 +87,14 @@ public:
         }
 
         int n = propList.getInteger("evolutions");
+        random.seed((uint64_t) propList.getFloat("seed", 11111));
 
-        std::string mesh_string = LSystemGrammar(premise, rules).evolve(n);
+        std::string mesh_string = LSystemGrammar(premise, rules, random).evolve(n);
+
+        float width_factor = propList.getFloat("width_factor", 0.7f);
+        float length_factor = propList.getFloat("length_factor", 0.7f);
+        float pitch_term = degToRad(propList.getFloat("pitch_term", 45.f));
+        float yaw_term = degToRad(propList.getFloat("yaw_term", 45.f));
 
         Transform trafo = propList.getTransform("toWorld", Transform());
         Timer timer;
@@ -91,12 +102,9 @@ public:
         std::vector<uint32_t>   indices;
 
         std::cout << mesh_string << "\n";
-        drawTree(mesh_string, positions, indices);
-        Vector3f a = Vector3f(0, 0, 0);
-        Vector3f a_n = Vector3f(-0.7f, 0.7f, 0.f).normalized();
-        Vector3f b = Vector3f(-2.f, 1.9f, 0.f);
 
-        //connect(a, b, a_n, 0.5f, 0.5f, 0, positions, indices);
+        drawTree(mesh_string, width_factor, length_factor, pitch_term, yaw_term, positions, indices);
+
 
         m_F.resize(3, indices.size()/3);
 
@@ -119,31 +127,34 @@ public:
     }
 private:
 
-    static Vector3f directional(const TurtleState& state) {
-        float x = cos(state.yaw)*cos(state.pitch);
-        float y = sin(state.pitch);
-        float z = sin(state.yaw)*cos(state.pitch);
+    pcg32 random;
+
+    static Vector3f directional(float pitch, float yaw) {
+        float x = cos(yaw)*cos(pitch);
+        float y = sin(pitch);
+        float z = sin(yaw)*cos(pitch);
         return Vector3f(x, y, z);
     }
 
-    static void drawTree(const std::string& seq,
+    static int idealSmoothness(float radius) {
+        return (int) (radius * 100);
+    }
+
+    void drawTree(const std::string& seq, float width_factor, float length_factor, float pitch_term, float yaw_term,
                          std::vector<Vector3f>& positions, std::vector<uint32_t>& indices) {
 
-        float thickness = 0.001f;
-        float length = 0.3f;
-        int smoothness = 5;
-        float angle = M_PI / 6;
-
+        float initial_thickness = 0.5f;
+        float initial_length = 1.f;
+        Config0 config = Config0(random);
 
         std::stack<TurtleState> turtle_states;
 
         TurtleState current_state = {
                 Vector3f(0.f), 0.f, M_PI / 2, Vector3f(0.f, 1.f, 0.f),
-                thickness, thickness, length
+                initial_thickness, initial_thickness, initial_length
         };
 
         TurtleState copy;
-        Vector3f a, b, a_n, b_n; // C++ being a pain in the butt
 
         for(char instr : seq) {
             switch(instr) {
@@ -157,44 +168,72 @@ private:
                     break;
                 case 'F':
                 case 'G':
-                    a = current_state.p;
-                    b = a + current_state.length * directional(current_state);
-
-                    a_n = current_state.p_n;
-                    b_n = (b-a).normalized();
-                    connect(a, b, a_n, current_state.in_thickness, current_state.out_thickness, smoothness,
-                            positions, indices);
-                    current_state.p = b;
-                    current_state.p_n = b_n;
-                    current_state.in_thickness = current_state.out_thickness;
+                    handleDraw(current_state, positions, indices, config);
                     break;
                 case '+':
-                    current_state.pitch += angle;
+                    current_state.pitch += pitch_term;
                     break;
                 case '-':
-                    current_state.pitch -= angle;
+                    current_state.pitch -= pitch_term;
                     break;
                 case '>':
-                    current_state.yaw += angle;
+                    current_state.yaw += yaw_term;
                     break;
                 case '<':
-                    current_state.yaw -= angle;
+                    current_state.yaw -= yaw_term;
                     break;
-                case 's':
-                    current_state.out_thickness *= 0.7f;
+                case 'w':
+                    current_state.out_thickness *= width_factor;
                     break;
-                case 'S':
-                    current_state.out_thickness *= 1/0.7f;
+                case 'W':
+                    current_state.out_thickness *= 1 / width_factor;
                     break;
                 case 'l':
-                    current_state.length *= 0.7f;
+                    current_state.length *= length_factor;
                     break;
                 case 'L':
-                    current_state.length *= 1/0.7f;
+                    current_state.length *= 1 / length_factor;
                     break;
+                case 'r':
+                    current_state.random = true;
+                    break;
+                case 'd':
+                    current_state.random = false;
                 default: break;
             }
         }
+    }
+
+    void handleDraw(TurtleState &state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices,
+                    LGrammarConfig& config) {
+
+        Vector3f a = state.p;
+        Vector3f a_n = state.p_n;
+
+        bool randomization = state.random;
+
+        float length = state.length;
+        float yaw = state.yaw, pitch = state.pitch;
+        float in_thickness = state.in_thickness;
+        float out_thickness = state.out_thickness;
+
+        if(randomization) {
+            length = config.randomizeLength(length);
+            yaw = config.randomizeYaw(yaw);
+            pitch = config.randomizePitch(pitch);
+            out_thickness = config.randomizeThickness(out_thickness);
+        }
+
+        Vector3f direction = directional(pitch, yaw);
+
+        Vector3f b = a + length * direction;
+
+        Vector3f b_n = (b-a).normalized();
+        connect(a, b, a_n, in_thickness, out_thickness,idealSmoothness(std::max(in_thickness, out_thickness)),
+                positions, indices);
+        state.p = b;
+        state.p_n = b_n;
+        state.in_thickness = out_thickness;
     }
 
     static void rotateXY(Vector3f& current, float angle) {
@@ -243,7 +282,6 @@ private:
             int i1 = i0 + 1;
             int j1 = j0 + 1;
 
-            // TODO: check if faces are provided in the right order
             indices.push_back(i0);
             indices.push_back(i1);
             indices.push_back(j1);
@@ -254,10 +292,6 @@ private:
 
             i0++;
             j0++;
-
-            //std::cout << "Face 1: " << i0 << "," << i1 << "," << j1 << "\n";
-            //std::cout << "Face 2: " << i0 << "," << j1 << "," << j0 << "\n";
-
         }
 
         indices.push_back(i0);
@@ -272,7 +306,9 @@ private:
     static std::vector<Vector3f> circle(const Vector3f& p, const Vector3f& p_n, float radius, int smoothness) {
 
         std::vector<Vector3f> pos(4 + smoothness);
-        Frame frame(p_n);
+        Vector3f test = Vector3f(-p_n.y(), p_n.x(), 0).normalized();
+        Vector3f test2 = p_n.cross(test).normalized();
+        Frame frame(test, test2, p_n);
         Vector3f anchor = Vector3f(radius, 0, 0);
 
         for(int j = 0; j < smoothness + 4; j++) {
@@ -281,10 +317,9 @@ private:
             //    x' = x cos θ − y sin θ
             //    y' = x sin θ + y cos θ
             Vector3f rotated_point = Vector3f(anchor.x() * cos(delta_angle) - anchor.y() * sin(delta_angle),
-                                              anchor.x() * sin(delta_angle) - anchor.y() * cos(delta_angle),
+                                              anchor.x() * sin(delta_angle) + anchor.y() * cos(delta_angle),
                                               0.f);
 
-            // TODO: check if this is correct
             pos[j] = frame.toWorld(rotated_point) + p;
         }
 
@@ -322,6 +357,23 @@ private:
             indices.push_back(edge_pointer);
             indices.push_back(head);
         }
+    }
+};
+
+using Rule = std::function<std::string(char, float)>;
+
+static Rule CUSTOM_0 = [](char c, float sample) {
+    if(c != 'F') {
+        return std::string(1, c);
+    }
+    if(sample < 0.2) {
+        return std::string("G");
+    } else if(sample < 0.5) {
+        return std::string("GF");
+    } else if(sample < 0.8) {
+        return std::string("G[wl+F]wl-F");
+    } else {
+        return std::string("G[wl+F][wlF]wl-F");
     }
 };
 
