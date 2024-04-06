@@ -33,12 +33,12 @@ public:
     }
 
     float randomizeLength(float length, char c) override {
-        if(c == 'F') return 0.2f;
+        //if(c == 'F') return 0.2f;
 
         return length * (1 + 0.3f * Warp::lineToLogistic(random.nextFloat(), 0.6));
     }
     float randomizeThickness(float thickness, char c) override {
-        if(c == 'F') return 0.12f;
+        //if(c == 'F') return 0.12f;
 
         return thickness * (1 + 0.1f * Warp::lineToLogistic(random.nextFloat(), 0.6));;
     }

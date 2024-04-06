@@ -17,6 +17,8 @@ TextureDiffuseMap::TextureDiffuseMap(const PropertyList &propList) : DiffuseMap(
 
 Color3f TextureDiffuseMap::T(float s, float t) const {
 
+    t = clamp(t, 0.f, 1.f);
+    s = clamp(s, 0.f, 1.f);
     if(s > 1 || t > 1 || s < 0 || t < 0) {
         throw NoriException("Texture coordinates out of range [0, 1]");
     }

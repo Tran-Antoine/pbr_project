@@ -3,7 +3,7 @@
     <integrator type="path_mis"/>
     <!-- Independent sample generator, 32 samples per pixel -->
     <sampler type="independent">
-        <integer name="sampleCount" value="16"/>
+        <integer name="sampleCount" value="64"/>
     </sampler>
 
     <mesh type="lsystem">
@@ -16,13 +16,19 @@
         <float name="yaw_term" value="30"/>
         <float name="seed" value="121614"/>
 
-        <integer name="evolutions" value="9"/>
+        <integer name="evolutions" value="6"/>
 
         <bsdf type="diffuse">
             <diffusemap type="texture">
-                <string name="filename" value="assets/texarray.exr"/>
+                <string name="filename" value="assets/htext.exr"/>
             </diffusemap>
         </bsdf>
+
+        <float name="bump_accentuate" value="3"/>
+        <diffusemap type="texture">
+            <string name="id" value="normal"/>
+            <string name="filename" value="assets/hnormal.exr"/>
+        </diffusemap>
     </mesh>
 
     <emitter type="env">
@@ -39,7 +45,7 @@
         <float name="fov" value="60"/>
         <transform name="toWorld">
             <scale value="-1,1,1"/>
-            <lookat target="-0.0, 3.5, 0.01" origin="0, 3.5, -34" up="0, 1, 0"/>
+            <lookat target="-0.0, 4.5, 0.01" origin="0, 4.5, -15" up="0, 1, 0"/>
         </transform>
 
         <integer name="height" value="600"/>

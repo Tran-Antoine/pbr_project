@@ -201,7 +201,8 @@ public:
         if(!normal_map) {
             return Vector3f(0.1f);
         }
-        Color3f color = normal_map->T(uv.x(), 1-uv.y());
+        // TODO: make sure this is correct
+        Color3f color = normal_map->T(uv.x(), 1-uv.y()).toSRGB();
         return Vector3f(color.x(), color.y(), color.z());
     }
 

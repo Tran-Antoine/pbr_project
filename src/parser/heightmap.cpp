@@ -205,7 +205,7 @@ public:
             case NoriObject::EDiffuseMap:
                 map = static_cast<DiffuseMap *>(obj);
                 if(map->getId() == "normal") normal_map = map;
-                else throw NoriException("Heightmap only supports normal maps");
+                else throw NoriException("LSystem only supports normal maps");
                 break;
             default:
                 Mesh::addChild(obj);

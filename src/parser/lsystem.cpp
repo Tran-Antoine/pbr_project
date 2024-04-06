@@ -95,6 +95,7 @@ public:
         float length_factor = propList.getFloat("length_factor", 0.7f);
         float pitch_term = degToRad(propList.getFloat("pitch_term", 45.f));
         float yaw_term = degToRad(propList.getFloat("yaw_term", 45.f));
+        bump_increase_factor = propList.getFloat("bump_accentuate", 1.f);
 
         Transform trafo = propList.getTransform("toWorld", Transform());
         Timer timer;
@@ -133,6 +134,20 @@ public:
                           sizeof(float) * (m_V.size() + m_N.size() + m_UV.size()))
              << ")" << endl;
     }
+
+    void addChild(nori::NoriObject *obj) override {
+        DiffuseMap* map;
+        switch (obj->getClassType()) {
+            case NoriObject::EDiffuseMap:
+                map = static_cast<DiffuseMap *>(obj);
+                if(map->getId() == "normal") normal_map = map;
+                else throw NoriException("Heightmap only supports normal maps");
+                break;
+            default:
+                Mesh::addChild(obj);
+                break;
+        }
+    }
 private:
 
     pcg32 random;
@@ -149,6 +164,7 @@ private:
     }
 
     static int idealSmoothness(float radius) {
+        return 10;
         return (int) (radius * 100);
     }
 
@@ -239,10 +255,8 @@ private:
         Vector3f direction = directional(pitch, yaw);
         Vector3f b = a + length * direction;
         Vector3f b_n = (b-a).normalized();
-        float x_texture = (float) config.colorIndex(c) / (float) config.colorCount();
 
-        connect(a, b, a_n, in_thickness, out_thickness,idealSmoothness(std::max(in_thickness, out_thickness)),
-                x_texture,
+        connect(a, b, a_n, in_thickness, out_thickness, idealSmoothness(std::max(in_thickness, out_thickness)),
                 positions, indices, texcoords);
         state.p = b;
         state.p_n = b_n;
@@ -271,9 +285,10 @@ private:
         );
     }
 
-    static void connect(const Point3f& a, const Point3f& b, const Vector3f& a_n, float in_thickness, float out_thickness, int smoothness,
-                        float x_texture,
-                        std::vector<Vector3f>& positions, std::vector<uint32_t>& indices, std::vector<Vector2f>& texcoords) {
+    static void
+    connect(const Point3f &a, const Point3f &b, const Vector3f &a_n, float in_thickness, float out_thickness,
+            int smoothness, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices,
+            std::vector<Vector2f> &texcoords) {
 
         Vector3f b_n = (b-a).normalized(); // normal of b must be according to the cylinder's direction
 
@@ -281,8 +296,8 @@ private:
         std::vector<Vector3f> to_circle   = circle(b, b_n, out_thickness, smoothness);
 
         int index_pointer = positions.size(); // save pointer before adding new vertices
-        push_circle(from_circle, a, positions, indices, texcoords, x_texture, false);
-        push_circle(to_circle, b, positions, indices, texcoords, x_texture, true);
+        push_circle(from_circle, a, positions, indices, texcoords, false);
+        push_circle(to_circle, b, positions, indices, texcoords, true);
 
         int n_points = from_circle.size() + 1; // +1 due to the center point
 
@@ -340,27 +355,31 @@ private:
         return (pos);
     }
 
-    static void
-    push_circle(std::vector<Vector3f> &circle_positions, const Vector3f &p, std::vector<Vector3f> &positions,
-                std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords, float x_texture,
+    static void push_circle(std::vector<Vector3f> &circle_positions, const Vector3f &p, std::vector<Vector3f> &positions,
+                std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords,
                 bool fill_circle) {
 
         int center_pointer = positions.size();
         int head = positions.size() + 1;
         int edge_pointer = head;
 
+        float y_texture = fill_circle ? 1.f : 0.f;
+
         positions.push_back(p);
-        addToTextCoords(x_texture, texcoords);
+        texcoords.push_back(Vector2f(0.5f, y_texture)); // the value of this one doesn't really matter
 
         Vector3f edge0 = circle_positions[0];
         positions.push_back(edge0);
-        addToTextCoords(x_texture, texcoords);
+        texcoords.push_back(Vector2f(0.0f, y_texture));
 
         for(int i = 1; i <= circle_positions.size() - 1; i++) {
 
+            float x_texture = (float) i / (float) circle_positions.size();
+
             Vector3f edge1 = circle_positions[i];
             positions.push_back(edge1);
-            addToTextCoords(x_texture, texcoords);
+            texcoords.push_back(Vector2f(x_texture, y_texture));
+
 
             if(fill_circle) {
                 indices.push_back(center_pointer);
