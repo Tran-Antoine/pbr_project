@@ -100,10 +100,11 @@ public:
         Timer timer;
         std::vector<Vector3f>   positions;
         std::vector<uint32_t>   indices;
+        std::vector<Vector2f>   texcoords;
 
         std::cout << mesh_string << "\n";
 
-        drawTree(mesh_string, width_factor, length_factor, pitch_term, yaw_term, positions, indices);
+        drawTree(mesh_string, width_factor, length_factor, pitch_term, yaw_term, positions, indices, texcoords);
 
 
         m_F.resize(3, indices.size()/3);
@@ -119,6 +120,13 @@ public:
             m_V.col(i) = trafo * positions[i];
         }
 
+        if (!texcoords.empty()) {
+            m_UV.resize(2, positions.size());
+            for (uint32_t i=0; i<texcoords.size(); ++i) {
+                m_UV.col(i) = texcoords[i];
+            }
+        }
+
         cout << "done. (V=" << m_V.cols() << ", F=" << m_F.cols() << ", took "
              << timer.elapsedString() << " and "
              << memString(m_F.size() * sizeof(uint32_t) +
@@ -128,6 +136,10 @@ public:
 private:
 
     pcg32 random;
+
+    static void addToTextCoords(float x_texture, std::vector<Vector2f>& textCoords) {
+        textCoords.push_back(Vector2f(x_texture, 0.5f));
+    }
 
     static Vector3f directional(float pitch, float yaw) {
         float x = cos(yaw)*cos(pitch);
@@ -141,7 +153,7 @@ private:
     }
 
     void drawTree(const std::string& seq, float width_factor, float length_factor, float pitch_term, float yaw_term,
-                         std::vector<Vector3f>& positions, std::vector<uint32_t>& indices) {
+                         std::vector<Vector3f>& positions, std::vector<uint32_t>& indices, std::vector<Vector2f>& texcoords) {
 
         float initial_thickness = 0.5f;
         float initial_length = 1.f;
@@ -168,7 +180,7 @@ private:
                     break;
                 case 'F':
                 case 'G':
-                    handleDraw(current_state, positions, indices, config);
+                    handleDraw(current_state, instr, positions, indices, texcoords, config);
                     break;
                 case '+':
                     current_state.pitch += pitch_term;
@@ -204,7 +216,7 @@ private:
         }
     }
 
-    void handleDraw(TurtleState &state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices,
+    void handleDraw(TurtleState &state, char c, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f>& texcoords,
                     LGrammarConfig& config) {
 
         Vector3f a = state.p;
@@ -218,19 +230,20 @@ private:
         float out_thickness = state.out_thickness;
 
         if(randomization) {
-            length = config.randomizeLength(length);
-            yaw = config.randomizeYaw(yaw);
-            pitch = config.randomizePitch(pitch);
-            out_thickness = config.randomizeThickness(out_thickness);
+            length = config.randomizeLength(length, c);
+            yaw = config.randomizeYaw(yaw, c);
+            pitch = config.randomizePitch(pitch, c);
+            out_thickness = config.randomizeThickness(out_thickness, c);
         }
 
         Vector3f direction = directional(pitch, yaw);
-
         Vector3f b = a + length * direction;
-
         Vector3f b_n = (b-a).normalized();
+        float x_texture = (float) config.colorIndex(c) / (float) config.colorCount();
+
         connect(a, b, a_n, in_thickness, out_thickness,idealSmoothness(std::max(in_thickness, out_thickness)),
-                positions, indices);
+                x_texture,
+                positions, indices, texcoords);
         state.p = b;
         state.p_n = b_n;
         state.in_thickness = out_thickness;
@@ -259,7 +272,8 @@ private:
     }
 
     static void connect(const Point3f& a, const Point3f& b, const Vector3f& a_n, float in_thickness, float out_thickness, int smoothness,
-                        std::vector<Vector3f>& positions, std::vector<uint32_t>& indices) {
+                        float x_texture,
+                        std::vector<Vector3f>& positions, std::vector<uint32_t>& indices, std::vector<Vector2f>& texcoords) {
 
         Vector3f b_n = (b-a).normalized(); // normal of b must be according to the cylinder's direction
 
@@ -267,8 +281,8 @@ private:
         std::vector<Vector3f> to_circle   = circle(b, b_n, out_thickness, smoothness);
 
         int index_pointer = positions.size(); // save pointer before adding new vertices
-        push_circle(from_circle, a, a_n, positions, indices, false);
-        push_circle(to_circle,   b, b_n, positions, indices, false);
+        push_circle(from_circle, a, positions, indices, texcoords, x_texture, false);
+        push_circle(to_circle, b, positions, indices, texcoords, x_texture, true);
 
         int n_points = from_circle.size() + 1; // +1 due to the center point
 
@@ -326,22 +340,27 @@ private:
         return (pos);
     }
 
-    static void push_circle(std::vector<Vector3f>& circle_positions, const Vector3f& p, const Vector3f& p_n,
-                            std::vector<Vector3f>& positions, std::vector<uint32_t>& indices, bool fill_circle) {
+    static void
+    push_circle(std::vector<Vector3f> &circle_positions, const Vector3f &p, std::vector<Vector3f> &positions,
+                std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords, float x_texture,
+                bool fill_circle) {
 
         int center_pointer = positions.size();
         int head = positions.size() + 1;
         int edge_pointer = head;
 
         positions.push_back(p);
+        addToTextCoords(x_texture, texcoords);
 
         Vector3f edge0 = circle_positions[0];
         positions.push_back(edge0);
+        addToTextCoords(x_texture, texcoords);
 
         for(int i = 1; i <= circle_positions.size() - 1; i++) {
 
             Vector3f edge1 = circle_positions[i];
             positions.push_back(edge1);
+            addToTextCoords(x_texture, texcoords);
 
             if(fill_circle) {
                 indices.push_back(center_pointer);
@@ -357,23 +376,6 @@ private:
             indices.push_back(edge_pointer);
             indices.push_back(head);
         }
-    }
-};
-
-using Rule = std::function<std::string(char, float)>;
-
-static Rule CUSTOM_0 = [](char c, float sample) {
-    if(c != 'F') {
-        return std::string(1, c);
-    }
-    if(sample < 0.2) {
-        return std::string("G");
-    } else if(sample < 0.5) {
-        return std::string("GF");
-    } else if(sample < 0.8) {
-        return std::string("G[wl+F]wl-F");
-    } else {
-        return std::string("G[wl+F][wlF]wl-F");
     }
 };
 
