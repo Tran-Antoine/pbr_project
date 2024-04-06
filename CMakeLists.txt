@@ -91,6 +91,7 @@ add_executable(nori
   include/nori/parser/parser.h
   include/nori/parser/proplist.h
   include/nori/parser/imageutil.h
+  include/nori/parser/lconfig.h
 
   include/nori/postprocessing/rfilter.h
 

@@ -92,6 +92,10 @@ public:
 
     static float lineToHomogeneousPathPdf(float t, float omega_t);
 
+    static float lineToLogistic(float s, float std);
+
+    static float lineToLogisticPdf(float t, float std);
+
 };
 
 NORI_NAMESPACE_END
