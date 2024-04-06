@@ -1,6 +1,6 @@
 <scene>
     <!-- Use the simple point light integrator -->
-    <integrator type="normals"/>
+    <integrator type="path_mis"/>
     <!-- Independent sample generator, 32 samples per pixel -->
     <sampler type="independent">
         <integer name="sampleCount" value="16"/>
@@ -16,8 +16,22 @@
         <float name="yaw_term" value="30"/>
         <float name="seed" value="121614"/>
 
-        <integer name="evolutions" value="6"/>
+        <integer name="evolutions" value="9"/>
+
+        <bsdf type="diffuse">
+            <diffusemap type="texture">
+                <string name="filename" value="assets/texarray.exr"/>
+            </diffusemap>
+        </bsdf>
     </mesh>
+
+    <emitter type="env">
+        <string name="half1" value="assets/env_left.exr"/>
+        <string name="half2" value="assets/env_right.exr"/>
+        <float name="radius" value="500.0"/>
+        <point name="center" value="0,0,0"/>
+        <float name="intensity" value="0.1"/>
+    </emitter>
 
 
     <!-- Render the scene viewed by a perspective camera -->
@@ -25,7 +39,7 @@
         <float name="fov" value="60"/>
         <transform name="toWorld">
             <scale value="-1,1,1"/>
-            <lookat target="-0.0, 3.5, 0.01" origin="0, 3.5, -14" up="0, 1, 0"/>
+            <lookat target="-0.0, 3.5, 0.01" origin="0, 3.5, -34" up="0, 1, 0"/>
         </transform>
 
         <integer name="height" value="600"/>
