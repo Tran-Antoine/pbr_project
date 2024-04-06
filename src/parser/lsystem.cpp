@@ -103,8 +103,6 @@ public:
         std::vector<uint32_t>   indices;
         std::vector<Vector2f>   texcoords;
 
-        std::cout << mesh_string << "\n";
-
         drawTree(mesh_string, width_factor, length_factor, pitch_term, yaw_term, positions, indices, texcoords);
 
 
@@ -164,7 +162,6 @@ private:
     }
 
     static int idealSmoothness(float radius) {
-        return 10;
         return (int) (radius * 100);
     }
 
