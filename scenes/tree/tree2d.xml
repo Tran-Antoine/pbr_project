@@ -16,7 +16,7 @@
         <float name="yaw_term" value="30"/>
         <float name="seed" value="121614"/>
 
-        <integer name="evolutions" value="6"/>
+        <integer name="evolutions" value="11"/>
 
         <bsdf type="diffuse">
             <diffusemap type="texture">
