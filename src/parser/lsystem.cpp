@@ -14,6 +14,21 @@ NORI_NAMESPACE_BEGIN
 class LSystemGrammar {
 
 public:
+
+    /**
+     * List of symbols:
+     *
+     * F,G: Draw
+     * [,]: Push/Restore turtle state
+     * +,-: Rotate in the XY plane
+     * <,>: Rotate in the XZ plane
+     * s,S: Shrink/Increase width
+     * l,L: Shrink/Increase length
+     *
+     *
+     * @param premise initial string
+     * @param rules evolutionary rules
+     */
     LSystemGrammar(std::string premise, std::vector<std::string> rules) : premise(std::move(premise)), rules(std::move(rules)){}
 
     std::string evolve(int n=1) {
@@ -21,12 +36,16 @@ public:
         for(int i = 0; i < n; i++) {
             std::string temp;
             for(auto c : current) {
+                bool found_rule = false;
                 for(auto rule : rules) {
                     if(rule.at(0) == c) {
-                        temp += rule.substr(2, rule.size()); break;
-                    } else {
-                        temp += c;
+                        temp += rule.substr(2, rule.size());
+                        found_rule = true;
+                        break;
                     }
+                }
+                if(!found_rule) {
+                    temp += c;
                 }
             }
             current = temp;
@@ -74,7 +93,13 @@ public:
         std::vector<Vector3f>   positions;
         std::vector<uint32_t>   indices;
 
+        std::cout << mesh_string << "\n";
         drawTree(mesh_string, positions, indices);
+        Vector3f a = Vector3f(0, 0, 0);
+        Vector3f a_n = Vector3f(-0.7f, 0.7f, 0.f).normalized();
+        Vector3f b = Vector3f(-2.f, 1.9f, 0.f);
+
+        //connect(a, b, a_n, 0.5f, 0.5f, 0, positions, indices);
 
         m_F.resize(3, indices.size()/3);
 
@@ -102,9 +127,9 @@ private:
                          std::vector<Vector3f>& positions, std::vector<uint32_t>& indices) {
 
         float thickness = 0.01f;
-        float length = 0.2f;
-        int smoothness = 50;
-        float angle = M_PI / 4;
+        float length = 0.3f;
+        int smoothness = 30;
+        float angle = M_PI / 6;
 
 
         std::stack<TurtleState> turtle_states;
@@ -138,6 +163,7 @@ private:
                             positions, indices);
                     current_state.p = b;
                     current_state.p_n = b_n;
+                    current_state.in_thickness = current_state.out_thickness;
                     break;
                 case '+':
                     rotateXY(current_state.dir, angle);
@@ -150,6 +176,18 @@ private:
                     break;
                 case '<':
                     rotateXZ(current_state.dir, -angle);
+                    break;
+                case 's':
+                    current_state.out_thickness *= 0.7f;
+                    break;
+                case 'S':
+                    current_state.out_thickness *= 1/0.7f;
+                    break;
+                case 'l':
+                    current_state.length *= 0.7f;
+                    break;
+                case 'L':
+                    current_state.length *= 1/0.7f;
                     break;
                 default: break;
             }
@@ -168,9 +206,14 @@ private:
     }
 
     static void rotateXZ(Vector3f& current, float angle) {
-        current = Vector3f(current.x() * cos(angle) - current.z() * sin(angle),
-                           current.y(),
-                           current.x() * sin(angle) - current.z() * cos(angle));
+        float x = current.x(), y = current.y(), z = current.z();
+        float cosTheta = cos(angle), sinTheta = sin(angle);
+
+        current = Vector3f(
+                x*cosTheta - z*sinTheta,
+                y,
+                x*sinTheta + z*cosTheta
+        );
     }
 
     static void connect(const Point3f& a, const Point3f& b, const Vector3f& a_n, float in_thickness, float out_thickness, int smoothness,
@@ -182,8 +225,8 @@ private:
         std::vector<Vector3f> to_circle   = circle(b, b_n, out_thickness, smoothness);
 
         int index_pointer = positions.size(); // save pointer before adding new vertices
-        push_circle(from_circle, a, a_n, positions, indices);
-        push_circle(to_circle,   b, b_n, positions, indices);
+        push_circle(from_circle, a, a_n, positions, indices, false);
+        push_circle(to_circle,   b, b_n, positions, indices, false);
 
         int n_points = from_circle.size() + 1; // +1 due to the center point
 
@@ -242,11 +285,11 @@ private:
             pos[j] = frame.toWorld(rotated_point) + p;
         }
 
-        return std::move(pos);
+        return (pos);
     }
 
     static void push_circle(std::vector<Vector3f>& circle_positions, const Vector3f& p, const Vector3f& p_n,
-                            std::vector<Vector3f>& positions, std::vector<uint32_t>& indices) {
+                            std::vector<Vector3f>& positions, std::vector<uint32_t>& indices, bool fill_circle) {
 
         int center_pointer = positions.size();
         int head = positions.size() + 1;
@@ -262,16 +305,20 @@ private:
             Vector3f edge1 = circle_positions[i];
             positions.push_back(edge1);
 
-            indices.push_back(center_pointer);
-            indices.push_back(edge_pointer);
-            indices.push_back(edge_pointer+1);
+            if(fill_circle) {
+                indices.push_back(center_pointer);
+                indices.push_back(edge_pointer);
+                indices.push_back(edge_pointer+1);
+            }
 
             edge_pointer++;
         }
 
-        indices.push_back(center_pointer);
-        indices.push_back(edge_pointer);
-        indices.push_back(head);
+        if(fill_circle) {
+            indices.push_back(center_pointer);
+            indices.push_back(edge_pointer);
+            indices.push_back(head);
+        }
     }
 };
 
