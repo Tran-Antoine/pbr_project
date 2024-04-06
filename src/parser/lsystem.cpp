@@ -35,20 +35,17 @@ public:
         std::string current = premise;
         for(int i = 0; i < n; i++) {
             std::string temp;
-            for(auto c : current) {
-                bool found_rule = false;
-                for(auto rule : rules) {
+            for(auto rule : rules) {
+                for(auto c : current) {
                     if(rule.at(0) == c) {
                         temp += rule.substr(2, rule.size());
-                        found_rule = true;
-                        break;
+                    } else {
+                        temp += c;
                     }
                 }
-                if(!found_rule) {
-                    temp += c;
-                }
+
+                current = temp;
             }
-            current = temp;
         }
         return current;
     }
@@ -61,7 +58,7 @@ private:
 struct TurtleState {
 
     Vector3f p;
-    Vector3f dir;
+    float yaw, pitch;
     Vector3f p_n;
     float in_thickness;
     float out_thickness;
@@ -122,20 +119,26 @@ public:
     }
 private:
 
+    static Vector3f directional(const TurtleState& state) {
+        float x = cos(state.yaw)*cos(state.pitch);
+        float y = sin(state.pitch);
+        float z = sin(state.yaw)*cos(state.pitch);
+        return Vector3f(x, y, z);
+    }
 
     static void drawTree(const std::string& seq,
                          std::vector<Vector3f>& positions, std::vector<uint32_t>& indices) {
 
-        float thickness = 0.01f;
+        float thickness = 0.001f;
         float length = 0.3f;
-        int smoothness = 30;
+        int smoothness = 5;
         float angle = M_PI / 6;
 
 
         std::stack<TurtleState> turtle_states;
 
         TurtleState current_state = {
-                Vector3f(0.f), Vector3f (0.f, 1.f, 0.f), Vector3f(0.f, 1.f, 0.f),
+                Vector3f(0.f), 0.f, M_PI / 2, Vector3f(0.f, 1.f, 0.f),
                 thickness, thickness, length
         };
 
@@ -155,7 +158,7 @@ private:
                 case 'F':
                 case 'G':
                     a = current_state.p;
-                    b = a + current_state.length * current_state.dir;
+                    b = a + current_state.length * directional(current_state);
 
                     a_n = current_state.p_n;
                     b_n = (b-a).normalized();
@@ -166,16 +169,16 @@ private:
                     current_state.in_thickness = current_state.out_thickness;
                     break;
                 case '+':
-                    rotateXY(current_state.dir, angle);
+                    current_state.pitch += angle;
                     break;
                 case '-':
-                    rotateXY(current_state.dir, -angle);
+                    current_state.pitch -= angle;
                     break;
                 case '>':
-                    rotateXZ(current_state.dir, angle);
+                    current_state.yaw += angle;
                     break;
                 case '<':
-                    rotateXZ(current_state.dir, -angle);
+                    current_state.yaw -= angle;
                     break;
                 case 's':
                     current_state.out_thickness *= 0.7f;
