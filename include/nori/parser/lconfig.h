@@ -38,10 +38,15 @@ public:
             LGrammarConfig(width_factor, length_factor, pitch_term, yaw_term){}
 
     float randomizeYaw(float yaw, char c) override {
-        return yaw + M_PI / 4 * Warp::lineToLogistic(random.nextFloat(), 0.6);
+        return yaw + M_PI / 5 * Warp::lineToLogistic(random.nextFloat(), 0.6);
     }
 
     float randomizePitch(float pitch, char c) override {
+
+        if(pitch < 0.f) {
+            return pitch / 2.f + 0.5f;
+        }
+
         return pitch * (1 + 0.2f * Warp::lineToLogistic(random.nextFloat(), 0.2));
     }
 
@@ -65,16 +70,18 @@ public:
 
     int pickRule(char c, float thickness, float length, int depth) override {
         float sample = random.nextFloat();
-        if(depth <= 1) {
+        if(depth <= 0) {
             return pick(sample, 0.0f, 0.35f, 0.35f, 0.3f);
+        } else if(depth <= 2) {
+            return pick(sample, 0.0f, 0.0f, 0.0f, 1.f);
         } else if(depth <= 4) {
-            return pick(sample, 0.0f, 0.0f, 0.0f, 0.9f);
+            return pick(sample, 0.0f, 0.2f, 0.2f, 0.6f);
         } else if(depth <= 6) {
             return pick(sample, 0.0f, 0.1f, 0.1f, 0.8f);
         } else if(depth <= 8) {
-            return pick(sample, 0.2f, 0.1f, 0.2f, 0.5f);
+            return pick(sample, 0.2f, 0.2f, 0.2f, 0.4f);
         } else {
-            return pick(sample, 0.5f, 0.0f, 0.2f, 0.3f);
+            return pick(sample, 0.5f, 0.0f, 0.0f, 0.5f);
         }
     }
 
