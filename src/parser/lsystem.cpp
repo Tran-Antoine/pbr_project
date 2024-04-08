@@ -3,13 +3,11 @@
 #include <core/common.h>
 #include <core/mesh.h>
 #include <core/timer.h>
-#include <filesystem/resolver.h>
 #include <unordered_map>
 #include <fstream>
 #include <ImfRgbaFile.h>
 #include <stack>
 #include <pcg32.h>
-#include <stats/warp.h>
 #include <parser/lconfig.h>
 
 NORI_NAMESPACE_BEGIN
@@ -43,7 +41,7 @@ public:
      * l,L: Shrink/Increase length
      * r,d: Add/Remove noise feature to all values
      * D  : Increase depth marker
-     * s  : Declare rule as stochastic (configuration decides the weight)
+     * s  : Declare rule as stochastic (configuration decides the weightage)
      *
      * @param premise initial string
      * @param rules evolutionary rules
@@ -94,19 +92,16 @@ public:
     }
 
     static TurtleState simulate(const std::string& instructions, const LGrammarConfig& config) {
-        float initial_thickness = 0.5f;
-        float initial_length = 1.f;
+
         std::stack<TurtleState> turtle_states;
         TurtleState current_state = {
                 Vector3f(0.f), 0.f, M_PI / 2, Vector3f(0.f, 1.f, 0.f),
-                initial_thickness, initial_thickness, initial_length
+                config.get_initial_width(), config.get_initial_width(), config.get_length_factor()
         };
         TurtleState copy;
 
         for (auto instr: instructions) {
             switch (instr) {
-                case 's':
-                    throw NoriException("Cannot simulate stochastic expressions");
                 case '[':
                     copy = current_state;
                     turtle_states.push(copy);
@@ -114,9 +109,6 @@ public:
                 case ']':
                     current_state = turtle_states.top();
                     turtle_states.pop();
-                    break;
-                case 'F':
-                case 'G':
                     break;
                 case '+':
                     current_state.pitch += config.get_pitch_term();
@@ -142,11 +134,6 @@ public:
                 case 'L':
                     current_state.length *= 1 / config.get_length_factor();
                     break;
-                case 'r':
-                    current_state.random = true;
-                    break;
-                case 'd':
-                    current_state.random = false;
                 case 'D':
                     current_state.depth++;
                 default:
@@ -227,10 +214,8 @@ public:
         float yaw_term = degToRad(propList.getFloat("yaw_term", 45.f));
         bump_increase_factor = propList.getFloat("bump_accentuate", 1.f);
 
-        Config0 config = Config0(random, width_factor, length_factor, pitch_term, yaw_term);
+        auto config = Config0(random, width_factor, length_factor, pitch_term, yaw_term);
         std::string mesh_string = LSystemGrammar(premise, rules).evolve(n, config);
-
-        std::cout << mesh_string << "\n";
 
         Transform trafo = propList.getTransform("toWorld", Transform());
         Timer timer;
@@ -238,7 +223,6 @@ public:
         std::vector<uint32_t>   indices;
         std::vector<Vector2f>   texcoords;
 
-        // TODO: Replace one long branch by 3 smaller branches, with randomness it will add curves
         drawTree(mesh_string, config, positions, indices, texcoords);
 
 
@@ -282,20 +266,10 @@ public:
                 break;
         }
     }
+
 protected:
 
     pcg32 random;
-
-    static void addToTextCoords(float x_texture, std::vector<Vector2f>& textCoords) {
-        textCoords.push_back(Vector2f(x_texture, 0.5f));
-    }
-
-    static Vector3f directional(float pitch, float yaw) {
-        float x = cos(yaw)*cos(pitch);
-        float y = sin(pitch);
-        float z = sin(yaw)*cos(pitch);
-        return Vector3f(x, y, z);
-    }
 
     static int idealSmoothness(float radius) {
         return (int) (radius * 100);
@@ -304,14 +278,11 @@ protected:
     void drawTree(const std::string &seq, LGrammarConfig& config,
                   std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) {
 
-        float initial_thickness = 0.5f;
-        float initial_length = 1.f;
-
         std::stack<TurtleState> turtle_states;
 
         TurtleState current_state = {
                 Vector3f(0.f), 0.f, M_PI / 2, Vector3f(0.f, 1.f, 0.f),
-                initial_thickness, initial_thickness, initial_length
+                config.get_initial_width(), config.get_initial_width(), config.get_length_factor()
         };
 
         TurtleState copy;
@@ -321,8 +292,6 @@ protected:
         while(index < instructions.length()) {
             char instr = instructions.at(index);
             switch(instr) {
-                case 's':
-                    throw NoriException("Unreachable case: no stochastic values accepted");
                 case '[':
                     copy = current_state;
                     turtle_states.push(copy);
@@ -404,30 +373,7 @@ protected:
         state.in_thickness = out_thickness;
     }
 
-    static void rotateXY(Vector3f& current, float angle) {
-        float x = current.x(), y = current.y(), z = current.z();
-        float cosTheta = cos(angle), sinTheta = sin(angle);
-
-        current = Vector3f(
-                    x*cosTheta - y*sinTheta,
-                    x*sinTheta + y*cosTheta,
-                    z
-                );
-    }
-
-    static void rotateXZ(Vector3f& current, float angle) {
-        float x = current.x(), y = current.y(), z = current.z();
-        float cosTheta = cos(angle), sinTheta = sin(angle);
-
-        current = Vector3f(
-                x*cosTheta - z*sinTheta,
-                y,
-                x*sinTheta + z*cosTheta
-        );
-    }
-
-    static void
-    connect(const Point3f &a, const Point3f &b, const Vector3f &a_n, float in_thickness, float out_thickness,
+    static void connect(const Point3f &a, const Point3f &b, const Vector3f &a_n, float in_thickness, float out_thickness,
             int smoothness, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices,
             std::vector<Vector2f> &texcoords) {
 

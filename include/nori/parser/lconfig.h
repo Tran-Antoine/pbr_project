@@ -10,8 +10,9 @@ class LGrammarConfig {
 
 public:
 
-    LGrammarConfig(float width_factor, float length_factor, float pitch_term, float yaw_term)
-        : width_factor(width_factor), length_factor(length_factor), pitch_term(pitch_term), yaw_term(yaw_term) {}
+    LGrammarConfig(float initial_width, float initial_length, float width_factor, float length_factor, float pitch_term, float yaw_term)
+        : initial_width(initial_width), initial_length(initial_length), width_factor(width_factor),
+          length_factor(length_factor), pitch_term(pitch_term), yaw_term(yaw_term) {}
 
     virtual float randomizeYaw(float yaw, char c) { return yaw; }
     virtual float randomizePitch(float pitch, char c) { return pitch; }
@@ -22,20 +23,23 @@ public:
     virtual int colorCount() { return 0; }
     virtual std::string specialRule(char c) { return std::string(1, c); }
 
+    float get_initial_width() const { return initial_width; }
+    float get_initial_length() const { return initial_length; }
     float get_width_factor() const { return width_factor; }
     float get_length_factor() const { return length_factor; }
     float get_pitch_term() const { return pitch_term; }
     float get_yaw_term() const { return yaw_term; }
 
 protected:
-    float width_factor, length_factor, pitch_term, yaw_term;
+    float initial_width, initial_length, width_factor,
+          length_factor, pitch_term, yaw_term;
 };
 
 class Config0 : public LGrammarConfig {
 
 public:
     Config0(pcg32& random, float width_factor, float length_factor, float pitch_term, float yaw_term) : random(random),
-            LGrammarConfig(width_factor, length_factor, pitch_term, yaw_term){}
+            LGrammarConfig(0.5f, 1.0f, width_factor, length_factor, pitch_term, yaw_term){}
 
     float randomizeYaw(float yaw, char c) override {
         return yaw + M_PI / 5 * Warp::lineToLogistic(random.nextFloat(), 0.6);
@@ -51,20 +55,25 @@ public:
     }
 
     float randomizeLength(float length, char c) override {
-        //if(c == 'F') return 0.2f;
 
         return length * (1 + 0.3f * Warp::lineToLogistic(random.nextFloat(), 0.6));
     }
     float randomizeThickness(float thickness, char c) override {
-        //if(c == 'F') return 0.12f;
 
-        return thickness * (1 + 0.1f * Warp::lineToLogistic(random.nextFloat(), 0.6));;
+        float randomized = thickness * (1 + 0.1f * Warp::lineToLogistic(random.nextFloat(), 0.6));
+
+        if(thickness < 0.22) {
+            randomized /= 1.5f;
+        }
+        return randomized;
     }
 
-    static int pick(float sample, float pa, float pb, float pc, float pd) {
+    static int pick(float sample, float pa, float pb, float pc=0.f, float pd=0.f, float pe=0.f, float pf=0.f) {
         if(sample < pa) return 0;
         if(sample < pa + pb) return 1;
         if(sample < pa + pb + pc) return 2;
+        if(sample < pa + pb + pc + pd) return 3;
+        if(sample < pa + pb + pc + pd + pe) return 4;
         return 3;
     }
 
