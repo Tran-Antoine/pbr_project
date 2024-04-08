@@ -14,6 +14,20 @@
 
 NORI_NAMESPACE_BEGIN
 
+struct TurtleState {
+
+    Vector3f p;
+    float yaw, pitch;
+    Vector3f p_n;
+    float in_thickness;
+    float out_thickness;
+    float length;
+    bool random = false;
+    int depth = 0;
+
+};
+
+
 class LSystemGrammar {
 
 public:
@@ -36,41 +50,140 @@ public:
      */
     LSystemGrammar(std::string premise, std::vector<std::string> rules) : premise(std::move(premise)), rules(std::move(rules)) {}
 
-    std::string evolve(int n=1) {
-
-        std::vector<std::string> filtered_rules;
-
-        for(auto s : rules) {
+    std::vector<std::vector<std::string>> get_stochastic_rules() {
+        std::vector<std::vector<std::string>> stochastic_rules;
+        for(const auto& r : rules) {
             bool found = false;
-            for(auto fs : filtered_rules) {
-                if (fs.at(0) == s.at(0)) {
+            for(auto slist : stochastic_rules) {
+                if(slist[0].at(0) == r.at(0)) {
+                    slist.push_back(r);
                     found = true;
                     break;
                 }
             }
-            if(!found) {
-                filtered_rules.push_back(s);
+            if(!found){
+                stochastic_rules.push_back(std::vector<std::string>{r});
+            }
+        }
+        return stochastic_rules;
+    }
+
+    std::vector<std::string> get_deterministic_rules() {
+        std::vector<std::string> rules;
+        for(const auto& r : rules) {
+            if(!isStochastic(r)) {
+                rules.push_back(r);
+            }
+        }
+        return rules;
+    }
+
+    std::string apply_det(const std::string& src, const std::string& rule) {
+        std::string out;
+        for(auto c : src) {
+            if(rule.at(0) == c) {
+                out += rule.substr(2, rule.size());
+            } else {
+                out += c;
+            }
+        }
+        return out;
+    }
+
+    static TurtleState simulate(const std::string& instructions, const LGrammarConfig& config) {
+        float initial_thickness = 0.5f;
+        float initial_length = 1.f;
+        std::stack<TurtleState> turtle_states;
+        TurtleState current_state = {
+                Vector3f(0.f), 0.f, M_PI / 2, Vector3f(0.f, 1.f, 0.f),
+                initial_thickness, initial_thickness, initial_length
+        };
+        TurtleState copy;
+
+        for (auto instr: instructions) {
+            switch (instr) {
+                case 's':
+                    throw NoriException("Cannot simulate stochastic expressions");
+                case '[':
+                    copy = current_state;
+                    turtle_states.push(copy);
+                    break;
+                case ']':
+                    current_state = turtle_states.top();
+                    turtle_states.pop();
+                    break;
+                case 'F':
+                case 'G':
+                    break;
+                case '+':
+                    current_state.pitch += config.get_pitch_term();
+                    break;
+                case '-':
+                    current_state.pitch -= config.get_pitch_term();
+                    break;
+                case '>':
+                    current_state.yaw += config.get_yaw_term();
+                    break;
+                case '<':
+                    current_state.yaw -= config.get_yaw_term();
+                    break;
+                case 'w':
+                    current_state.out_thickness *= config.get_width_factor();
+                    break;
+                case 'W':
+                    current_state.out_thickness *= 1 / config.get_width_factor();
+                    break;
+                case 'l':
+                    current_state.length *= config.get_length_factor();
+                    break;
+                case 'L':
+                    current_state.length *= 1 / config.get_length_factor();
+                    break;
+                case 'r':
+                    current_state.random = true;
+                    break;
+                case 'd':
+                    current_state.random = false;
+                case 'D':
+                    current_state.depth++;
+                default:
+                    break;
+            }
+
+        }
+        return current_state;
+    }
+
+    std::string apply_stoch(const std::string& src, const std::vector<std::string>& rule, LGrammarConfig& config) {
+        std::string out;
+        char target_char = rule[0].at(0);
+
+        for(auto c : src) {
+            if(c == target_char) {
+                TurtleState state = simulate(out, config);
+                out += rule[config.pickRule(c, state.in_thickness, state.length, state.depth)];
+            } else {
+                out += c;
             }
         }
 
+        return out;
+    }
+
+    std::string evolve(int n, LGrammarConfig& config) {
+
+        std::vector<std::string> det_rules = get_deterministic_rules();
+        std::vector<std::vector<std::string>> stoch_rules = get_stochastic_rules();
+
         std::string current = premise;
         for(int i = 0; i < n; i++) {
-            for(auto rule : filtered_rules) {
-                std::string temp;
-                for(auto c : current) {
-                    if(rule.at(0) == c) {
-                        if (isStochastic(rule)) {
-                            temp += "s";
-                            temp += c;
-                        } else {
-                            temp += rule.substr(2, rule.size());
-                        }
-                    } else {
-                        temp += c;
-                    }
-                }
 
-                current = temp;
+            for(const auto& rule : stoch_rules) {
+                current = apply_stoch(current, rule, config);
+            }
+
+            for(const auto& rule : det_rules) {
+                current = apply_det(current, rule);
             }
         }
         return current;
@@ -83,19 +196,6 @@ private:
     }
     std::string premise;
     std::vector<std::string> rules;
-};
-
-struct TurtleState {
-
-    Vector3f p;
-    float yaw, pitch;
-    Vector3f p_n;
-    float in_thickness;
-    float out_thickness;
-    float length;
-    bool random = false;
-    int depth = 0;
-
 };
 
 class LSystemMesh : public Mesh {
@@ -124,6 +224,8 @@ public:
         bump_increase_factor = propList.getFloat("bump_accentuate", 1.f);
 
         std::string mesh_string = processStochastic(premise, rules, n, width_factor, length_factor, pitch_term, yaw_term);
+
+        std::cout << mesh_string << "\n";
 
         Transform trafo = propList.getTransform("toWorld", Transform());
         Timer timer;
@@ -175,7 +277,7 @@ public:
                 break;
         }
     }
-private:
+protected:
 
     pcg32 random;
 
@@ -205,7 +307,7 @@ private:
                 sRules.push_back(r);
             }
         }
-        std::string rule = sRules[config.pickRule(state.in_thickness, state.length, state.depth)];
+        std::string rule = sRules[config.pickRule(c, state.in_thickness, state.length, state.depth)];
         return rule.substr(3, rule.length() - 3);
     }
 
@@ -218,87 +320,33 @@ private:
         return prefix + insertion + instruction.substr(index + 1, instruction.length() - index - 1);
     }
 
+    static bool containsStochastic(const std::string& instructions) {
+        return instructions.find('s') != std::string::npos;
+    }
+
     // Convert input language to IR without stochastic branches
     std::string processStochastic(const std::string& seq, const std::vector<std::string>& rules, int n_evolutions,
                                   float width_factor, float length_factor, float pitch_term, float yaw_term) {
 
         std::string instructions = seq;
+        Config0 config = Config0(random);
 
         for(int i = 0; i < n_evolutions; i++) {
 
-            instructions = LSystemGrammar(instructions, rules).evolve();
-
-            float initial_thickness = 0.5f;
-            float initial_length = 1.f;
-            Config0 config = Config0(random);
-
-            std::stack<TurtleState> turtle_states;
-
-            TurtleState current_state = {
-                    Vector3f(0.f), 0.f, M_PI / 2, Vector3f(0.f, 1.f, 0.f),
-                    initial_thickness, initial_thickness, initial_length
-            };
-
-            TurtleState copy;
-
-            int index = 0;
-            while(index < instructions.length()) {
-                char instr = instructions.at(index);
-                switch(instr) {
-                    case 's':
-                        instructions = insertRule(
-                                instructions, index+1,
-                                pickStochastic(config, current_state, instructions.at(index+1), rules));
-                        index--;
-                        break;
-                    case '[':
-                        copy = current_state;
-                        turtle_states.push(copy);
-                        break;
-                    case ']':
-                        current_state = turtle_states.top();
-                        turtle_states.pop();
-                        break;
-                    case 'F':
-                    case 'G':
-                        break;
-                    case '+':
-                        current_state.pitch += pitch_term;
-                        break;
-                    case '-':
-                        current_state.pitch -= pitch_term;
-                        break;
-                    case '>':
-                        current_state.yaw += yaw_term;
-                        break;
-                    case '<':
-                        current_state.yaw -= yaw_term;
-                        break;
-                    case 'w':
-                        current_state.out_thickness *= width_factor;
-                        break;
-                    case 'W':
-                        current_state.out_thickness *= 1 / width_factor;
-                        break;
-                    case 'l':
-                        current_state.length *= length_factor;
-                        break;
-                    case 'L':
-                        current_state.length *= 1 / length_factor;
-                        break;
-                    case 'r':
-                        current_state.random = true;
-                        break;
-                    case 'd':
-                        current_state.random = false;
-                    case 'D':
-                        current_state.depth++;
-                    default: break;
-                }
-
-                index++;
+            if(!containsStochastic(instructions)) {
+                instructions = LSystemGrammar(instructions, rules).evolve(1,);
             }
 
+            auto indexPicker = [&](char c) {
+                return config.pickRule(c, current_state.in_thickness, current_state.length, current_state.depth);
+            };
+
+
+            if(containsStochastic(instructions)) {
+                throw NoriException("Supposedly unreachable");
+            }
+
+            instructions = LSystemGrammar(instructions, rules).evolve(1);
         }
 
         return instructions;

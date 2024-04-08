@@ -7,12 +7,13 @@
     </sampler>
 
     <mesh type="lsystem">
-        <string name="premise" value="rLLLF"/>
+        <string name="premise" value="LLLLF"/>
         <string name="rule0" value="F=sDG"/>
-        <string name="rule1" value="F=sDB"/>
-        <string name="rule2" value="F=sDG[B]>B"/>
-        <string name="rule3" value="F=sDG[B]>>[B]>>B"/>
-        <string name="rule4" value="B=wl+F"/>
+        <string name="rule1" value="F=sDA"/>
+        <string name="rule2" value="F=sDB"/>
+        <string name="rule3" value="F=s[DA]DB"/>
+        <string name="rule4" value="A=wl+F"/>
+        <string name="rule5" value="B=wl-F"/>
 
 
         <float name="width_factor" value="0.85"/>

@@ -10,14 +10,25 @@ class LGrammarConfig {
 
 public:
 
+    LGrammarConfig(float width_factor, float length_factor, float pitch_term, float yaw_term)
+        : width_factor(width_factor), length_factor(length_factor), pitch_term(pitch_term), yaw_term(yaw_term) {}
+
     virtual float randomizeYaw(float yaw, char c) { return yaw; }
     virtual float randomizePitch(float pitch, char c) { return pitch; }
     virtual float randomizeLength(float length, char c) { return length; }
     virtual float randomizeThickness(float thickness, char c) { return thickness; }
-    virtual int pickRule(float thickness, float length, int depth) { return 0; }
+    virtual int pickRule(char c, float thickness, float length, int depth) { return 0; }
     virtual int colorIndex(char c) { return 0; }
     virtual int colorCount() { return 0; }
     virtual std::string specialRule(char c) { return std::string(1, c); }
+
+    float get_width_factor() const { return width_factor; }
+    float get_length_factor() const { return length_factor; }
+    float get_pitch_term() const { return pitch_term; }
+    float get_yaw_term() const { return yaw_term; }
+
+protected:
+    float width_factor, length_factor, pitch_term, yaw_term;
 };
 
 class Config0 : public LGrammarConfig {
@@ -51,7 +62,7 @@ public:
         return 3;
     }
 
-    int pickRule(float thickness, float length, int depth) override {
+    int pickRule(char c, float thickness, float length, int depth) override {
         float sample = random.nextFloat();
         if(depth <= 2) {
             return pick(sample, 0.0f, 0.4f, 0.4f, 0.2f);
