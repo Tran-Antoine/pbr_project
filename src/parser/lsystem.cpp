@@ -53,8 +53,11 @@ public:
     std::vector<std::vector<std::string>> get_stochastic_rules() {
         std::vector<std::vector<std::string>> stochastic_rules;
         for(const auto& r : rules) {
+            if(!isStochastic(r)) {
+                continue;
+            }
             bool found = false;
-            for(auto slist : stochastic_rules) {
+            for(auto& slist : stochastic_rules) {
                 if(slist[0].at(0) == r.at(0)) {
                     slist.push_back(r);
                     found = true;
@@ -69,13 +72,13 @@ public:
     }
 
     std::vector<std::string> get_deterministic_rules() {
-        std::vector<std::string> rules;
+        std::vector<std::string> det_rules;
         for(const auto& r : rules) {
             if(!isStochastic(r)) {
-                rules.push_back(r);
+                det_rules.push_back(r);
             }
         }
-        return rules;
+        return det_rules;
     }
 
     std::string apply_det(const std::string& src, const std::string& rule) {
@@ -161,7 +164,8 @@ public:
         for(auto c : src) {
             if(c == target_char) {
                 TurtleState state = simulate(out, config);
-                out += rule[config.pickRule(c, state.in_thickness, state.length, state.depth)];
+                const std::string& single_rule = rule[config.pickRule(c, state.in_thickness, state.length, state.depth)];
+                out += single_rule.substr(3);
             } else {
                 out += c;
             }
@@ -223,7 +227,8 @@ public:
         float yaw_term = degToRad(propList.getFloat("yaw_term", 45.f));
         bump_increase_factor = propList.getFloat("bump_accentuate", 1.f);
 
-        std::string mesh_string = processStochastic(premise, rules, n, width_factor, length_factor, pitch_term, yaw_term);
+        Config0 config = Config0(random, width_factor, length_factor, pitch_term, yaw_term);
+        std::string mesh_string = LSystemGrammar(premise, rules).evolve(n, config);
 
         std::cout << mesh_string << "\n";
 
@@ -234,7 +239,7 @@ public:
         std::vector<Vector2f>   texcoords;
 
         // TODO: Replace one long branch by 3 smaller branches, with randomness it will add curves
-        drawTree(mesh_string, width_factor, length_factor, pitch_term, yaw_term, positions, indices, texcoords);
+        drawTree(mesh_string, config, positions, indices, texcoords);
 
 
         m_F.resize(3, indices.size()/3);
@@ -296,68 +301,11 @@ protected:
         return (int) (radius * 100);
     }
 
-    bool isStochastic(std::string rule) {
-        return rule.at(2) == 's';
-    }
-
-    std::string pickStochastic(LGrammarConfig& config, const TurtleState& state, char c, const std::vector<std::string>& rules) {
-        std::vector<std::string> sRules;
-        for(auto r : rules) {
-            if(isStochastic(r) && r.at(0) == c) {
-                sRules.push_back(r);
-            }
-        }
-        std::string rule = sRules[config.pickRule(c, state.in_thickness, state.length, state.depth)];
-        return rule.substr(3, rule.length() - 3);
-    }
-
-    static std::string insertRule(const std::string& instruction, int index, const std::string& insertion) {
-        std::string prefix = instruction.substr(0, index - 1);
-        if(index + 1 == instruction.length()) {
-            return prefix + insertion;
-        }
-
-        return prefix + insertion + instruction.substr(index + 1, instruction.length() - index - 1);
-    }
-
-    static bool containsStochastic(const std::string& instructions) {
-        return instructions.find('s') != std::string::npos;
-    }
-
-    // Convert input language to IR without stochastic branches
-    std::string processStochastic(const std::string& seq, const std::vector<std::string>& rules, int n_evolutions,
-                                  float width_factor, float length_factor, float pitch_term, float yaw_term) {
-
-        std::string instructions = seq;
-        Config0 config = Config0(random);
-
-        for(int i = 0; i < n_evolutions; i++) {
-
-            if(!containsStochastic(instructions)) {
-                instructions = LSystemGrammar(instructions, rules).evolve(1,);
-            }
-
-            auto indexPicker = [&](char c) {
-                return config.pickRule(c, current_state.in_thickness, current_state.length, current_state.depth);
-            };
-
-
-            if(containsStochastic(instructions)) {
-                throw NoriException("Supposedly unreachable");
-            }
-
-            instructions = LSystemGrammar(instructions, rules).evolve(1);
-        }
-
-        return instructions;
-    }
-
-    void drawTree(const std::string &seq, float width_factor, float length_factor, float pitch_term, float yaw_term,
+    void drawTree(const std::string &seq, LGrammarConfig& config,
                   std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) {
 
         float initial_thickness = 0.5f;
         float initial_length = 1.f;
-        Config0 config = Config0(random);
 
         std::stack<TurtleState> turtle_states;
 
@@ -388,28 +336,28 @@ protected:
                     handleDraw(current_state, instr, positions, indices, texcoords, config);
                     break;
                 case '+':
-                    current_state.pitch += pitch_term;
+                    current_state.pitch += config.get_pitch_term();
                     break;
                 case '-':
-                    current_state.pitch -= pitch_term;
+                    current_state.pitch -= config.get_pitch_term();
                     break;
                 case '>':
-                    current_state.yaw += yaw_term;
+                    current_state.yaw += config.get_yaw_term();
                     break;
                 case '<':
-                    current_state.yaw -= yaw_term;
+                    current_state.yaw -= config.get_yaw_term();
                     break;
                 case 'w':
-                    current_state.out_thickness *= width_factor;
+                    current_state.out_thickness *= config.get_width_factor();
                     break;
                 case 'W':
-                    current_state.out_thickness *= 1 / width_factor;
+                    current_state.out_thickness *= 1 / config.get_width_factor();
                     break;
                 case 'l':
-                    current_state.length *= length_factor;
+                    current_state.length *= config.get_length_factor();
                     break;
                 case 'L':
-                    current_state.length *= 1 / length_factor;
+                    current_state.length *= 1 / config.get_length_factor();
                     break;
                 case 'r':
                     current_state.random = true;
