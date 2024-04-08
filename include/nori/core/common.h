@@ -248,6 +248,35 @@ inline float balancedMIS(float p, float other) {
     return p / (other + p);
 }
 
+inline Eigen::Vector3f directional(float pitch, float yaw) {
+    float x = cos(yaw)*cos(pitch);
+    float y = sin(pitch);
+    float z = sin(yaw)*cos(pitch);
+    return Eigen::Vector3f(x, y, z);
+}
+
+inline void rotateXY(Eigen::Vector3f& current, float angle) {
+    float x = current.x(), y = current.y(), z = current.z();
+    float cosTheta = cos(angle), sinTheta = sin(angle);
+
+    current = Eigen::Vector3f(
+            x*cosTheta - y*sinTheta,
+            x*sinTheta + y*cosTheta,
+            z
+    );
+}
+
+inline void rotateXZ(Eigen::Vector3f& current, float angle) {
+    float x = current.x(), y = current.y(), z = current.z();
+    float cosTheta = cos(angle), sinTheta = sin(angle);
+
+    current = Eigen::Vector3f(
+            x*cosTheta - z*sinTheta,
+            y,
+            x*sinTheta + z*cosTheta
+    );
+}
+
 /// Compute a direction for the given coordinates in spherical coordinates
 extern Vector3f sphericalDirection(float theta, float phi);
 
