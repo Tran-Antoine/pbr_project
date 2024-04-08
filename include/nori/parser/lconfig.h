@@ -14,6 +14,7 @@ public:
     virtual float randomizePitch(float pitch, char c) { return pitch; }
     virtual float randomizeLength(float length, char c) { return length; }
     virtual float randomizeThickness(float thickness, char c) { return thickness; }
+    virtual int pickRule(float thickness, float length, int depth) { return 0; }
     virtual int colorIndex(char c) { return 0; }
     virtual int colorCount() { return 0; }
     virtual std::string specialRule(char c) { return std::string(1, c); }
@@ -22,7 +23,7 @@ public:
 class Config0 : public LGrammarConfig {
 
 public:
-    Config0(pcg32 random) : random(random) {}
+    Config0(pcg32& random) : random(random) {}
 
     float randomizeYaw(float yaw, char c) override {
         return yaw + M_PI / 4 * Warp::lineToLogistic(random.nextFloat(), 0.6);
@@ -41,6 +42,26 @@ public:
         //if(c == 'F') return 0.12f;
 
         return thickness * (1 + 0.1f * Warp::lineToLogistic(random.nextFloat(), 0.6));;
+    }
+
+    static int pick(float sample, float pa, float pb, float pc, float pd) {
+        if(sample < pa) return 0;
+        if(sample < pa + pb) return 1;
+        if(sample < pa + pb + pc) return 2;
+        return 3;
+    }
+
+    int pickRule(float thickness, float length, int depth) override {
+        float sample = random.nextFloat();
+        if(depth <= 2) {
+            return pick(sample, 0.0f, 0.4f, 0.4f, 0.2f);
+        } else if(depth <= 5) {
+            return pick(sample, 0.2f, 0.2f, 0.4f, 0.2f);
+        } else if(depth <= 8) {
+            return pick(sample, 0.3f, 0.1f, 0.3f, 0.3f);
+        } else {
+            return pick(sample, 0.5f, 0.0f, 0.2f, 0.3f);
+        }
     }
 
     int colorIndex(char c) override {

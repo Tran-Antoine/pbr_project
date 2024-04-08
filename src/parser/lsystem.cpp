@@ -25,23 +25,46 @@ public:
      * [,]: Push/Restore turtle state
      * +,-: Rotate in the XY plane
      * <,>: Rotate in the XZ plane
-     * s,S: Shrink/Increase width
+     * w,W: Shrink/Increase width
      * l,L: Shrink/Increase length
      * r,d: Add/Remove noise feature to all values
+     * D  : Increase depth marker
+     * s  : Declare rule as stochastic (configuration decides the weight)
      *
      * @param premise initial string
      * @param rules evolutionary rules
      */
-    LSystemGrammar(std::string premise, std::vector<std::string> rules, pcg32& random) : premise(std::move(premise)), rules(std::move(rules)), random(random){}
+    LSystemGrammar(std::string premise, std::vector<std::string> rules) : premise(std::move(premise)), rules(std::move(rules)) {}
 
     std::string evolve(int n=1) {
+
+        std::vector<std::string> filtered_rules;
+
+        for(auto s : rules) {
+            bool found = false;
+            for(auto fs : filtered_rules) {
+                if (fs.at(0) == s.at(0)) {
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) {
+                filtered_rules.push_back(s);
+            }
+        }
+
         std::string current = premise;
         for(int i = 0; i < n; i++) {
-            for(auto rule : rules) {
+            for(auto rule : filtered_rules) {
                 std::string temp;
                 for(auto c : current) {
                     if(rule.at(0) == c) {
-                        temp += rule.substr(2, rule.size());
+                        if (isStochastic(rule)) {
+                            temp += "s";
+                            temp += c;
+                        } else {
+                            temp += rule.substr(2, rule.size());
+                        }
                     } else {
                         temp += c;
                     }
@@ -54,9 +77,12 @@ public:
     }
 
 private:
+
+    bool isStochastic(std::string rule) {
+        return rule.at(2) == 's';
+    }
     std::string premise;
     std::vector<std::string> rules;
-    pcg32& random;
 };
 
 struct TurtleState {
@@ -68,6 +94,7 @@ struct TurtleState {
     float out_thickness;
     float length;
     bool random = false;
+    int depth = 0;
 
 };
 
@@ -89,7 +116,6 @@ public:
         int n = propList.getInteger("evolutions");
         random.seed((uint64_t) propList.getFloat("seed", 11111));
 
-        std::string mesh_string = LSystemGrammar(premise, rules, random).evolve(n);
 
         float width_factor = propList.getFloat("width_factor", 0.7f);
         float length_factor = propList.getFloat("length_factor", 0.7f);
@@ -97,12 +123,15 @@ public:
         float yaw_term = degToRad(propList.getFloat("yaw_term", 45.f));
         bump_increase_factor = propList.getFloat("bump_accentuate", 1.f);
 
+        std::string mesh_string = processStochastic(premise, rules, n, width_factor, length_factor, pitch_term, yaw_term);
+
         Transform trafo = propList.getTransform("toWorld", Transform());
         Timer timer;
         std::vector<Vector3f>   positions;
         std::vector<uint32_t>   indices;
         std::vector<Vector2f>   texcoords;
 
+        // TODO: Replace one long branch by 3 smaller branches, with randomness it will add curves
         drawTree(mesh_string, width_factor, length_factor, pitch_term, yaw_term, positions, indices, texcoords);
 
 
@@ -165,8 +194,118 @@ private:
         return (int) (radius * 100);
     }
 
-    void drawTree(const std::string& seq, float width_factor, float length_factor, float pitch_term, float yaw_term,
-                         std::vector<Vector3f>& positions, std::vector<uint32_t>& indices, std::vector<Vector2f>& texcoords) {
+    bool isStochastic(std::string rule) {
+        return rule.at(2) == 's';
+    }
+
+    std::string pickStochastic(LGrammarConfig& config, const TurtleState& state, char c, const std::vector<std::string>& rules) {
+        std::vector<std::string> sRules;
+        for(auto r : rules) {
+            if(isStochastic(r) && r.at(0) == c) {
+                sRules.push_back(r);
+            }
+        }
+        std::string rule = sRules[config.pickRule(state.in_thickness, state.length, state.depth)];
+        return rule.substr(3, rule.length() - 3);
+    }
+
+    static std::string insertRule(const std::string& instruction, int index, const std::string& insertion) {
+        std::string prefix = instruction.substr(0, index - 1);
+        if(index + 1 == instruction.length()) {
+            return prefix + insertion;
+        }
+
+        return prefix + insertion + instruction.substr(index + 1, instruction.length() - index - 1);
+    }
+
+    // Convert input language to IR without stochastic branches
+    std::string processStochastic(const std::string& seq, const std::vector<std::string>& rules, int n_evolutions,
+                                  float width_factor, float length_factor, float pitch_term, float yaw_term) {
+
+        std::string instructions = seq;
+
+        for(int i = 0; i < n_evolutions; i++) {
+
+            instructions = LSystemGrammar(instructions, rules).evolve();
+
+            float initial_thickness = 0.5f;
+            float initial_length = 1.f;
+            Config0 config = Config0(random);
+
+            std::stack<TurtleState> turtle_states;
+
+            TurtleState current_state = {
+                    Vector3f(0.f), 0.f, M_PI / 2, Vector3f(0.f, 1.f, 0.f),
+                    initial_thickness, initial_thickness, initial_length
+            };
+
+            TurtleState copy;
+
+            int index = 0;
+            while(index < instructions.length()) {
+                char instr = instructions.at(index);
+                switch(instr) {
+                    case 's':
+                        instructions = insertRule(
+                                instructions, index+1,
+                                pickStochastic(config, current_state, instructions.at(index+1), rules));
+                        index--;
+                        break;
+                    case '[':
+                        copy = current_state;
+                        turtle_states.push(copy);
+                        break;
+                    case ']':
+                        current_state = turtle_states.top();
+                        turtle_states.pop();
+                        break;
+                    case 'F':
+                    case 'G':
+                        break;
+                    case '+':
+                        current_state.pitch += pitch_term;
+                        break;
+                    case '-':
+                        current_state.pitch -= pitch_term;
+                        break;
+                    case '>':
+                        current_state.yaw += yaw_term;
+                        break;
+                    case '<':
+                        current_state.yaw -= yaw_term;
+                        break;
+                    case 'w':
+                        current_state.out_thickness *= width_factor;
+                        break;
+                    case 'W':
+                        current_state.out_thickness *= 1 / width_factor;
+                        break;
+                    case 'l':
+                        current_state.length *= length_factor;
+                        break;
+                    case 'L':
+                        current_state.length *= 1 / length_factor;
+                        break;
+                    case 'r':
+                        current_state.random = true;
+                        break;
+                    case 'd':
+                        current_state.random = false;
+                    case 'D':
+                        current_state.depth++;
+                    default: break;
+                }
+
+                index++;
+            }
+
+        }
+
+        return instructions;
+    }
+
+    void drawTree(const std::string &seq, float width_factor, float length_factor, float pitch_term, float yaw_term,
+                  std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) {
 
         float initial_thickness = 0.5f;
         float initial_length = 1.f;
@@ -181,8 +320,13 @@ private:
 
         TurtleState copy;
 
-        for(char instr : seq) {
+        std::string instructions = seq;
+        int index = 0;
+        while(index < instructions.length()) {
+            char instr = instructions.at(index);
             switch(instr) {
+                case 's':
+                    throw NoriException("Unreachable case: no stochastic values accepted");
                 case '[':
                     copy = current_state;
                     turtle_states.push(copy);
@@ -224,8 +368,12 @@ private:
                     break;
                 case 'd':
                     current_state.random = false;
+                case 'D':
+                    current_state.depth++;
                 default: break;
             }
+
+            index++;
         }
     }
 
