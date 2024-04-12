@@ -92,6 +92,8 @@ add_executable(nori
   include/nori/parser/proplist.h
   include/nori/parser/imageutil.h
   include/nori/parser/lconfig.h
+  include/nori/parser/lsystem.h
+  include/nori/parser/turtle.h
 
   include/nori/postprocessing/rfilter.h
 
@@ -159,6 +161,7 @@ add_executable(nori
   src/parser/proplist.cpp
   src/parser/imageutil.cpp
   src/parser/lsystem.cpp
+  src/parser/turtle.cpp
 
   src/postprocessing/rfilter.cpp
 

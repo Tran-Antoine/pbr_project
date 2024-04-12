@@ -48,8 +48,8 @@ public:
                     Le += beta * emittance;
                 }
                 // seems more logic to break the indirect lighting loop whenever we hit an hit_emitter,
-                // regardless of whether its contribution should be counted or not
-                break;
+                // regardless of whether its contribution should be counted or not (WRONG)
+                //break;
             }
 
             if(!surface_bsdf) {

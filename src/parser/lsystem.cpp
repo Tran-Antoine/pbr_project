@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/common.h>
+#include <parser/lsystem.h>
 #include <core/mesh.h>
 #include <core/timer.h>
 #include <unordered_map>
@@ -12,182 +13,88 @@
 
 NORI_NAMESPACE_BEGIN
 
-struct TurtleState {
+LSystemGrammar::LSystemGrammar(std::string premise, std::vector<std::string> rules) : premise(std::move(premise)), rules(std::move(rules)) {}
 
-    Vector3f p;
-    float yaw, pitch;
-    Vector3f p_n;
-    float in_thickness;
-    float out_thickness;
-    float length;
-    bool random = false;
-    int depth = 0;
-
-};
-
-
-class LSystemGrammar {
-
-public:
-
-    /**
-     * List of symbols:
-     *
-     * F,G: Draw
-     * [,]: Push/Restore turtle state
-     * +,-: Rotate in the XY plane
-     * <,>: Rotate in the XZ plane
-     * w,W: Shrink/Increase width
-     * l,L: Shrink/Increase length
-     * r,d: Add/Remove noise feature to all values
-     * D  : Increase depth marker
-     * s  : Declare rule as stochastic (configuration decides the weightage)
-     *
-     * @param premise initial string
-     * @param rules evolutionary rules
-     */
-    LSystemGrammar(std::string premise, std::vector<std::string> rules) : premise(std::move(premise)), rules(std::move(rules)) {}
-
-    std::vector<std::vector<std::string>> get_stochastic_rules() {
-        std::vector<std::vector<std::string>> stochastic_rules;
-        for(const auto& r : rules) {
-            if(!isStochastic(r)) {
-                continue;
-            }
-            bool found = false;
-            for(auto& slist : stochastic_rules) {
-                if(slist[0].at(0) == r.at(0)) {
-                    slist.push_back(r);
-                    found = true;
-                    break;
-                }
-            }
-            if(!found){
-                stochastic_rules.push_back(std::vector<std::string>{r});
+std::vector<std::vector<std::string>> LSystemGrammar::get_stochastic_rules() {
+    std::vector<std::vector<std::string>> stochastic_rules;
+    for(const auto& r : rules) {
+        if(!isStochastic(r)) {
+            continue;
+        }
+        bool found = false;
+        for(auto& slist : stochastic_rules) {
+            if(slist[0].at(0) == r.at(0)) {
+                slist.push_back(r);
+                found = true;
+                break;
             }
         }
-        return stochastic_rules;
-    }
-
-    std::vector<std::string> get_deterministic_rules() {
-        std::vector<std::string> det_rules;
-        for(const auto& r : rules) {
-            if(!isStochastic(r)) {
-                det_rules.push_back(r);
-            }
+        if(!found){
+            stochastic_rules.push_back(std::vector<std::string>{r});
         }
-        return det_rules;
     }
+    return stochastic_rules;
+}
 
-    std::string apply_det(const std::string& src, const std::string& rule) {
-        std::string out;
-        for(auto c : src) {
-            if(rule.at(0) == c) {
-                out += rule.substr(2, rule.size());
-            } else {
-                out += c;
-            }
+std::vector<std::string> LSystemGrammar::get_deterministic_rules() {
+    std::vector<std::string> det_rules;
+    for(const auto& r : rules) {
+        if(!isStochastic(r)) {
+            det_rules.push_back(r);
         }
-        return out;
     }
+    return det_rules;
+}
 
-    static TurtleState simulate(const std::string& instructions, const LGrammarConfig& config) {
-
-        std::stack<TurtleState> turtle_states;
-        TurtleState current_state = {
-                Vector3f(0.f), 0.f, M_PI / 2, Vector3f(0.f, 1.f, 0.f),
-                config.get_initial_width(), config.get_initial_width(), config.get_length_factor()
-        };
-        TurtleState copy;
-
-        for (auto instr: instructions) {
-            switch (instr) {
-                case '[':
-                    copy = current_state;
-                    turtle_states.push(copy);
-                    break;
-                case ']':
-                    current_state = turtle_states.top();
-                    turtle_states.pop();
-                    break;
-                case '+':
-                    current_state.pitch += config.get_pitch_term();
-                    break;
-                case '-':
-                    current_state.pitch -= config.get_pitch_term();
-                    break;
-                case '>':
-                    current_state.yaw += config.get_yaw_term();
-                    break;
-                case '<':
-                    current_state.yaw -= config.get_yaw_term();
-                    break;
-                case 'w':
-                    current_state.out_thickness *= config.get_width_factor();
-                    break;
-                case 'W':
-                    current_state.out_thickness *= 1 / config.get_width_factor();
-                    break;
-                case 'l':
-                    current_state.length *= config.get_length_factor();
-                    break;
-                case 'L':
-                    current_state.length *= 1 / config.get_length_factor();
-                    break;
-                case 'D':
-                    current_state.depth++;
-                default:
-                    break;
-            }
-
+std::string LSystemGrammar::apply_det(const std::string& src, const std::string& rule) {
+    std::string out;
+    for(auto c : src) {
+        if(rule.at(0) == c) {
+            out += rule.substr(2, rule.size());
+        } else {
+            out += c;
         }
-        return current_state;
+    }
+    return out;
+}
+
+
+
+std::string LSystemGrammar::apply_stoch(const std::string& src, const std::vector<std::string>& rule, LGrammarConfig& config) {
+    std::string out;
+    char target_char = rule[0].at(0);
+
+    for(auto c : src) {
+        if(c == target_char) {
+            TurtleState state = simulate(out, config);
+            const std::string& single_rule = rule[config.pickRule(c, state.in_thickness, state.length, state.depth)];
+            out += single_rule.substr(3);
+        } else {
+            out += c;
+        }
     }
 
-    std::string apply_stoch(const std::string& src, const std::vector<std::string>& rule, LGrammarConfig& config) {
-        std::string out;
-        char target_char = rule[0].at(0);
+    return out;
+}
 
-        for(auto c : src) {
-            if(c == target_char) {
-                TurtleState state = simulate(out, config);
-                const std::string& single_rule = rule[config.pickRule(c, state.in_thickness, state.length, state.depth)];
-                out += single_rule.substr(3);
-            } else {
-                out += c;
-            }
+std::string LSystemGrammar::evolve(int n, LGrammarConfig& config) {
+
+    std::vector<std::string> det_rules = get_deterministic_rules();
+    std::vector<std::vector<std::string>> stoch_rules = get_stochastic_rules();
+
+    std::string current = premise;
+    for(int i = 0; i < n; i++) {
+
+        for(const auto& rule : stoch_rules) {
+            current = apply_stoch(current, rule, config);
         }
 
-        return out;
-    }
-
-    std::string evolve(int n, LGrammarConfig& config) {
-
-        std::vector<std::string> det_rules = get_deterministic_rules();
-        std::vector<std::vector<std::string>> stoch_rules = get_stochastic_rules();
-
-        std::string current = premise;
-        for(int i = 0; i < n; i++) {
-
-            for(const auto& rule : stoch_rules) {
-                current = apply_stoch(current, rule, config);
-            }
-
-            for(const auto& rule : det_rules) {
-                current = apply_det(current, rule);
-            }
+        for(const auto& rule : det_rules) {
+            current = apply_det(current, rule);
         }
-        return current;
     }
-
-private:
-
-    bool isStochastic(std::string rule) {
-        return rule.at(2) == 's';
-    }
-    std::string premise;
-    std::vector<std::string> rules;
-};
+    return current;
+}
 
 class LSystemMesh : public Mesh {
 
@@ -196,7 +103,7 @@ public:
 
         std::string premise = propList.getString("premise");
         std::vector<std::string> rules;
-        for(int i = 0; i < 10; i++) {
+        for(int i = 0; i < 30; i++) {
             std::string tagName = "rule" + std::to_string(i);
             std::string rule = propList.getString(tagName, "");
             if(rule.empty()) break;
@@ -223,7 +130,7 @@ public:
         std::vector<uint32_t>   indices;
         std::vector<Vector2f>   texcoords;
 
-        drawTree(mesh_string, config, positions, indices, texcoords);
+        drawLSystem(mesh_string, config, positions, indices, texcoords);
 
 
         m_F.resize(3, indices.size()/3);
@@ -271,12 +178,9 @@ protected:
 
     pcg32 random;
 
-    static int idealSmoothness(float radius) {
-        return (int) (radius * 100);
-    }
 
-    void drawTree(const std::string &seq, LGrammarConfig& config,
-                  std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) {
+    void drawLSystem(const std::string &seq, LGrammarConfig& config,
+                     std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) {
 
         std::stack<TurtleState> turtle_states;
 
@@ -302,7 +206,8 @@ protected:
                     break;
                 case 'F':
                 case 'G':
-                    handleDraw(current_state, instr, positions, indices, texcoords, config);
+                case 'H':
+                    config.drawSegment(instr, current_state, positions, indices, texcoords);
                     break;
                 case '+':
                     current_state.pitch += config.get_pitch_term();
@@ -339,148 +244,6 @@ protected:
             }
 
             index++;
-        }
-    }
-
-    void handleDraw(TurtleState &state, char c, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f>& texcoords,
-                    LGrammarConfig& config) {
-
-        Vector3f a = state.p;
-        Vector3f a_n = state.p_n;
-
-        bool randomization = state.random;
-
-        float length = state.length;
-        float yaw = state.yaw, pitch = state.pitch;
-        float in_thickness = state.in_thickness;
-        float out_thickness = state.out_thickness;
-
-        if(randomization) {
-            length = config.randomizeLength(length, c);
-            yaw = config.randomizeYaw(yaw, c);
-            pitch = config.randomizePitch(pitch, c);
-            out_thickness = config.randomizeThickness(out_thickness, c);
-        }
-
-        Vector3f direction = directional(pitch, yaw);
-        Vector3f b = a + length * direction;
-        Vector3f b_n = (b-a).normalized();
-
-        connect(a, b, a_n, in_thickness, out_thickness, idealSmoothness(std::max(in_thickness, out_thickness)),
-                positions, indices, texcoords);
-        state.p = b;
-        state.p_n = b_n;
-        state.in_thickness = out_thickness;
-    }
-
-    static void connect(const Point3f &a, const Point3f &b, const Vector3f &a_n, float in_thickness, float out_thickness,
-            int smoothness, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices,
-            std::vector<Vector2f> &texcoords) {
-
-        Vector3f b_n = (b-a).normalized(); // normal of b must be according to the cylinder's direction
-
-        std::vector<Vector3f> from_circle = circle(a, a_n, in_thickness, smoothness);
-        std::vector<Vector3f> to_circle   = circle(b, b_n, out_thickness, smoothness);
-
-        int index_pointer = positions.size(); // save pointer before adding new vertices
-        push_circle(from_circle, a, positions, indices, texcoords, false);
-        push_circle(to_circle, b, positions, indices, texcoords, true);
-
-        int n_points = from_circle.size() + 1; // +1 due to the center point
-
-        // goal: form two triangles to shape the rectangle of points (a0, a1, b0, b1)
-        int i0 = index_pointer + 1;
-        int j0 = i0 + n_points;
-
-        // For now we only allow smoothness to control the number of points, not the "length" resolution
-        for(int i = 1; i < n_points - 1; i++) {
-
-            int i1 = i0 + 1;
-            int j1 = j0 + 1;
-
-            indices.push_back(i0);
-            indices.push_back(i1);
-            indices.push_back(j1);
-
-            indices.push_back(i0);
-            indices.push_back(j1);
-            indices.push_back(j0);
-
-            i0++;
-            j0++;
-        }
-
-        indices.push_back(i0);
-        indices.push_back(index_pointer + 1);
-        indices.push_back(index_pointer + 1 + n_points);
-
-        indices.push_back(i0);
-        indices.push_back(index_pointer + 1 + n_points);
-        indices.push_back(j0);
-    }
-
-    static std::vector<Vector3f> circle(const Vector3f& p, const Vector3f& p_n, float radius, int smoothness) {
-
-        std::vector<Vector3f> pos(4 + smoothness);
-        Vector3f test = Vector3f(-p_n.y(), p_n.x(), 0).normalized();
-        Vector3f test2 = p_n.cross(test).normalized();
-        Frame frame(test, test2, p_n);
-        Vector3f anchor = Vector3f(radius, 0, 0);
-
-        for(int j = 0; j < smoothness + 4; j++) {
-
-            float delta_angle = j * 2 * M_PI * (1.f / (4 + smoothness));
-            //    x' = x cos θ − y sin θ
-            //    y' = x sin θ + y cos θ
-            Vector3f rotated_point = Vector3f(anchor.x() * cos(delta_angle) - anchor.y() * sin(delta_angle),
-                                              anchor.x() * sin(delta_angle) + anchor.y() * cos(delta_angle),
-                                              0.f);
-
-            pos[j] = frame.toWorld(rotated_point) + p;
-        }
-
-        return (pos);
-    }
-
-    static void push_circle(std::vector<Vector3f> &circle_positions, const Vector3f &p, std::vector<Vector3f> &positions,
-                std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords,
-                bool fill_circle) {
-
-        int center_pointer = positions.size();
-        int head = positions.size() + 1;
-        int edge_pointer = head;
-
-        float y_texture = fill_circle ? 1.f : 0.f;
-
-        positions.push_back(p);
-        texcoords.push_back(Vector2f(0.5f, y_texture)); // the value of this one doesn't really matter
-
-        Vector3f edge0 = circle_positions[0];
-        positions.push_back(edge0);
-        texcoords.push_back(Vector2f(0.0f, y_texture));
-
-        for(int i = 1; i <= circle_positions.size() - 1; i++) {
-
-            float x_texture = (float) i / (float) circle_positions.size();
-
-            Vector3f edge1 = circle_positions[i];
-            positions.push_back(edge1);
-            texcoords.push_back(Vector2f(x_texture, y_texture));
-
-
-            if(fill_circle) {
-                indices.push_back(center_pointer);
-                indices.push_back(edge_pointer);
-                indices.push_back(edge_pointer+1);
-            }
-
-            edge_pointer++;
-        }
-
-        if(fill_circle) {
-            indices.push_back(center_pointer);
-            indices.push_back(edge_pointer);
-            indices.push_back(head);
         }
     }
 };

@@ -7,14 +7,15 @@
     </sampler>
 
     <mesh type="lsystem">
-        <string name="premise" value="rlF"/>
-        <string name="rule0" value="F=sGGG"/>
-        <string name="rule1" value="F=sGGGDA"/>
-        <string name="rule2" value="F=sGGGDB"/>
-        <string name="rule3" value="F=s[GGDA]GGDB"/>
-        <string name="rule4" value="A=wl+F"/>
-        <string name="rule5" value="B=wl-F"/>
-
+        <string name="premise" value="rllF"/>
+        <string name="rule0" value="F=sC"/>
+        <string name="rule1" value="F=sCDA"/>
+        <string name="rule2" value="F=sCDB"/>
+        <string name="rule3" value="F=s[CDA]CDB"/>
+        <string name="rule4" value="F=s[lllD[+H]G[+H]G[+H]LLLA]lllD[+H]G[+H]G[+H]LLLB"/>
+        <string name="rule5" value="A=wl+F"/>
+        <string name="rule6" value="B=wl-F"/>
+        <string name="rule7" value="C=GGG"/>
 
         <float name="width_factor" value="0.85"/>
         <float name="length_factor" value="0.95"/>
@@ -51,7 +52,7 @@
         <float name="fov" value="60"/>
         <transform name="toWorld">
             <scale value="-1,1,1"/>
-            <lookat target="-0.0, 4.5, 0.01" origin="0, 4.5, -20" up="0, 1, 0"/>
+            <lookat target="-0.0, 6.5, 0.01" origin="0, 4.5, -20" up="0, 1, 0"/>
         </transform>
 
         <integer name="height" value="600"/>
