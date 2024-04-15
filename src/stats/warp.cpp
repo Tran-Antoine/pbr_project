@@ -301,4 +301,49 @@ float Warp::lineToLogisticPdf(float t, float std) {
     throw NoriException("Not implemented yet");
 }
 
+static float majorant(const Medium& medium) {
+    throw NoriException("Not implemented yet");
+}
+
+float Warp::sampleHeterogeneousPath(Sampler* sampler, const Point3f& x, const Vector3f& d, const Medium &medium) {
+
+    float eta1 = sampler->next1D();
+    float maj = majorant(medium);
+
+    float t = 0;
+    float p_real_interaction = 0.f;
+
+    while(p_real_interaction < eta1) {
+        eta1 = (eta1 - p_real_interaction) / (1 - p_real_interaction);
+
+        t += -log(1.f - sampler->next1D()) / maj;
+        float omega_t = medium.attenuation(x + t * d, d);
+        p_real_interaction = omega_t / maj;
+    }
+
+    return t;
+}
+
+static float ratio_tracking(const Point3f& a, const Point3f& b, const Medium& medium, Sampler* sampler) {
+    Vector3f d = (b-a).normalized();
+    float total_distance = (b-a).norm();
+    float maj = majorant(medium);
+
+    float weight = 1.f;
+    float t = 0.f;
+
+    while(t < total_distance) {
+        t += -log(1 - sampler->next1D()) / maj;
+        float null_amount = maj - medium.attenuation(a + d*t, d);
+        weight *= null_amount / maj;
+    }
+
+    return weight;
+}
+
+float Warp::sampleToHeterogeneousPathPdf(const Point3f& a, const Point3f& b, const Medium &medium, Sampler* sampler) {
+    // TODO: I think this should return the transmittance as sampleHeterogeneousPath aims to importance sample via the transmittance
+    return ratio_tracking(a, b, medium, sampler);
+}
+
 NORI_NAMESPACE_END

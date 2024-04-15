@@ -3,6 +3,9 @@ project(nori)
 
 add_subdirectory(ext ext_build)
 
+list(APPEND CMAKE_MODULE_PATH "C:/Program Files/OpenVDB/lib/cmake/OpenVDB")
+find_package(OpenVDB REQUIRED)
+
 set(OpenCV_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ext/opencv/build)
 # Find OpenCV package
 find_package(OpenCV REQUIRED)
@@ -40,7 +43,6 @@ include_directories(
   # OpenCV
   SYSTEM ${OPENCV_INCLUDE_DIR}
 )
-
 # The following lines build the main executable. If you add a source
 # code file to Nori, be sure to include it in this list.
 add_executable(nori
@@ -189,9 +191,9 @@ add_definitions(${NANOGUI_EXTRA_DEFS})
 
 
 if (WIN32)
-  target_link_libraries(nori tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS} zlibstatic ${OpenCV_LIBS})
+  target_link_libraries(nori tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS} zlibstatic ${OpenCV_LIBS} OpenVDB::openvdb)
 else()
-  target_link_libraries(nori tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS} ${OpenCV_LIBS})
+  target_link_libraries(nori tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS} ${OpenCV_LIBS} OpenVDB::openvdb)
 endif()
 
 #target_link_libraries(warptest tbb_static nanogui ${NANOGUI_EXTRA_LIBS})
