@@ -1,6 +1,7 @@
 #include <openvdb/openvdb.h>
 #include <openvdb/tools/ChangeBackground.h>
 #include <iostream>
+#include <openvdb/tools/Interpolation.h>
 
 static std::string PATH = "assets/voxel/Cloud_02.vdb";
 
@@ -23,9 +24,21 @@ int main() {
     }
     file.close();
 
-    openvdb::FloatGrid::Ptr grid = openvdb::gridPtrCast<openvdb::FloatGrid>(baseGrid);
+    using GridType = openvdb::FloatGrid;
 
-    std::cout << grid->activeVoxelCount() << "\n";
+    const GridType::Ptr grid = openvdb::gridPtrCast<openvdb::FloatGrid>(baseGrid);
+
+    openvdb::tools::GridSampler<GridType, openvdb::tools::BoxSampler> sampler(*grid);
+
+    for (openvdb::MetaMap::MetaIterator iter = grid->beginMeta();
+         iter != grid->endMeta(); ++iter) {
+        const std::string& name = iter->first;
+        openvdb::Metadata::Ptr value = iter->second;
+        std::string valueAsString = value->str();
+        std::cout << name << " = " << valueAsString << " (" << value->typeName() << ")" <<  std::endl;
+    }
+
+    std::cout << grid->indexToWorld(openvdb::Coord(300, 0, 0)) << "\n";
 
     for (openvdb::FloatGrid::ValueOnCIter iter = grid->cbeginValueOn(); iter; ++iter) {
         //std::cout << "Grid" << iter.getCoord() << " = " << *iter << std::endl;
