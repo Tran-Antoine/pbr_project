@@ -157,6 +157,7 @@ add_executable(nori
   src/integrator/volum4.cpp
   src/integrator/volum5.cpp
   src/integrator/volum6.cpp
+  src/integrator/volum7.cpp
 
   src/emitter/area.cpp
   src/emitter/environment.cpp
@@ -169,6 +170,7 @@ add_executable(nori
   src/parser/imageutil.cpp
   src/parser/lsystem.cpp
   src/parser/turtle.cpp
+  src/parser/boundedmedium.cpp
 
   src/postprocessing/rfilter.cpp
 
@@ -177,9 +179,9 @@ add_executable(nori
   src/volume/voxelmedium.cpp
   src/volume/voxelreader.cpp
 
-  #src/main.cpp
+  src/main.cpp
   #test/readvoxel.cpp
-  test/medium_test.cpp
+  #test/medium_test.cpp
   #test/perlin_test.cpp
   #test/fbm_test.cpp
   #test/mipmap_test.cpp

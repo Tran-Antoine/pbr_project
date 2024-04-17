@@ -305,7 +305,7 @@ static float majorant(const Medium& medium) {
     throw NoriException("Not implemented yet");
 }
 
-float Warp::sampleHeterogeneousPath(Sampler* sampler, const Point3f& x, const Vector3f& d, const Medium &medium) {
+float Warp::sampleHeterogeneousPath(Sampler* sampler, const Point3f& x, const Vector3f& d, const Medium &medium, float& pdf) {
 
     float eta1 = sampler->next1D();
     float maj = majorant(medium);
@@ -313,18 +313,30 @@ float Warp::sampleHeterogeneousPath(Sampler* sampler, const Point3f& x, const Ve
     float t = 0;
     float p_real_interaction = 0.f;
 
-    while(p_real_interaction < eta1) {
-        eta1 = (eta1 - p_real_interaction) / (1 - p_real_interaction);
+    float _pdf = 1.f;
 
-        t += -log(1.f - sampler->next1D()) / maj;
+    while(p_real_interaction < eta1) {
+
+        _pdf *= (1 - p_real_interaction);
+
+        float eta2 = sampler->next1D();
+        float distance_travelled = lineToHomogeneousPath(eta2, maj);
+
+        _pdf *= lineToHomogeneousPathPdf(distance_travelled, maj);
+        t += distance_travelled;
+
         float omega_t = medium.attenuation(x + t * d, d);
         p_real_interaction = omega_t / maj;
+
+        // remapping
+        eta1 = (eta1 - p_real_interaction) / (1 - p_real_interaction);
     }
 
+    pdf = _pdf;
     return t;
 }
 
-static float ratio_tracking(const Point3f& a, const Point3f& b, const Medium& medium, Sampler* sampler) {
+float Warp::ratio_tracking(const Point3f& a, const Point3f& b, const Medium& medium, Sampler* sampler) {
     Vector3f d = (b-a).normalized();
     float total_distance = (b-a).norm();
     float maj = majorant(medium);
@@ -342,8 +354,7 @@ static float ratio_tracking(const Point3f& a, const Point3f& b, const Medium& me
 }
 
 float Warp::sampleToHeterogeneousPathPdf(const Point3f& a, const Point3f& b, const Medium &medium, Sampler* sampler) {
-    // TODO: I think this should return the transmittance as sampleHeterogeneousPath aims to importance sample via the transmittance
-    return ratio_tracking(a, b, medium, sampler);
+    throw NoriException("PDF cannot be a posteriori evaluated");
 }
 
 NORI_NAMESPACE_END

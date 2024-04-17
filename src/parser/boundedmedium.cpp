@@ -72,22 +72,22 @@ public:
         std::vector<Vector3f> positions = {c000, c001, c010, c011, c100, c101, c110, c111};
         std::vector<uint32_t> indices = {
                 i000, i001, i011,
-                i000, i001, i010,
+                i000, i011, i010,
 
                 i000, i001, i101,
-                i000, i001, i100,
+                i000, i101, i100,
 
                 i001, i011, i111,
-                i001, i011, i101,
+                i001, i111, i101,
 
                 i000, i010, i110,
-                i000, i010, i100,
+                i000, i110, i100,
 
                 i010, i011, i111,
-                i010, i011, i110,
+                i010, i111, i110,
 
                 i100, i101, i111,
-                i100, i101, i110
+                i100, i111, i110
         };
 
         m_F.resize(3, indices.size()/3);
@@ -118,9 +118,6 @@ public:
                 break;
         }
     }
-
-protected:
-    Medium* medium = nullptr;
 };
 
 NORI_REGISTER_CLASS(BoundedMedium, "medium_mesh");
