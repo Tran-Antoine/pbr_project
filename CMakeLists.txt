@@ -3,6 +3,10 @@ project(nori)
 
 add_subdirectory(ext ext_build)
 
+set(BOOST_ROOT "C:/Users/Antoine/libs/vcpkg/installed/x64-windows")
+set(TBB_ROOT "C:/Users/Antoine/libs/vcpkg/installed/x64-windows")
+set(BLOSC_ROOT "C:/Users/Antoine/libs/vcpkg/installed/x64-windows")
+set(ZLIB_ROOT "C:/Users/Antoine/libs/vcpkg/installed/x64-windows")
 list(APPEND CMAKE_MODULE_PATH "C:/Program Files/OpenVDB/lib/cmake/OpenVDB")
 find_package(OpenVDB REQUIRED)
 
@@ -170,7 +174,8 @@ add_executable(nori
   src/volume/homogeneous.cpp
   src/volume/uniformphase.cpp
 
-  src/main.cpp
+  #src/main.cpp
+  test/readvoxel.cpp
   #test/perlin_test.cpp
   #test/fbm_test.cpp
   #test/mipmap_test.cpp
