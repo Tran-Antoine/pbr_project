@@ -4,6 +4,9 @@
 #include <core/object.h>
 #include <core/vector.h>
 #include <volume/phase.h>
+#include <openvdb/openvdb.h>
+#include <openvdb/tools/Interpolation.h>
+#include <core/bbox.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -17,9 +20,25 @@ class ConstantCoefficient : public MediumCoefficient {
 public:
     explicit ConstantCoefficient(float coeff) : coeff(coeff) {}
 
-    float eval(const Point3f& p, const Vector3f& v) const { return coeff; }
+    float eval(const Point3f& p, const Vector3f& v) const override { return coeff; }
 private:
     float coeff;
+};
+
+using VGrid = openvdb::FloatGrid;
+using VSampler = openvdb::tools::GridSampler<VGrid, openvdb::tools::BoxSampler>;
+
+class VoxelReader : public MediumCoefficient {
+public:
+    VoxelReader(const std::string &path, Transform  transform);
+    float eval(const Point3f& p, const Vector3f& v) const override;
+protected:
+    VGrid::Ptr voxel_data;
+    VSampler sampler;
+    Transform transform;
+    float majorant;
+    BoundingBox3i bounds_i;
+    BoundingBox3f bounds_w;
 };
 
 NORI_NAMESPACE_END
