@@ -5,6 +5,7 @@
 #include <core/vector.h>
 #include <volume/phase.h>
 #include <volume/coefficient.h>
+#include <core/bbox.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -33,6 +34,7 @@ public:
     void samplePhase(Sampler* sampler, const Vector3f& in, Vector3f& out, float& pdf) const { phase->sample(sampler, in, out, pdf); }
     Color3f evalPhase(const Vector3f& in, const Vector3f& out) const { return phase->eval(in, out); }
     float phasePdf(const Vector3f& in, const Vector3f& out) const { return phase->pdf(in, out); }
+    virtual BoundingBox3f bounds() const { return BoundingBox3f(); }
 
     /// Register a child object (e.g. a BSDF) with the mesh
     void addChild(NoriObject *obj) override {

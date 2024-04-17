@@ -534,7 +534,6 @@ bool Accel::rayIntersect(const Ray3f &_ray, Intersection &its, bool shadowRay) c
             } else {
                 its.shFrame = its.geoFrame;
             }
-            //std::cout << its.shFrame.n << "\n";
         }
     }
 

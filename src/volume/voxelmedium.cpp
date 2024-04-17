@@ -18,6 +18,10 @@ public:
         return "voxel";
     }
 
+    BoundingBox3f bounds() const override {
+        return static_cast<VoxelReader*>(absorption)->world_bounds();
+    }
+
 protected:
     Transform trafo;
 };

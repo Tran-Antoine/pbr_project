@@ -38,8 +38,9 @@ int main() {
         std::cout << name << " = " << valueAsString << " (" << value->typeName() << ")" <<  std::endl;
     }
 
-    std::cout << grid->indexToWorld(openvdb::Coord(300, 0, 0)) << "\n";
-
+    std::cout << "At 300,0,0: " << grid->indexToWorld(openvdb::Coord(300, 0, 0)) << "\n";
+    std::cout << "Min value: " << openvdb::tools::minMax(grid->tree()).min() << "\n";
+    std::cout << "Max value: " << openvdb::tools::minMax(grid->tree()).max() << "\n";
     for (openvdb::FloatGrid::ValueOnCIter iter = grid->cbeginValueOn(); iter; ++iter) {
         //std::cout << "Grid" << iter.getCoord() << " = " << *iter << std::endl;
     }

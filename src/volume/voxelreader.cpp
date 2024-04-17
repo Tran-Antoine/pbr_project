@@ -22,10 +22,14 @@ VoxelReader::VoxelReader(const std::string &path, Transform trafo)
 
     bounds_i = BoundingBox3i(min_i, max_i);
     bounds_w = BoundingBox3f(min_w, max_w);
+
+    auto minmax = openvdb::tools::minMax(voxel_data->tree());
+    majorant = minmax.max();
 }
 
 float VoxelReader::eval(const nori::Point3f &p, const nori::Vector3f &v) const {
-
+    // TODO: use cache version to optimize this
+    return sampler.wsSample(openvdb::Vec3R(p.x(), p.y(), p.z()));
 }
 
 NORI_NAMESPACE_END
