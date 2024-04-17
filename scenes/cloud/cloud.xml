@@ -1,0 +1,72 @@
+<scene>
+    <integrator type="volum7">
+    </integrator>
+
+    <sampler type="independent">
+        <integer name="sampleCount" value="256"/>
+    </sampler>
+
+    <camera type="perspective">
+        <!-- Camera-to-world coordinate system transformation -->
+        <transform name="toWorld">
+            <lookat origin="0, 2.3, -9" target="0, 1.5, 1" up="0,1,0"/>
+        </transform>
+
+        <float name="fov" value="90"/>
+
+        <integer name="width" value="768"/>
+        <integer name="height" value="384"/>
+    </camera>
+
+    <!-- Lamp -->
+    <mesh type="obj">
+        <string name="filename" value="flatcube.obj"/>
+        <transform name="toWorld">
+            <scale value="10, 0.2, 10"/>
+            <translate value="0,15,0"/>
+        </transform>
+        <emitter type="area">
+            <color name="radiance" value="4 3 3"/>
+        </emitter>
+    </mesh>
+
+    <!-- Volume -->
+    <mesh type="obj">
+        <transform name="toWorld">
+            <scale value="1, 5, 1"/>
+            <translate value="0,2,0"/>
+        </transform>
+        <string name="filename" value="flatcube.obj"/>
+
+        <medium type="homogeneous">
+            <float name="absorption" value="0.0"/>
+            <float name="scattering" value="0.4"/>
+        </medium>
+    </mesh>
+
+    <!-- Background cube -->
+    <mesh type="obj">
+        <transform name="toWorld">
+            <scale value="80, 80, 2.5"/>
+            <translate value="0,2,6"/>
+        </transform>
+        <string name="filename" value="flatcube.obj"/>
+
+        <bsdf type="diffuse">
+            <color name="albedo" value="0.725 0.31 0.68"/>
+        </bsdf>
+    </mesh>
+
+    <!-- Floor -->
+    <mesh type="obj">
+        <transform name="toWorld">
+            <scale value="7, 0.2, 7"/>
+            <translate value="0,100,0"/>
+        </transform>
+        <string name="filename" value="flatcube.obj"/>
+
+        <bsdf type="diffuse">
+            <color name="albedo" value="0.761 0.702 0.553"/>
+        </bsdf>
+    </mesh>
+</scene>

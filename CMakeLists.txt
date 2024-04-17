@@ -106,6 +106,7 @@ add_executable(nori
   include/nori/volume/medium.h
   include/nori/volume/phase.h
   include/nori/volume/coefficient.h
+  include/nori/volume/vdbutil.h
   
   
   # Source code files
@@ -173,9 +174,12 @@ add_executable(nori
 
   src/volume/homogeneous.cpp
   src/volume/uniformphase.cpp
+  src/volume/voxelmedium.cpp
+  src/volume/voxelreader.cpp
 
   #src/main.cpp
-  test/readvoxel.cpp
+  #test/readvoxel.cpp
+  test/medium_test.cpp
   #test/perlin_test.cpp
   #test/fbm_test.cpp
   #test/mipmap_test.cpp

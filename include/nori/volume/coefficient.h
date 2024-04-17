@@ -7,6 +7,7 @@
 #include <openvdb/openvdb.h>
 #include <openvdb/tools/Interpolation.h>
 #include <core/bbox.h>
+#include <core/transform.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -32,6 +33,11 @@ class VoxelReader : public MediumCoefficient {
 public:
     VoxelReader(const std::string &path, Transform  transform);
     float eval(const Point3f& p, const Vector3f& v) const override;
+
+    BoundingBox3i index_bounds() const { return bounds_i; }
+    BoundingBox3f world_bounds() const { return bounds_w; }
+    float get_majorant() const { return majorant; }
+
 protected:
     VGrid::Ptr voxel_data;
     VSampler sampler;
