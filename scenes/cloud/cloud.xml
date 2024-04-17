@@ -3,13 +3,13 @@
     </integrator>
 
     <sampler type="independent">
-        <integer name="sampleCount" value="256"/>
+        <integer name="sampleCount" value="1"/>
     </sampler>
 
     <camera type="perspective">
         <!-- Camera-to-world coordinate system transformation -->
         <transform name="toWorld">
-            <lookat origin="0, 2.3, -9" target="0, 1.5, 1" up="0,1,0"/>
+            <lookat origin="0.11, 0.01, -10" target="0, 0, 0" up="0,1,0"/>
         </transform>
 
         <float name="fov" value="90"/>
@@ -18,55 +18,26 @@
         <integer name="height" value="384"/>
     </camera>
 
-    <!-- Lamp -->
-    <mesh type="obj">
-        <string name="filename" value="flatcube.obj"/>
-        <transform name="toWorld">
-            <scale value="10, 0.2, 10"/>
-            <translate value="0,15,0"/>
-        </transform>
-        <emitter type="area">
-            <color name="radiance" value="4 3 3"/>
-        </emitter>
-    </mesh>
-
     <!-- Volume -->
-    <mesh type="obj">
-        <transform name="toWorld">
-            <scale value="1, 5, 1"/>
-            <translate value="0,2,0"/>
-        </transform>
-        <string name="filename" value="flatcube.obj"/>
-
-        <medium type="homogeneous">
-            <float name="absorption" value="0.0"/>
-            <float name="scattering" value="0.4"/>
+    <mesh type="medium_mesh">
+        <medium type="voxel">
+            <string name="voxel_path" value="assets/voxel/Cloud_02.vdb"/>
+            <float name="scattering" value="0.01"/>
         </medium>
     </mesh>
 
-    <!-- Background cube -->
     <mesh type="obj">
+        <string name="filename" value="assets/shape/squarelight.obj"/>
         <transform name="toWorld">
-            <scale value="80, 80, 2.5"/>
-            <translate value="0,2,6"/>
+            <scale value="50,1,50"/>
+            <translate value="0,10,0"/>
         </transform>
-        <string name="filename" value="flatcube.obj"/>
+        <emitter type="area">
+            <color name="radiance" value="60 60 60"/>
+        </emitter>
 
         <bsdf type="diffuse">
-            <color name="albedo" value="0.725 0.31 0.68"/>
-        </bsdf>
-    </mesh>
-
-    <!-- Floor -->
-    <mesh type="obj">
-        <transform name="toWorld">
-            <scale value="7, 0.2, 7"/>
-            <translate value="0,100,0"/>
-        </transform>
-        <string name="filename" value="flatcube.obj"/>
-
-        <bsdf type="diffuse">
-            <color name="albedo" value="0.761 0.702 0.553"/>
+            <color name="albedo" value="0.5 0.5 0.5"/>
         </bsdf>
     </mesh>
 </scene>

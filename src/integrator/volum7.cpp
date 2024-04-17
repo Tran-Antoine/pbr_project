@@ -6,7 +6,7 @@
 NORI_NAMESPACE_BEGIN
 
 /// Volumetric integrator. Supports:
-/// - Heterogeneous medium absorption
+/// - Heterogeneous medium absorption and scattering
 /// - NEE + Indirect scattering with MIS
 /// - Both emitter and regular surfaces
 class Volum7Integrator : public Integrator {
@@ -44,11 +44,7 @@ public:
 
             if(hit_emitter) {
                 if(!its.medium.is_present() && (bounces == 0 || last_specular)) {
-                    Le += beta * emittance(its);
-                }
-
-                if (bounces != 0) {
-                    break;
+                    addIllumination(Le, beta * emittance(its));
                 }
             }
 
@@ -74,11 +70,16 @@ public:
                 Vector3f wo = record.wo();
 
                 float pdf_material  = directionalChangePdf(scatters, its, record);
+
+                if(pdf_material == 0) {
+                    continue;
+                }
+
                 float weight = balancedMIS(light_point_pdf, pdf_material);
 
                 if(light_point_pdf != 0.f && emitter->is_source_visible(scene, record)) {
                     // transmittance/pdf = 1
-                    Li += weight * tr_over_pdf * beta * emitted * directional_term / light_point_pdf;
+                    addIllumination(Li, weight * tr_over_pdf * beta * emitted * directional_term / light_point_pdf);
                 }
             }
 
@@ -117,11 +118,11 @@ public:
                 }
 
                 float previous_tr_over_pdf = its.medium.is_present()
-                        ? its.medium.medium->attenuation(0.f, 0.f)
+                        ? its.medium.medium->attenuation(intersection_point, 0.f)
                         : 1.0f;
 
                 float weight = balancedMIS(brdf_pdf, light_pdf);
-                Li += weight * previous_tr_over_pdf * beta * emitted * directional_term / light_point_pdf;
+                addIllumination(Li, weight * previous_tr_over_pdf * beta * emitted * directional_term / light_point_pdf);
             }
         }
         return Le + Li;
@@ -130,7 +131,7 @@ public:
     static Color3f directionalChangeTerm(bool scattering, const Intersection& its, const EmitterQueryRecord& rec) {
 
         if(scattering) {
-            float omega_s = its.medium.medium->out_scattering(0.f, 0.f);
+            float omega_s = its.medium.medium->out_scattering(its.p, 0.f);
             return omega_s * its.medium.medium->evalPhase(rec.wi, rec.wo());
         } else {
             BSDFQueryRecord bsdf_query(rec.wi, rec.wo(), its.shFrame, EMeasure::ESolidAngle, its.uv);
@@ -163,7 +164,7 @@ public:
         if(scattering) {
             const Medium *m = its.medium.medium;
             m->samplePhase(sampler, in, next, unused);
-            beta *= m->out_scattering(0.f, 0.f) * m->evalPhase(in, next);
+            beta *= m->out_scattering(its.p, 0.f) * m->evalPhase(in, next);
         } else {
             const BSDF* bsdf = its.mesh->getBSDF();
             BSDFQueryRecord record(its.shFrame.toLocal(-in));
@@ -178,7 +179,7 @@ public:
         if(scattering) {
             return EmitterQueryRecord(nullptr, p, 0.f, -ray.d, 0.f);
         } else {
-            return EmitterQueryRecord(its.mesh->getBSDF(), p, its.shFrame.n, -ray.d, its.uv);
+            return EmitterQueryRecord(find_bsdf(its), p, its.shFrame.n, -ray.d, its.uv);
         }
     }
 
@@ -211,9 +212,10 @@ public:
             return true;
         }
 
-        float omega_t = its.medium.medium->attenuation(0.f, 0.f);
+        Point3f enteringPoint = ray.o + its.medium.mint * ray.d;
+
         float t_max = maxt(found, its);
-        float t_through_media = Warp::lineToHomogeneousPath(sampler->next1D(), omega_t);
+        float t_through_media = Warp::sampleHeterogeneousPath(sampler, enteringPoint, ray.d, *its.medium.medium);
         float t_travelled = its.medium.mint + t_through_media;
 
         // Medium found, but the ray still travelled all the way through it
@@ -230,6 +232,8 @@ public:
 
         // Medium found, and scattering happened
         intersection = ray.o + t_travelled * ray.d;
+        float omega_t = its.medium.medium->attenuation(intersection, 0.f);
+
         scattering = true;
         tr_pdf_ratio = 1.f / omega_t;
         return true;
@@ -257,9 +261,22 @@ public:
         return emitter->getEmittance(EmitterQueryRecord(nullptr, 0.f, 0.f, 0.f, its.p, its.shFrame.n, its.uv));
     }
 
+    static const BSDF* find_bsdf(const Intersection& its) {
+        return its.mesh ? its.mesh->getBSDF() : nullptr;
+    }
+
+    static void addIllumination(Color3f& src, const Color3f& val) {
+        if(!val.isValid()) {
+            throw NoriException("Invalid radiance");
+        }
+        src = src + val;
+    }
+
     std::string toString() const {
         return "Volum7Integrator[]";
     }
+
+
 };
 
 NORI_REGISTER_CLASS(Volum7Integrator, "volum7");
