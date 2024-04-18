@@ -15,10 +15,10 @@ public:
         /* No parameters this time */
     }
 
-    Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const {
+    constexpr static float Q = 0.1f;
+    constexpr static int MAX_BOUNCES = 10;
 
-        float q = 0.1;
-        int max_bounces = 10;
+    Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const {
 
         Color3f Le(0.f), Li(0.f);
         Color3f beta(1.f);
@@ -30,7 +30,7 @@ public:
 
         found = scene->rayIntersect(current_ray, its);
 
-        while(sampler->next1D() > q && bounces <= max_bounces) {
+        while(roulette_success(sampler, bounces)) {
 
             // short circuit to avoid computation if the contribution is zero
             if(beta.isZero()) {
@@ -39,25 +39,31 @@ public:
 
             Vector3f wi = -current_ray.d;
             const Emitter* hit_emitter = find_emitter(its);
-            const BSDF* bsdf = its.mesh ? its.mesh->getBSDF() : nullptr;
-            const Vector3f& n = found ? its.shFrame.n : 0.f;
+            const BSDF* hit_bsdf = its.mesh ? its.mesh->getBSDF() : nullptr;
+            const Vector3f& surface_normal = found ? its.shFrame.n : 0.f;
 
             if(hit_emitter) {
                 if(!its.medium.is_present() && (bounces == 0 || last_specular)) {
-                    addIllumination(Le, beta * emittance(its));
+                    add_illumination(Le, beta * emittance(its));
                 }
             }
 
             bool scatters;
             Point3f intersection_point;
-            float tr_over_pdf;
+            float transmittance;
+            float free_flight_pdf;
             float light_point_pdf;
-            bool valid_ray = sampleIntersection(found, current_ray, its, sampler, scatters, tr_over_pdf, intersection_point);
+
+            bool any_intersection = sampleIntersection(found, current_ray, its, sampler,
+                                                       scatters, transmittance, free_flight_pdf, intersection_point);
 
             // If there is no medium AND no intersection is found, there is nothing else to do
-            if(!valid_ray) {
+            if(!any_intersection) {
                 break;
             }
+
+            beta *= transmittance / free_flight_pdf;
+
             // NEE for either medium scattering or surface intersection with Emitter Importance Sampling
             for(const Emitter* emitter : scene->getEmitters()) {
 
@@ -66,20 +72,19 @@ public:
 
                 Color3f directional_term = directionalChangeTerm(scatters, its, record);
                 Color3f emitted = emitter->getEmittance(record);
-
                 Vector3f wo = record.wo();
 
-                float pdf_material  = directionalChangePdf(scatters, its, record);
+                float direct_transmittance = eval_transmittance(its.medium.medium, record, sampler);
+                float directional_pdf  = directionalChangePdf(scatters, its, record);
 
-                if(pdf_material == 0) {
+                if(directional_pdf == 0 || light_point_pdf == 0) {
                     continue;
                 }
 
-                float weight = balancedMIS(light_point_pdf, pdf_material);
+                float weight = balancedMIS(light_point_pdf, directional_pdf);
 
-                if(light_point_pdf != 0.f && emitter->is_source_visible(scene, record)) {
-                    // transmittance/pdf = 1
-                    addIllumination(Li, weight * tr_over_pdf * beta * emitted * directional_term / light_point_pdf);
+                if(emitter->is_source_visible(scene, record)) {
+                    add_illumination(Li, weight * direct_transmittance * beta * emitted * directional_term / light_point_pdf_remove_this_pdf?);
                 }
             }
 
@@ -87,12 +92,13 @@ public:
             Ray3f previous_ray = current_ray;
             Intersection previous_its = its;
 
+            // sample next direction and include loss of energy due to scattering
             Vector3f next_direction = sampleNextDirection(sampler, current_ray.d, scatters, its, beta);
             current_ray = Ray3f(intersection_point, next_direction);
             current_ray.starting_medium = its.medium.medium; // potentially nullptr (and it's fine)
             last_specular = !scatters && !its.mesh->getBSDF()->isDiffuse(); // if no scattering, the BSDF must exist
             bounces++;
-            beta /= (1-q);
+            beta /= (1-Q);
             found = scene->rayIntersect(current_ray, its);
 
 
@@ -101,10 +107,16 @@ public:
             if(found && find_emitter(its)) {
 
                 const Emitter* emitter_hit = find_emitter(its);
-                EmitterQueryRecord emitter_hit_record = recordForLateNEE(previous_ray, its, bsdf, intersection_point, n, scatters);
+                EmitterQueryRecord emitter_hit_record = recordForLateNEE(previous_ray,
+                                                                         its,
+                                                                         hit_bsdf,
+                                                                         intersection_point,
+                                                                         surface_normal,
+                                                                         scatters);
 
                 Color3f emitted = emitter_hit->getEmittance(emitter_hit_record);
                 Color3f directional_term = directionalChangeTerm(scatters, previous_its, emitter_hit_record);
+                float direct_transmittance = eval_transmittance(its.medium.medium, emitter_hit_record, sampler);
 
                 if(emitted.isZero()) {
                     continue;
@@ -117,12 +129,13 @@ public:
                     continue;
                 }
 
-                float previous_tr_over_pdf = its.medium.is_present()
+                previous_tr_over = its.medium.is_present()
                         ? its.medium.medium->attenuation(intersection_point, 0.f)
                         : 1.0f;
 
                 float weight = balancedMIS(brdf_pdf, light_pdf);
-                addIllumination(Li, weight * previous_tr_over_pdf * beta * emitted * directional_term / light_point_pdf);
+                add_illumination(Li,
+                                 weight * direct_transmittance * beta * emitted * directional_term / light_point_pdf_this_is_wrong);
             }
         }
         return Le + Li;
@@ -198,44 +211,50 @@ public:
         }
     }
 
-    static bool sampleIntersection(bool found, const Ray3f& ray, const Intersection& its, Sampler* sampler, bool& scattering, float& tr_pdf_ratio, Point3f& intersection) {
+    static bool sampleIntersection(bool contains_surface, const Ray3f& ray, const Intersection& its, Sampler* sampler,
+                                   bool& scattering, float& transmittance, float& free_flight_pdf, Point3f& intersection) {
 
-        if(!its.medium.is_present() && !found) {
+        if(!its.medium.is_present() && !contains_surface) {
             return false;
         }
 
         // if no medium, PDF is a discrete dirac delta
+        // Transmittance is 1, pdf is 1 (as only one possibility)
         if(!its.medium.is_present()) {
             scattering = false;
-            tr_pdf_ratio = 1.f;
+            transmittance = 1.f;
+            free_flight_pdf = 1.f;
             intersection = its.p;
             return true;
         }
 
-        Point3f enteringPoint = ray.o + its.medium.mint * ray.d;
+        Point3f medium_entrance = ray.o + its.medium.mint * ray.d;
+        Point3f medium_exit = ray.o + its.medium.maxt * ray.d;
 
-        float t_max = maxt(found, its);
-        float t_through_media = Warp::sampleHeterogeneousPath(sampler, enteringPoint, ray.d, *its.medium.medium);
+        float _free_flight_pdf;
+        float t_max = maxt(contains_surface, its);
+        float t_through_media = Warp::sampleHeterogeneousDistance(sampler, medium_entrance, ray.d, *its.medium.medium,_free_flight_pdf);
         float t_travelled = its.medium.mint + t_through_media;
 
         // Medium found, but the ray still travelled all the way through it
         if(t_travelled >= t_max) {
-            if(!found) {
+            if(!contains_surface) {
                 // no surface hit, and the ray went through the medium
                 return false;
             }
             scattering = false;
-            tr_pdf_ratio = 1.f; // discrete PDF
+            transmittance = Warp::ratio_tracking(medium_entrance, medium_exit, *its.medium.medium, sampler);
+            free_flight_pdf = _free_flight_pdf; // TODO: not sure if this is correct
             intersection = its.p;
             return true;
         }
 
-        // Medium found, and scattering happened
+        // Medium contains_surface, and scattering happened
         intersection = ray.o + t_travelled * ray.d;
-        float omega_t = its.medium.medium->attenuation(intersection, 0.f);
-
+        transmittance = Warp::ratio_tracking(medium_entrance, intersection, *its.medium.medium, sampler);
+        free_flight_pdf = _free_flight_pdf;
         scattering = true;
-        tr_pdf_ratio = 1.f / omega_t;
+
         return true;
     }
 
@@ -265,11 +284,22 @@ public:
         return its.mesh ? its.mesh->getBSDF() : nullptr;
     }
 
-    static void addIllumination(Color3f& src, const Color3f& val) {
+    static void add_illumination(Color3f& src, const Color3f& val) {
         if(!val.isValid()) {
             throw NoriException("Invalid radiance");
         }
         src = src + val;
+    }
+
+    static bool roulette_success(Sampler* sampler, int bounces) {
+        return sampler->next1D() > Q && bounces <= MAX_BOUNCES;
+    }
+
+    static float eval_transmittance(const Medium* medium, const EmitterQueryRecord& record, Sampler* sampler) {
+        if(!medium) {
+            return 1.0f;
+        }
+        return Warp::ratio_tracking(record.p, record.l, *medium, sampler);
     }
 
     std::string toString() const {

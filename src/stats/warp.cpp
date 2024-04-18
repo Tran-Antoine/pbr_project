@@ -305,7 +305,7 @@ static float majorant(const Medium& medium) {
     throw NoriException("Not implemented yet");
 }
 
-float Warp::sampleHeterogeneousPath(Sampler* sampler, const Point3f& x, const Vector3f& d, const Medium &medium, float& pdf) {
+float Warp::sampleHeterogeneousDistance(Sampler* sampler, const Point3f& x, const Vector3f& d, const Medium &medium, float& pdf) {
 
     float eta1 = sampler->next1D();
     float maj = majorant(medium);
@@ -315,14 +315,13 @@ float Warp::sampleHeterogeneousPath(Sampler* sampler, const Point3f& x, const Ve
 
     float _pdf = 1.f;
 
-    while(p_real_interaction < eta1) {
+    while(p_real_interaction < eta1 && medium.bounds().contains(x + t*d)) {
 
         _pdf *= (1 - p_real_interaction);
 
         float eta2 = sampler->next1D();
         float distance_travelled = lineToHomogeneousPath(eta2, maj);
 
-        _pdf *= lineToHomogeneousPathPdf(distance_travelled, maj);
         t += distance_travelled;
 
         float omega_t = medium.attenuation(x + t * d, d);
