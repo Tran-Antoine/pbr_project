@@ -96,7 +96,7 @@ public:
 
     static float lineToLogisticPdf(float t, float std);
 
-    static float sampleHeterogeneousPath(Sampler* sampler, const Point3f& x, const Vector3f& d, const Medium &medium, float& pdf);
+    static float sampleHeterogeneousDistance(Sampler* sampler, const Point3f& x, const Vector3f& d, const Medium &medium, float& pdf);
 
     static float sampleToHeterogeneousPathPdf(const Point3f& a, const Point3f& b, const Medium &medium, Sampler* sampler);
 
