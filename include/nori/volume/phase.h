@@ -24,4 +24,11 @@ class UniformPhase : public PhaseFunction {
     std::string toString() const override;
 };
 
+class HenyeyGreensteinPhase : public PhaseFunction {
+    float pdf(const Vector3f &in, const Vector3f &out) const override;
+    void sample(Sampler *sampler, const Vector3f &in, Vector3f &out, float &pdf) const override;
+    Color3f eval(const Vector3f &in, const Vector3f &out) const override;
+    std::string toString() const override;
+};
+
 NORI_NAMESPACE_END

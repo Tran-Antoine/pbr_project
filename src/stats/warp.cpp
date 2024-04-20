@@ -356,4 +356,21 @@ float Warp::sampleToHeterogeneousPathPdf(const Point3f& a, const Point3f& b, con
     throw NoriException("PDF cannot be a posteriori evaluated");
 }
 
+Vector3f Warp::squareToHenyeyGreenstein(const Point2f& sample, float g) {
+    float temp = (1 - g*g) / (1 - g + 2*g*sample.x());
+    float cosTheta = 1 / (2*g) * (1 + g*g - (temp*temp));
+    float sinTheta = sqrt(1 - cosTheta*cosTheta);
+    float phi = 2*M_PI*sample.y();
+
+    return Vector3f(
+            sinTheta * cos(phi),
+            sinTheta * sin(phi),
+            cosTheta
+    );
+}
+
+Vector3f Warp::squareToHenyeyGreensteinPdf(float cosTheta, float g) {
+    return 1.f / (4*M_PI) * (1 - g*g) / pow(1 + g*g + 2*g*cosTheta, 1.5);
+}
+
 NORI_NAMESPACE_END
