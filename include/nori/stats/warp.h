@@ -101,6 +101,10 @@ public:
     static float sampleToHeterogeneousPathPdf(const Point3f& a, const Point3f& b, const Medium &medium, Sampler* sampler);
 
     static float ratio_tracking(const Point3f &a, const Point3f &b, const Medium &medium, Sampler *sampler);
+
+    static Vector3f squareToHenyeyGreenstein(const Point2f& sample, float g);
+
+    static Vector3f squareToHenyeyGreensteinPdf(float cosTheta, float g);
 };
 
 NORI_NAMESPACE_END
