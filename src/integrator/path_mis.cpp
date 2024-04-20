@@ -45,12 +45,12 @@ public:
 
             if(hit_emitter) {
                 if(bounces == 0 || last_specular) {
-                    EmitterQueryRecord hit_emitter_rec = EmitterQueryRecord(nullptr, 0.f, 0.f, wi, x, n, its.uv);
+                    EmitterQueryRecord hit_emitter_rec = EmitterQueryRecord(nullptr, ray.o, 0.f, wi, x, n, its.uv);
                     Color3f emittance = hit_emitter->getEmittance(hit_emitter_rec);
 
                     Le += beta * emittance;
                 }
-                break;
+                //break;
             }
 
             if(!surface_bsdf) {
@@ -70,10 +70,10 @@ public:
 
                 Color3f direct_rad = emitter->sampleRadiance(emitter_rec, *sampler, scene, pdf_light, EMeasure::ESurfaceArea);
 
-                if(direct_rad.isZero()) {
+                if(direct_rad.isZero() || pdf_light == 0) {
                     continue;
                 }
-                direct_rad /= pdf_light;
+                direct_rad /= pdf_light; // TODO
                 pdf_light_angular = emitter->to_angular(emitter_rec, pdf_light);
 
                 Vector3f wo = emitter_rec.wo();
@@ -113,11 +113,11 @@ public:
                 float light_pdf = emitter_hit->pdf(emitter_hit_record, ESolidAngle);
                 float brdf_pdf = surface_bsdf->pdf(bsdf_record);
 
-                if(light_pdf + brdf_pdf == 0) {
+                if(light_pdf == 0 || brdf_pdf == 0) {
                     continue;
                 }
 
-                float weight = balancedMIS(brdf_pdf, light_pdf);
+                float weight = balancedMIS(brdf_pdf, light_pdf) / brdf_pdf;
                 Ld += direct(beta, weight, emittance);
             }
         }

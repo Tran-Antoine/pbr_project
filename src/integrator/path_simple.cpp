@@ -43,7 +43,7 @@ public:
             if(hit_emitter) {
                 if(bounces == 0 || last_specular) {
                     // here x and n are actually l and n_l
-                    EmitterQueryRecord emitter_rec = EmitterQueryRecord(nullptr, 0.f, 0.f, wi, x, n, its.uv);
+                    EmitterQueryRecord emitter_rec = EmitterQueryRecord(nullptr, ray.o, 0.f, wi, x, n, its.uv);
                     Color3f emittance = hit_emitter->getEmittance(emitter_rec);
                     Le += beta * emittance;
                 }
@@ -64,7 +64,6 @@ public:
                 Color3f direct_rad = emitter->sampleRadiance(emitter_rec, *sampler, scene, pdf, ESurfaceArea);
 
                 if (pdf != 0) {
-                    Color3f weighted_rad = direct_rad / pdf;
                     Ld += beta * direct_rad / pdf;
                 }
             }
