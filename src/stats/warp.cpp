@@ -310,7 +310,7 @@ float Warp::sampleHeterogeneousDistance(Sampler* sampler, const Point3f& x, cons
     float eta1 = sampler->next1D();
     float maj = majorant(medium);
 
-    float t = 0;
+    float t = Epsilon;
     float p_real_interaction = 0.f;
 
     float _pdf = 1.f;
