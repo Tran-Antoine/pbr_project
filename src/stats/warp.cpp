@@ -293,6 +293,14 @@ float Warp::lineToHomogeneousPathPdf(float t, float omega_t) {
     return omega_t * exp(-omega_t * t);
 }
 
+float Warp::sampleHeterogeneousDistanceFromMajorant(float s, float maj) {
+    return Warp::lineToHomogeneousPath(s, maj);
+}
+
+float Warp::sampleHeterogeneousDistanceFromMajorantPdf(float s, float maj) {
+    return Warp::lineToHomogeneousPathPdf(s, maj);
+}
+
 float Warp::lineToLogistic(float s, float std) {
     return -std * std::log(1 / s - 1);
 }
@@ -305,7 +313,7 @@ static float majorant(const Medium& medium) {
     throw NoriException("Not implemented yet");
 }
 
-float Warp::sampleHeterogeneousDistance(Sampler* sampler, const Point3f& x, const Vector3f& d, const Medium &medium, float& pdf) {
+float Warp::sampleHeterogeneousDistance(Sampler *sampler, const Point3f &x, const Vector3f &d, const Medium &medium) {
 
     float eta1 = sampler->next1D();
     float maj = majorant(medium);
@@ -313,11 +321,8 @@ float Warp::sampleHeterogeneousDistance(Sampler* sampler, const Point3f& x, cons
     float t = Epsilon;
     float p_real_interaction = 0.f;
 
-    float _pdf = 1.f;
 
     while(p_real_interaction < eta1 && medium.bounds().contains(x + t*d)) {
-
-        _pdf *= (1 - p_real_interaction);
 
         float eta2 = sampler->next1D();
         float distance_travelled = lineToHomogeneousPath(eta2, maj);
@@ -331,7 +336,6 @@ float Warp::sampleHeterogeneousDistance(Sampler* sampler, const Point3f& x, cons
         eta1 = (eta1 - p_real_interaction) / (1 - p_real_interaction);
     }
 
-    pdf = _pdf;
     return t;
 }
 
@@ -352,7 +356,7 @@ float Warp::ratio_tracking(const Point3f& a, const Point3f& b, const Medium& med
     return weight;
 }
 
-float Warp::sampleToHeterogeneousPathPdf(const Point3f& a, const Point3f& b, const Medium &medium, Sampler* sampler) {
+float Warp::sampleToHeterogeneousDistancePdf(const Point3f& a, const Point3f& b, const Medium &medium, Sampler* sampler) {
     throw NoriException("PDF cannot be a posteriori evaluated");
 }
 
@@ -372,5 +376,7 @@ Vector3f Warp::squareToHenyeyGreenstein(const Point2f& sample, float g) {
 Vector3f Warp::squareToHenyeyGreensteinPdf(float cosTheta, float g) {
     return 1.f / (4*M_PI) * (1 - g*g) / pow(1 + g*g + 2*g*cosTheta, 1.5);
 }
+
+
 
 NORI_NAMESPACE_END

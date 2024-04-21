@@ -96,9 +96,14 @@ public:
 
     static float lineToLogisticPdf(float t, float std);
 
-    static float sampleHeterogeneousDistance(Sampler* sampler, const Point3f& x, const Vector3f& d, const Medium &medium, float& pdf);
+    static float
+    sampleHeterogeneousDistance(Sampler *sampler, const Point3f &x, const Vector3f &d, const Medium &medium);
 
-    static float sampleToHeterogeneousPathPdf(const Point3f& a, const Point3f& b, const Medium &medium, Sampler* sampler);
+    static float sampleToHeterogeneousDistancePdf(const Point3f& a, const Point3f& b, const Medium &medium, Sampler* sampler);
+
+    static float sampleHeterogeneousDistanceFromMajorant(float s, float maj);
+
+    static float sampleHeterogeneousDistanceFromMajorantPdf(float s, float maj);
 
     static float ratio_tracking(const Point3f &a, const Point3f &b, const Medium &medium, Sampler *sampler);
 

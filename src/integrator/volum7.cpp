@@ -75,7 +75,7 @@ public:
                 Vector3f wo = record.wo();
 
                 float direct_transmittance = eval_transmittance(its.medium.medium, record, sampler);
-                float directional_pdf  = directionalChangePdf(scatters, its, record);
+                float directional_pdf  = directional_change_pdf(scatters, its, record);
 
                 if(directional_pdf == 0 || light_point_pdf == 0) {
                     continue;
@@ -84,7 +84,7 @@ public:
                 float weight = balancedMIS(light_point_pdf, directional_pdf);
 
                 if(emitter->is_source_visible(scene, record)) {
-                    add_illumination(Li, weight * direct_transmittance * beta * emitted * directional_term / light_point_pdf_remove_this_pdf?);
+                    add_illumination(Li, weight * direct_transmittance * beta * emitted * directional_term / light_point_pdf);
                 }
             }
 
@@ -129,13 +129,13 @@ public:
                     continue;
                 }
 
-                previous_tr_over = its.medium.is_present()
+                float previous_tr_over = its.medium.is_present()
                         ? its.medium.medium->attenuation(intersection_point, 0.f)
                         : 1.0f;
 
                 float weight = balancedMIS(brdf_pdf, light_pdf);
                 add_illumination(Li,
-                                 weight * direct_transmittance * beta * emitted * directional_term / light_point_pdf_this_is_wrong);
+                                 weight * direct_transmittance * beta * emitted * directional_term / brdf_pdf);
             }
         }
         return Le + Li;
@@ -152,7 +152,7 @@ public:
         }
     }
 
-    static float directionalChangePdf(bool scattering, const Intersection& its, const EmitterQueryRecord& rec) {
+    static float directional_change_pdf(bool scattering, const Intersection& its, const EmitterQueryRecord& rec) {
         if(scattering) {
             return its.medium.medium->phasePdf(-rec.wi, rec.wo());
         } else {
@@ -212,29 +212,34 @@ public:
     }
 
     static bool sampleIntersection(bool contains_surface, const Ray3f& ray, const Intersection& its, Sampler* sampler,
-                                   bool& scattering, float& transmittance, float& free_flight_pdf, Point3f& intersection) {
+                                   bool& scattering, float& tr_over_pdf, Point3f& intersection) {
 
-        if(!its.medium.is_present() && !contains_surface) {
+        const MediumInteraction& mits = its.medium;
+
+        if(!mits.is_present() && !contains_surface) {
             return false;
         }
 
         // if no medium, PDF is a discrete dirac delta
         // Transmittance is 1, pdf is 1 (as only one possibility)
-        if(!its.medium.is_present()) {
+        if(!mits.is_present()) {
             scattering = false;
-            transmittance = 1.f;
-            free_flight_pdf = 1.f;
+            tr_over_pdf = 1.f;
             intersection = its.p;
             return true;
         }
 
-        Point3f medium_entrance = ray.o + its.medium.mint * ray.d;
-        Point3f medium_exit = ray.o + its.medium.maxt * ray.d;
+        Point3f medium_entrance = ray.o + mits.mint * ray.d;
+        Point3f medium_exit = ray.o + mits.maxt * ray.d;
 
-        float _free_flight_pdf;
         float t_max = maxt(contains_surface, its);
-        float t_through_media = Warp::sampleHeterogeneousDistance(sampler, medium_entrance, ray.d, *its.medium.medium,_free_flight_pdf);
-        float t_travelled = its.medium.mint + t_through_media;
+
+        // Very conveniently, the warping scheme samples as though the medium was of infinite volume,
+        // but any point outside its defined spectrum has infinite density. This stopping condition allows us to
+        // still define the normalization pdf factor as omega_t(stopping point), as P(tmax > t) = p(tmax), as the pdf
+        // becomes a dirac delta on the edges
+        float t_through_media = Warp::sampleHeterogeneousDistance(sampler, medium_entrance, ray.d, *mits.medium);
+        float t_travelled = mits.mint + t_through_media;
 
         // Medium found, but the ray still travelled all the way through it
         if(t_travelled >= t_max) {
@@ -243,16 +248,15 @@ public:
                 return false;
             }
             scattering = false;
-            transmittance = Warp::ratio_tracking(medium_entrance, medium_exit, *its.medium.medium, sampler);
-            free_flight_pdf = _free_flight_pdf; // TODO: not sure if this is correct
+            Point3f endpoint = ray.o + (1- Epsilon) * t_max * ray.d;
+            tr_over_pdf = 1.0f / mits.medium->attenuation(endpoint, ray.d);
             intersection = its.p;
             return true;
         }
 
         // Medium contains_surface, and scattering happened
         intersection = ray.o + t_travelled * ray.d;
-        transmittance = Warp::ratio_tracking(medium_entrance, intersection, *its.medium.medium, sampler);
-        free_flight_pdf = _free_flight_pdf;
+        tr_over_pdf = 1.0f / mits.medium->attenuation(intersection, ray.d);
         scattering = true;
 
         return true;
@@ -269,7 +273,11 @@ public:
     }
 
     static float maxt(bool found, const Intersection& its) {
-        return found ? its.t : std::numeric_limits<float>::infinity();
+        float v = std::numeric_limits<float>::infinity();
+        if(found) v = std::min(v, its.t);
+        if(its.medium.is_present()) v = std::min(v, its.medium.maxt);
+
+        return v;
     }
 
     static Color3f emittance(const Intersection& its) {
