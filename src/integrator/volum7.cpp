@@ -32,6 +32,8 @@ public:
 
         while(roulette_success(sampler, bounces)) {
 
+            beta /= (1-Q);
+
             // short circuit to avoid computation if the contribution is zero
             if(beta.isZero()) {
                 break;
@@ -42,49 +44,83 @@ public:
             const BSDF* hit_bsdf = its.mesh ? its.mesh->getBSDF() : nullptr;
             const Vector3f& surface_normal = found ? its.shFrame.n : 0.f;
 
-            if(hit_emitter) {
-                if(!its.medium.is_present() && (bounces == 0 || last_specular)) {
-                    add_illumination(Le, beta * emittance(its));
-                }
-            }
-
             bool scatters;
             Point3f intersection_point;
-            float transmittance;
-            float free_flight_pdf;
             float light_point_pdf;
+            float tr_over_pdf;
 
             bool any_intersection = sampleIntersection(found, current_ray, its, sampler,
-                                                       scatters, transmittance, free_flight_pdf, intersection_point);
+                                                       scatters, tr_over_pdf, intersection_point);
 
             // If there is no medium AND no intersection is found, there is nothing else to do
             if(!any_intersection) {
-                break;
+                return Color3f(0.1f, 0.2f, 0.7f);
             }
 
-            beta *= transmittance / free_flight_pdf;
+            beta *= tr_over_pdf;
+
+            if(!scatters && hit_emitter && (bounces == 0 || last_specular)) {
+                add_illumination(Le, beta * emittance(its));
+            }
 
             // NEE for either medium scattering or surface intersection with Emitter Importance Sampling
             for(const Emitter* emitter : scene->getEmitters()) {
 
+                // Sample point on the emitter
                 EmitterQueryRecord record = recordForNEE(current_ray, its, intersection_point, scatters);
-                emitter->samplePoint(*sampler, record, light_point_pdf, EMeasure::ESolidAngle);
+                emitter->samplePoint(*sampler, record, light_point_pdf, EMeasure::ESurfaceArea);
 
-                Color3f directional_term = directionalChangeTerm(scatters, its, record);
-                Color3f emitted = emitter->getEmittance(record);
-                Vector3f wo = record.wo();
+                // Sample emittance
+                Color3f emitted = emitter->getEmittance(record) / light_point_pdf;
+                // Cost induced by either the BRDF, or the Phase function
+                Color3f directional_cost = directionalChangeTerm(scatters, its, record);
 
-                float direct_transmittance = eval_transmittance(its.medium.medium, record, sampler);
-                float directional_pdf  = directional_change_pdf(scatters, its, record);
+                if(!directional_cost.isValid()) {
+                    std::cout << "a";
+                }
+                /*
+                 * Trace ray between "intersection_point" and "record.l"
+                 * We need to know if there is a medium, and it's not necessarily the same medium
+                 * This is a bit annoying as we'd rather just perform a shadow ray, but we need that medium information
+                 */
+                bool obstructed;
+                Intersection direct_its;
+                Ray3f direct_ray = Ray3f(intersection_point, record.wo(), Epsilon, (1-Epsilon) * record.dist());
+                if(its.medium.is_present() && its.medium.medium->bounds().contains(intersection_point)) {
+                    direct_ray.starting_medium = its.medium.medium;
+                }
+                obstructed = scene->rayIntersect(direct_ray, direct_its);
 
-                if(directional_pdf == 0 || light_point_pdf == 0) {
+                if(obstructed) {
                     continue;
                 }
 
-                float weight = balancedMIS(light_point_pdf, directional_pdf);
+                // Transmittance of NEE. Potentially 1.0 if there is no media blocking the path
+                float direct_transmittance = eval_transmittance(direct_its.medium.medium, record, sampler);
+
+                if(direct_transmittance < 0) {
+                    std::cout << "b";
+                }
+
+                if(!emitted.isValid()) {
+                    std::cout << "c";
+                }
+
+                if(!beta.isValid()) {
+                    std::cout << "d";
+                }
+                // evaluate hypothetical phase function / BRDF pdf for MIS
+                float light_point_angular_pdf = emitter->to_angular(record, light_point_pdf);
+                float directional_pdf  = directional_change_pdf(scatters, its, record);
+
+                if(directional_pdf == 0 || light_point_angular_pdf == 0) {
+                    continue;
+                }
+
+                float weight = 1.f;//balancedMIS(light_point_angular_pdf, directional_pdf);
 
                 if(emitter->is_source_visible(scene, record)) {
-                    add_illumination(Li, weight * direct_transmittance * beta * emitted * directional_term / light_point_pdf);
+                    add_illumination(Li, weight * direct_transmittance * beta * emitted * directional_cost);
                 }
             }
 
@@ -98,13 +134,12 @@ public:
             current_ray.starting_medium = its.medium.medium; // potentially nullptr (and it's fine)
             last_specular = !scatters && !its.mesh->getBSDF()->isDiffuse(); // if no scattering, the BSDF must exist
             bounces++;
-            beta /= (1-Q);
             found = scene->rayIntersect(current_ray, its);
 
 
             // Direct illumination with BRDF Importance Sampling
             // Done late as we need the collision result from the next step first
-            if(found && find_emitter(its)) {
+            if(false && found && find_emitter(its)) {
 
                 const Emitter* emitter_hit = find_emitter(its);
                 EmitterQueryRecord emitter_hit_record = recordForLateNEE(previous_ray,
@@ -135,9 +170,10 @@ public:
 
                 float weight = balancedMIS(brdf_pdf, light_pdf);
                 add_illumination(Li,
-                                 weight * direct_transmittance * beta * emitted * directional_term / brdf_pdf);
+                                 weight * direct_transmittance * beta * emitted * directional_term);
             }
         }
+
         return Le + Li;
     }
 
@@ -294,7 +330,7 @@ public:
 
     static void add_illumination(Color3f& src, const Color3f& val) {
         if(!val.isValid()) {
-            throw NoriException("Invalid radiance");
+            //throw NoriException("Invalid radiance");
         }
         src = src + val;
     }

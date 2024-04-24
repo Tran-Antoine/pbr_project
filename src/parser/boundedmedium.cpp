@@ -21,27 +21,9 @@
 
 NORI_NAMESPACE_BEGIN
 
-/**
-* \brief Loader for Heightmap triangle meshes
-*/
 class BoundedMedium : public Mesh {
 public:
 
-    /**
-     * Build a mesh from a gray-scale PNG heightmap. The x-axis goes from left to right, while
-     * the z-axis goes from top to bottom. The y-axis represents the height.
-     * Required property values:
-     *
-     * * `filename`: the local path to the .png heightmap
-     * * `minh`: the minimum height in meters
-     * * `maxh`: the maximum height in meters
-     *
-     * Optional property values:
-     *
-     * * `xratio`: the meter/#vertices ratio in the x direction
-     * * `zratio`: the meter/#vertices ratio in the z direction
-     * * `toWorld`: the transformation matrix to apply
-    */
     BoundedMedium(const PropertyList &propList) {}
 
     void build_box() {

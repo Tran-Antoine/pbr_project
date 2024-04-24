@@ -157,7 +157,7 @@ add_executable(nori
   src/integrator/volum4.cpp
   src/integrator/volum5.cpp
   src/integrator/volum6.cpp
-  #src/integrator/volum7.cpp
+  src/integrator/volum7.cpp
 
   src/emitter/area.cpp
   src/emitter/environment.cpp

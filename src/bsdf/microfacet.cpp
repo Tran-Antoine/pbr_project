@@ -37,7 +37,7 @@ public:
         /* Exterior IOR (default: air) */
         m_extIOR = propList.getFloat("extIOR", 1.000277f);
 
-        Color3f albedo = propList.getColor("albedo", Color3f(-1.f));
+        Color3f albedo = propList.getColor("kd", Color3f(-1.f));
 
         if(albedo.isValid()) {
             m_albedo = new UniformDiffuseMap(albedo);

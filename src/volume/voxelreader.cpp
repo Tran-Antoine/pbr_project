@@ -5,8 +5,8 @@
 
 NORI_NAMESPACE_BEGIN
 
-VoxelReader::VoxelReader(const std::string &path, Transform trafo)
-    : transform(std::move(trafo)), voxel_data(from_file(path)), sampler(VSampler(*voxel_data)) {
+VoxelReader::VoxelReader(const std::string &path, Transform trafo, float d_factor)
+    : transform(std::move(trafo)), voxel_data(from_file(path)), sampler(VSampler(*voxel_data)), d_factor(d_factor) {
 
     auto min = voxel_data->metaValue<openvdb::Vec3i>("file_bbox_min");
     auto max = voxel_data->metaValue<openvdb::Vec3i>("file_bbox_max");
@@ -29,7 +29,7 @@ VoxelReader::VoxelReader(const std::string &path, Transform trafo)
 
 float VoxelReader::eval(const nori::Point3f &p, const nori::Vector3f &v) const {
     // TODO: use cache version to optimize this
-    return sampler.wsSample(openvdb::Vec3R(p.x(), p.y(), p.z()));
+    return d_factor * sampler.wsSample(openvdb::Vec3R(p.x(), p.y(), p.z()));
 }
 
 NORI_NAMESPACE_END
