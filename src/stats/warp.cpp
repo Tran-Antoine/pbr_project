@@ -309,20 +309,17 @@ float Warp::lineToLogisticPdf(float t, float std) {
     throw NoriException("Not implemented yet");
 }
 
-static float majorant(const Medium& medium) {
-    throw NoriException("Not implemented yet");
-}
-
 float Warp::sampleHeterogeneousDistance(Sampler *sampler, const Point3f &x, const Vector3f &d, const Medium &medium) {
 
     float eta1 = sampler->next1D();
-    float maj = majorant(medium);
+    float maj = medium.majorant();
 
-    float t = Epsilon;
+    float t = 0;
     float p_real_interaction = 0.f;
 
+    const BoundingBox3f& bounds = medium.bounds();
 
-    while(p_real_interaction < eta1 && medium.bounds().contains(x + t*d)) {
+    while(t == 0 || (p_real_interaction < eta1 && bounds.contains(x + (t-Epsilon)*d))) {
 
         float eta2 = sampler->next1D();
         float distance_travelled = lineToHomogeneousPath(eta2, maj);
@@ -342,14 +339,22 @@ float Warp::sampleHeterogeneousDistance(Sampler *sampler, const Point3f &x, cons
 float Warp::ratio_tracking(const Point3f& a, const Point3f& b, const Medium& medium, Sampler* sampler) {
     Vector3f d = (b-a).normalized();
     float total_distance = (b-a).norm();
-    float maj = majorant(medium);
+    float maj = medium.majorant();
 
     float weight = 1.f;
     float t = 0.f;
 
     while(t < total_distance) {
         t += -log(1 - sampler->next1D()) / maj;
-        float null_amount = maj - medium.attenuation(a + d*t, d);
+        float omega_t = medium.bounds().contains(a + t*d)
+                ? medium.attenuation(a + d*t, d)
+                : 0.f;
+
+        if(omega_t > maj) {
+            std::cout << maj << ", " << omega_t << "\n";
+        }
+
+        float null_amount = maj - omega_t;
         weight *= null_amount / maj;
     }
 
@@ -374,7 +379,7 @@ Vector3f Warp::squareToHenyeyGreenstein(const Point2f& sample, float g) {
 }
 
 Vector3f Warp::squareToHenyeyGreensteinPdf(float cosTheta, float g) {
-    return 1.f / (4*M_PI) * (1 - g*g) / pow(1 + g*g + 2*g*cosTheta, 1.5);
+    return 1.f / (4*M_PI) * (1 - g*g) / (float) pow(1 + g*g + 2*g*cosTheta, 1.5);
 }
 
 

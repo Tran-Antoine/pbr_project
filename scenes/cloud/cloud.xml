@@ -3,13 +3,13 @@
     </integrator>
 
     <sampler type="independent">
-        <integer name="sampleCount" value="1"/>
+        <integer name="sampleCount" value="64"/>
     </sampler>
 
     <camera type="perspective">
         <!-- Camera-to-world coordinate system transformation -->
         <transform name="toWorld">
-            <lookat origin="0.11, 0.01, -10" target="0, 0, 0" up="0,1,0"/>
+            <lookat origin="0.11, 0.01, -4" target="0, 0, 0" up="0,1,0"/>
         </transform>
 
         <float name="fov" value="90"/>
@@ -21,19 +21,20 @@
     <!-- Volume -->
     <mesh type="medium_mesh">
         <medium type="voxel">
-            <string name="voxel_path" value="assets/voxel/Cloud_02.vdb"/>
-            <float name="scattering" value="0.01"/>
+            <string name="voxel_path" value="assets/voxel/cs-motion-design/Cloud_02.vdb"/>
+            <float name="scattering" value="0"/>
+            <float name="d_factor" value="1"/>
         </medium>
     </mesh>
 
     <mesh type="obj">
-        <string name="filename" value="assets/shape/squarelight.obj"/>
+        <string name="filename" value="assets/shape/sphere.obj"/>
         <transform name="toWorld">
-            <scale value="50,1,50"/>
-            <translate value="0,10,0"/>
+            <scale value="0.7,0.7,0.7"/>
+            <translate value="0,0,2.5"/>
         </transform>
         <emitter type="area">
-            <color name="radiance" value="60 60 60"/>
+            <color name="radiance" value="1 1 1"/>
         </emitter>
 
         <bsdf type="diffuse">
