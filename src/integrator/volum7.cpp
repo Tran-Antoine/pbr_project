@@ -30,7 +30,7 @@ public:
 
         found = scene->rayIntersect(current_ray, its);
 
-        while(roulette_success(sampler, bounces)) {
+        while(roulette_success(sampler, bounces) && bounces == 0) {
 
             beta /= (1-Q);
 
@@ -56,7 +56,9 @@ public:
             if(!any_intersection) {
                 break;
             }
-
+            if(scatters) {
+                //std::cout << "t";
+            }
             beta *= tr_over_pdf;
 
             if(!scatters && hit_emitter && (bounces == 0 || last_specular)) {
@@ -75,9 +77,7 @@ public:
                 // Cost induced by either the BRDF, or the Phase function
                 Color3f directional_cost = directionalChangeTerm(scatters, its, record);
 
-                if(scatters) {
-                    //std::cout << "t";
-                }
+
                 /*
                  * Trace ray between "intersection_point" and "record.l"
                  * We need to know if there is a medium, and it's not necessarily the same medium
@@ -294,7 +294,7 @@ public:
 
         // Medium contains_surface, and scattering happened
         intersection = ray.o + t_travelled * ray.d;
-        tr_over_pdf = 1.0f / omega_t;
+        tr_over_pdf = 1.0f;//1.0f / omega_t;
         scattering = true;
 
         return true;
