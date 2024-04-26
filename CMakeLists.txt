@@ -176,8 +176,10 @@ add_executable(nori
 
   src/volume/homogeneous.cpp
   src/volume/uniformphase.cpp
+  src/volume/henyeygreenstein.cpp
   src/volume/voxelmedium.cpp
   src/volume/voxelreader.cpp
+  src/volume/debugmedia.cpp
 
   src/main.cpp
   #test/readvoxel.cpp

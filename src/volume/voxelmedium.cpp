@@ -9,10 +9,10 @@ class VoxelMedium : public Medium {
 public:
     explicit VoxelMedium(const PropertyList &props) {
         trafo = props.getTransform("toWorld", Transform());
-        phase = new UniformPhase();
-        absorption = new VoxelReader(props.getString("voxel_path"), trafo, props.getFloat("d_factor", 1.f));
+        phase = new HenyeyGreensteinPhase(0.877f);
+        absorption = new VoxelReader(props.getString("voxel_path"), trafo, props.getFloat("a_factor", 1.f));
         //absorption = new ConstantCoefficient(props.getFloat("d_factor"));
-        scattering = new ConstantCoefficient(props.getFloat("scattering"));
+        scattering = new VoxelReader(props.getString("voxel_path"), trafo, props.getFloat("s_factor", 1.f));
     }
 
     std::string toString() const override {

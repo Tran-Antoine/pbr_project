@@ -24,7 +24,7 @@ VoxelReader::VoxelReader(const std::string &path, Transform trafo, float d_facto
     bounds_w = BoundingBox3f(min_w, max_w);
 
     auto minmax = openvdb::tools::minMax(voxel_data->tree());
-    majorant = minmax.max();
+    majorant = d_factor * minmax.max();
 }
 
 float VoxelReader::eval(const nori::Point3f &p, const nori::Vector3f &v) const {

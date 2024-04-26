@@ -29,6 +29,7 @@ public:
     void build_box() {
 
         BoundingBox3f box = medium->bounds();
+
         Vector3f min = box.min, max = box.max;
         float xm = min.x(), ym = min.y(), zm = min.z(),
               xM = max.x(), yM = max.y(), zM = max.z();
@@ -37,7 +38,11 @@ public:
             throw NoriException("Invalid bounding box (too small)");
         }
 
-        Point3f
+        std::cout << xm << ", " << xM << "\n";
+        std::cout << ym << ", " << yM << "\n";
+        std::cout << zm << ", " << zM << "\n";
+
+                  Point3f
             c000 = min,
             c001 = Point3f(xm, ym, zM),
             c010 = Point3f (xm, yM, zm),
@@ -94,6 +99,7 @@ public:
                 }
                 medium = static_cast<Medium*>(obj);
                 build_box();
+                //medium = nullptr;
                 break;
             default:
                 Mesh::addChild(obj);

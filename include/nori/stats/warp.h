@@ -96,8 +96,7 @@ public:
 
     static float lineToLogisticPdf(float t, float std);
 
-    static float
-    sampleHeterogeneousDistance(Sampler *sampler, const Point3f &x, const Vector3f &d, const Medium &medium);
+    static float sampleHeterogeneousDistance(Sampler *sampler, const Point3f &x, const Vector3f &d, const Medium &medium, float& omega_t);
 
     static float sampleToHeterogeneousDistancePdf(const Point3f& a, const Point3f& b, const Medium &medium, Sampler* sampler);
 
@@ -109,7 +108,7 @@ public:
 
     static Vector3f squareToHenyeyGreenstein(const Point2f& sample, float g);
 
-    static Vector3f squareToHenyeyGreensteinPdf(float cosTheta, float g);
+    static float squareToHenyeyGreensteinPdf(float cosTheta, float g);
 };
 
 NORI_NAMESPACE_END

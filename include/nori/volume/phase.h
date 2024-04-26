@@ -18,6 +18,7 @@ public:
 };
 
 class UniformPhase : public PhaseFunction {
+public:
     float pdf(const Vector3f &in, const Vector3f &out) const override;
     void sample(Sampler *sampler, const Vector3f &in, Vector3f &out, float &pdf) const override;
     Color3f eval(const Vector3f &in, const Vector3f &out) const override;
@@ -25,10 +26,16 @@ class UniformPhase : public PhaseFunction {
 };
 
 class HenyeyGreensteinPhase : public PhaseFunction {
+
+public:
+    explicit HenyeyGreensteinPhase(float g) : g(g) {}
     float pdf(const Vector3f &in, const Vector3f &out) const override;
     void sample(Sampler *sampler, const Vector3f &in, Vector3f &out, float &pdf) const override;
     Color3f eval(const Vector3f &in, const Vector3f &out) const override;
     std::string toString() const override;
+
+protected:
+    float g;
 };
 
 NORI_NAMESPACE_END
