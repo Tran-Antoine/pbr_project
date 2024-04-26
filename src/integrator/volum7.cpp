@@ -54,7 +54,7 @@ public:
 
             // If there is no medium AND no intersection is found, there is nothing else to do
             if(!any_intersection) {
-                return Color3f(0.1f, 0.2f, 0.7f);
+                break;
             }
 
             beta *= tr_over_pdf;
@@ -75,8 +75,8 @@ public:
                 // Cost induced by either the BRDF, or the Phase function
                 Color3f directional_cost = directionalChangeTerm(scatters, its, record);
 
-                if(!directional_cost.isValid()) {
-                    std::cout << "a";
+                if(scatters) {
+                    //std::cout << "t";
                 }
                 /*
                  * Trace ray between "intersection_point" and "record.l"
@@ -98,17 +98,6 @@ public:
                 // Transmittance of NEE. Potentially 1.0 if there is no media blocking the path
                 float direct_transmittance = eval_transmittance(direct_its.medium.medium, record, sampler);
 
-                if(direct_transmittance < 0) {
-                    std::cout << "b";
-                }
-
-                if(!emitted.isValid()) {
-                    std::cout << "c";
-                }
-
-                if(!beta.isValid()) {
-                    std::cout << "d";
-                }
                 // evaluate hypothetical phase function / BRDF pdf for MIS
                 float light_point_angular_pdf = emitter->to_angular(record, light_point_pdf);
                 float directional_pdf  = directional_change_pdf(scatters, its, record);
@@ -131,9 +120,18 @@ public:
             // sample next direction and include loss of energy due to scattering
             Vector3f next_direction = sampleNextDirection(sampler, current_ray.d, scatters, its, beta);
             current_ray = Ray3f(intersection_point, next_direction);
-            current_ray.starting_medium = its.medium.medium; // potentially nullptr (and it's fine)
+
+            if(its.medium.is_present()) {
+                if(its.medium.medium->bounds().contains(intersection_point)) {
+                    current_ray.starting_medium = its.medium.medium;
+                } else {
+                    current_ray.starting_medium = nullptr;
+                }
+            }
+
             last_specular = !scatters && !its.mesh->getBSDF()->isDiffuse(); // if no scattering, the BSDF must exist
             bounces++;
+            its.medium = MediumInteraction();
             found = scene->rayIntersect(current_ray, its);
 
 
@@ -180,7 +178,7 @@ public:
     static Color3f directionalChangeTerm(bool scattering, const Intersection& its, const EmitterQueryRecord& rec) {
 
         if(scattering) {
-            float omega_s = its.medium.medium->out_scattering(its.p, 0.f);
+            float omega_s = its.medium.medium->out_scattering(rec.p, 0.f);
             return omega_s * its.medium.medium->evalPhase(rec.wi, rec.wo());
         } else {
             BSDFQueryRecord bsdf_query(rec.wi, rec.wo(), its.shFrame, EMeasure::ESolidAngle, its.uv);
@@ -274,25 +272,29 @@ public:
         // but any point outside its defined spectrum has infinite density. This stopping condition allows us to
         // still define the normalization pdf factor as omega_t(stopping point), as P(tmax > t) = p(tmax), as the pdf
         // becomes a dirac delta on the edges
-        float t_through_media = Warp::sampleHeterogeneousDistance(sampler, medium_entrance, ray.d, *mits.medium);
+        float omega_t;
+        float t_through_media = Warp::sampleHeterogeneousDistance(sampler, medium_entrance, ray.d, *mits.medium, omega_t);
         float t_travelled = mits.mint + t_through_media;
 
+
         // Medium found, but the ray still travelled all the way through it
-        if(t_travelled >= t_max) {
+        // Or, meaning the delta tracking didn't encounter a single non-zero value
+        // Or, that the medium traversal had such a narrow window that it skipped it (and it's fine)
+        // TODO: Note: for now it doesn't work if a surface is inside a media
+        if(omega_t < 0 || t_travelled > t_max) {
             if(!contains_surface) {
                 // no surface hit, and the ray went through the medium
                 return false;
             }
             scattering = false;
-            Point3f endpoint = ray.o + (1- Epsilon) * t_max * ray.d;
-            tr_over_pdf = 1.0f / mits.medium->attenuation(endpoint, ray.d);
+            tr_over_pdf = 1.0f;
             intersection = its.p;
             return true;
         }
 
         // Medium contains_surface, and scattering happened
         intersection = ray.o + t_travelled * ray.d;
-        tr_over_pdf = 1.0f / mits.medium->attenuation(intersection, ray.d);
+        tr_over_pdf = 1.0f / omega_t;
         scattering = true;
 
         return true;
@@ -338,6 +340,9 @@ public:
     static bool roulette_success(Sampler* sampler, int bounces) {
         return sampler->next1D() > Q && bounces <= MAX_BOUNCES;
     }
+
+    int test = 0;
+    int total = 0;
 
     static float eval_transmittance(const Medium* medium, const EmitterQueryRecord& record, Sampler* sampler) {
         if(!medium) {

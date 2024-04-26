@@ -16,6 +16,10 @@ public:
     std::string toString() const override {
         return "homogeneous";
     }
+
+    BoundingBox3f bounds() const override {
+        return BoundingBox3f(Point3f(-1), Point3f(1));
+    }
 };
 
 NORI_REGISTER_CLASS(HomogeneousMedium, "homogeneous");
