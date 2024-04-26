@@ -22,8 +22,8 @@
     <mesh type="medium_mesh">
         <medium type="voxel">
             <string name="voxel_path" value="assets/voxel/wdas_cloud/wdas_cloud_eighth.vdb"/>
-            <float name="s_factor" value="0.00001"/>
-            <float name="a_factor" value="0.03"/>
+            <float name="s_factor" value="0.002"/>
+            <float name="a_factor" value="0.025"/>
         </medium>
     </mesh>
 
