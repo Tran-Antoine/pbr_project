@@ -30,7 +30,7 @@ public:
 
         found = scene->rayIntersect(current_ray, its);
 
-        while(roulette_success(sampler, bounces) && bounces == 0) {
+        while(roulette_success(sampler, bounces)) {
 
             beta /= (1-Q);
 
@@ -46,7 +46,6 @@ public:
 
             bool scatters;
             Point3f intersection_point;
-            float light_point_pdf;
             float tr_over_pdf;
 
             bool any_intersection = sampleIntersection(found, current_ray, its, sampler,
@@ -56,27 +55,36 @@ public:
             if(!any_intersection) {
                 break;
             }
-            if(scatters) {
-                //std::cout << "t";
-            }
+
             beta *= tr_over_pdf;
 
             if(!scatters && hit_emitter && (bounces == 0 || last_specular)) {
                 add_illumination(Le, beta * emittance(its));
             }
 
+            // If no BSDF we hit an object that can't continue the path tracing algorithm
+            // such as an environment map
+            if(hit_emitter && !its.mesh && !scatters) {
+                break;
+            }
+
             // NEE for either medium scattering or surface intersection with Emitter Importance Sampling
             for(const Emitter* emitter : scene->getEmitters()) {
 
+                float light_point_pdf;
                 // Sample point on the emitter
                 EmitterQueryRecord record = recordForNEE(current_ray, its, intersection_point, scatters);
                 emitter->samplePoint(*sampler, record, light_point_pdf, EMeasure::ESurfaceArea);
 
                 // Sample emittance
                 Color3f emitted = emitter->getEmittance(record) / light_point_pdf;
+
                 // Cost induced by either the BRDF, or the Phase function
                 Color3f directional_cost = directionalChangeTerm(scatters, its, record);
 
+                float angular_distortion = !scatters
+                        ? emitter->angular_distortion(record)
+                        : 1 / emitter->to_angular(record, 1.f);
 
                 /*
                  * Trace ray between "intersection_point" and "record.l"
@@ -109,7 +117,7 @@ public:
                 float weight = 1.f;//balancedMIS(light_point_angular_pdf, directional_pdf);
 
                 if(emitter->is_source_visible(scene, record)) {
-                    add_illumination(Li, weight * direct_transmittance * beta * emitted * directional_cost);
+                    add_illumination(Li, weight * direct_transmittance * beta * emitted * directional_cost * angular_distortion);
                 }
             }
 
@@ -280,7 +288,7 @@ public:
         // Medium found, but the ray still travelled all the way through it
         // Or, meaning the delta tracking didn't encounter a single non-zero value
         // Or, that the medium traversal had such a narrow window that it skipped it (and it's fine)
-        // TODO: Note: for now it doesn't work if a surface is inside a media
+        // TODO: Note: for now it doesn't work if a surface is inside a media - doesnt it?
         if(omega_t < 0 || t_travelled > t_max) {
             if(!contains_surface) {
                 // no surface hit, and the ray went through the medium
@@ -294,7 +302,7 @@ public:
 
         // Medium contains_surface, and scattering happened
         intersection = ray.o + t_travelled * ray.d;
-        tr_over_pdf = 1.0f;//1.0f / omega_t;
+        tr_over_pdf = 1.0f / omega_t;
         scattering = true;
 
         return true;
@@ -332,17 +340,14 @@ public:
 
     static void add_illumination(Color3f& src, const Color3f& val) {
         if(!val.isValid()) {
-            //throw NoriException("Invalid radiance");
+            throw NoriException("Invalid radiance");
         }
-        src = src + val;
+        src += val;
     }
 
     static bool roulette_success(Sampler* sampler, int bounces) {
         return sampler->next1D() > Q && bounces <= MAX_BOUNCES;
     }
-
-    int test = 0;
-    int total = 0;
 
     static float eval_transmittance(const Medium* medium, const EmitterQueryRecord& record, Sampler* sampler) {
         if(!medium) {
@@ -354,8 +359,6 @@ public:
     std::string toString() const {
         return "Volum7Integrator[]";
     }
-
-
 };
 
 NORI_REGISTER_CLASS(Volum7Integrator, "volum7");

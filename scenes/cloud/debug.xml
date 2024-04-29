@@ -3,7 +3,7 @@
     </integrator>
 
     <sampler type="independent">
-        <integer name="sampleCount" value="128"/>
+        <integer name="sampleCount" value="64"/>
     </sampler>
 
     <camera type="perspective">
@@ -48,12 +48,12 @@
     <mesh type="obj">
         <string name="filename" value="assets/shape/sphere.obj"/>
         <transform name="toWorld">
-            <scale value="3.5, 3.5, 1"/>
+            <scale value="0.5, 0.5, 1"/>
             <translate value="0, 0, 5"/>
 
         </transform>
         <emitter type="area">
-            <color name="radiance" value="0.4 0.4 0.4"/>
+            <color name="radiance" value="1000.4 1000.4 1000.4"/>
         </emitter>
 
         <bsdf type="diffuse">

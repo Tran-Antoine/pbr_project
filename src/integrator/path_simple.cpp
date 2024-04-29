@@ -43,13 +43,17 @@ public:
             if(hit_emitter) {
                 if(bounces == 0 || last_specular) {
                     // here x and n are actually l and n_l
-                    EmitterQueryRecord emitter_rec = EmitterQueryRecord(nullptr, ray.o, 0.f, wi, x, n, its.uv);
+                    EmitterQueryRecord emitter_rec = EmitterQueryRecord(surface_bsdf, x, n, wi, its.p, its.shFrame.n, its.uv);
                     Color3f emittance = hit_emitter->getEmittance(emitter_rec);
                     Le += beta * emittance;
                 }
                 // seems more logic to break the indirect lighting loop whenever we hit an hit_emitter,
                 // regardless of whether its contribution should be counted or not (WRONG)
                 //break;
+            }
+
+            if(!its.mesh) {
+                break;
             }
 
             if(!surface_bsdf) {
