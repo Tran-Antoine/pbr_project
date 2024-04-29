@@ -44,6 +44,7 @@ protected:
     VGrid::Ptr voxel_data;
     VSampler sampler;
     Transform transform;
+    Transform inv_transform;
     float d_factor;
     float majorant;
     BoundingBox3i bounds_i;

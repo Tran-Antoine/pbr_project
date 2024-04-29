@@ -42,6 +42,7 @@ protected:
     float height;
     float intensity;
     bool lerp;
+    float theta0, phi0;
 };
 
 NORI_REGISTER_CLASS(EnvironmentEmitter, "env")

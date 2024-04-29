@@ -277,6 +277,10 @@ inline void rotateXZ(Eigen::Vector3f& current, float angle) {
     );
 }
 
+inline std::string vstr(Eigen::Vector3f& v) {
+    return std::to_string(v.x()) + ", " + std::to_string(v.y()) + ", " + std::to_string(v.z());
+}
+
 /// Compute a direction for the given coordinates in spherical coordinates
 extern Vector3f sphericalDirection(float theta, float phi);
 
