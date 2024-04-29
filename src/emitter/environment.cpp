@@ -15,6 +15,8 @@ EnvironmentEmitter::EnvironmentEmitter(const PropertyList& props) :
     height = props.getFloat("height", 0.f);
     intensity = props.getFloat("intensity");
     lerp = props.getBoolean("lerp-transition", false);
+    theta0 = props.getFloat("theta0", 0.f);
+    phi0 = props.getFloat("phi0", 0.f);
 }
 
 float EnvironmentEmitter::pdf(const EmitterQueryRecord &rec, EMeasure unit) const {
@@ -130,16 +132,9 @@ Point3f EnvironmentEmitter::map1_to_world(const Point2f &coords) const{
     float theta = y_norm * M_PI;
     float phi = x_norm * 2 * M_PI;
 
-    /*Point3f s = radius * sphericalDirection(theta, phi).normalized();
-    std::swap(s.y(), s.z());
-    s.x() *= -1;
-    s.y() *= -1;
-    s.z() *= -1;*/
     float x = -radius * sin(theta) * cos(phi);
     float y = -radius * cos(theta);
     float z = -radius * sin(theta) * sin(phi);
-    //
-    //std::cout << "P: " << x << ", " << y << ", " << z << "\n";
 
     return center + Point3f(x, y, z);
 }
@@ -152,9 +147,9 @@ Point3f EnvironmentEmitter::map2_to_world(const Point2f &coords) const{
     float theta = y_norm * M_PI;
     float phi = x_norm * 2 * M_PI;
 
-    float x = -radius * sin(theta) * cos(phi);
-    float y = -radius * cos(theta);
-    float z = -radius * sin(theta) * sin(phi);
+    float x = -radius * sin(theta + theta0) * cos(phi + phi0);
+    float y = -radius * cos(theta + theta0);
+    float z = -radius * sin(theta + theta0) * sin(phi + phi0);
     return center + Point3f(x, y, z);
 }
 

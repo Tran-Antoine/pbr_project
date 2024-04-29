@@ -35,14 +35,15 @@ public:
               xM = max.x(), yM = max.y(), zM = max.z();
 
         if(box.getVolume() < Epsilon) {
-            throw NoriException("Invalid bounding box (too small)");
+            std::string message = "Invalid bounding box (too small): " + std::to_string(box.getVolume());
+            throw NoriException(message.c_str());
         }
 
         std::cout << xm << ", " << xM << "\n";
         std::cout << ym << ", " << yM << "\n";
         std::cout << zm << ", " << zM << "\n";
 
-                  Point3f
+        Point3f
             c000 = min,
             c001 = Point3f(xm, ym, zM),
             c010 = Point3f (xm, yM, zm),
