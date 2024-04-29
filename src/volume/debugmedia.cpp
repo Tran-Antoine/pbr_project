@@ -130,8 +130,8 @@ public:
     explicit Debug4Medium(const PropertyList &props) {
         phase = new UniformPhase();
         //absorption = new VoxelReader(props.getString("voxel_path"), trafo, props.getFloat("d_factor", 1.f));
-        absorption = new ConstantCoefficient(0.0f);
-        scattering = new ConstantCoefficient(0.5f);
+        absorption = new ConstantCoefficient(0.6f);
+        scattering = new ConstantCoefficient(0.3f);
     }
 
     std::string toString() const override {

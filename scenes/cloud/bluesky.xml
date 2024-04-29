@@ -1,0 +1,30 @@
+<scene>
+    <integrator type="volum7">
+    </integrator>
+
+    <sampler type="independent">
+        <integer name="sampleCount" value="4"/>
+    </sampler>
+
+    <camera type="perspective">
+        <!-- Camera-to-world coordinate system transformation -->
+        <transform name="toWorld">
+            <lookat origin="548.064, -82.473, -63.856" target="6.021, 100.043, -43.679" up="0.273, 0.962, -0.009"/>
+        </transform>
+
+        <float name="fov" value="90"/>
+
+        <integer name="width" value="768"/>
+        <integer name="height" value="384"/>
+    </camera>
+
+
+
+    <emitter type="env">
+        <string name="half1" value="assets/env/highcontrast_left.exr"/>
+        <string name="half2" value="assets/env/highcontrast_right.exr"/>
+        <float name="radius" value="1600.0"/>
+        <point name="center" value="0,0,0"/>
+        <float name="intensity" value="10"/>
+    </emitter>
+</scene>

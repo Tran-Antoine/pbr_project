@@ -54,7 +54,7 @@ Color3f EnvironmentEmitter::evalRadiance(const EmitterQueryRecord &rec, const Sc
     Color3f emitted = getEmittance(rec);
     Color3f bsdf_term = evalBSDF(rec);
 
-    return intensity * distortion_factor * (emitted * bsdf_term);
+    return distortion_factor * (emitted * bsdf_term);
 }
 
 Color3f EnvironmentEmitter::sampleRadiance(EmitterQueryRecord &rec, Sampler &sampler, const Scene *scene, float &pdf,
