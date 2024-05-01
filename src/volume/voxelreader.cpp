@@ -50,4 +50,23 @@ float VoxelReader::eval(const nori::Point3f &p, const nori::Vector3f &v) const {
     return d_factor * sampler.wsSample(openvdb::Vec3R(ip.x(), ip.y(), ip.z()));
 }
 
+BinaryVoxelReader::BinaryVoxelReader(float value, const VoxelReader* child)
+    : value(value), child(child) {
+}
+
+float BinaryVoxelReader::eval(const nori::Point3f &p, const nori::Vector3f &v) const {
+    return child->eval(p, v) > Epsilon
+        ? value
+        : 0;
+}
+
+ScatteringVoxelReader::ScatteringVoxelReader(float max, const nori::VoxelReader *child) : max(max), child(child) {}
+
+
+float ScatteringVoxelReader::eval(const nori::Point3f &p, const nori::Vector3f &v) const {
+    float cv = child->eval(p, v);
+    if(cv < Epsilon) return 0.f;
+    if(cv < max / 3.f) return max;
+    return max / 2;
+}
 NORI_NAMESPACE_END

@@ -70,7 +70,7 @@ public:
 
                 Color3f direct_rad = emitter->sampleRadiance(emitter_rec, *sampler, scene, pdf_light, EMeasure::ESurfaceArea);
 
-                if(direct_rad.isZero() || pdf_light == 0) {
+                if(pdf_light == 0) {
                     continue;
                 }
                 direct_rad /= pdf_light; // TODO
@@ -106,9 +106,6 @@ public:
                 EmitterQueryRecord emitter_hit_record = EmitterQueryRecord(surface_bsdf, x, n, wi, its.p, its.shFrame.n, its.uv) ;
 
                 Color3f emittance = emitter_hit->getEmittance(emitter_hit_record);
-                if(emittance.isZero()) {
-                    continue;
-                }
 
                 float light_pdf = emitter_hit->pdf(emitter_hit_record, ESolidAngle);
                 float brdf_pdf = surface_bsdf->pdf(bsdf_record);

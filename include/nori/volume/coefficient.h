@@ -51,4 +51,32 @@ protected:
     BoundingBox3f bounds_w;
 };
 
+class BinaryVoxelReader : public MediumCoefficient {
+public:
+    BinaryVoxelReader(float value, const VoxelReader* child);
+
+    BoundingBox3i index_bounds() const { return child->index_bounds(); }
+    BoundingBox3f world_bounds() const { return child->world_bounds(); }
+    float maj() const override { return value; }
+    float eval(const Point3f& p, const Vector3f& v) const override;
+
+private:
+    float value;
+    const VoxelReader* child = nullptr;
+};
+
+class ScatteringVoxelReader : public MediumCoefficient {
+public:
+    ScatteringVoxelReader(float max, const VoxelReader* child);
+
+    BoundingBox3i index_bounds() const { return child->index_bounds(); }
+    BoundingBox3f world_bounds() const { return child->world_bounds(); }
+    float maj() const override { return max; }
+    float eval(const Point3f& p, const Vector3f& v) const override;
+
+private:
+    float max;
+    const VoxelReader* child = nullptr;
+};
+
 NORI_NAMESPACE_END
