@@ -93,6 +93,7 @@ add_executable(nori
   include/nori/emitter/area.h
   include/nori/emitter/emitter.h
   include/nori/emitter/environment.h
+  include/nori/emitter/directional.h
   
   include/nori/parser/parser.h
   include/nori/parser/proplist.h
@@ -162,6 +163,7 @@ add_executable(nori
   src/emitter/area.cpp
   src/emitter/environment.cpp
   src/emitter/emitter.cpp
+  src/emitter/directional.cpp
 
   src/parser/obj.cpp
   src/parser/heightmap.cpp

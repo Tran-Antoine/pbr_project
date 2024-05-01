@@ -179,7 +179,6 @@ public:
                                  weight * direct_transmittance * beta * emitted * directional_term);
             }
         }
-
         return Le + Li;
     }
 

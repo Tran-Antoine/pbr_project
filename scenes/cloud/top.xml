@@ -1,0 +1,48 @@
+<scene>
+    <integrator type="volum7">
+    </integrator>
+
+    <sampler type="independent">
+        <integer name="sampleCount" value="8"/>
+    </sampler>
+
+    <camera type="perspective">
+        <!-- Camera-to-world coordinate system transformation -->
+        <transform name="toWorld">
+            <lookat origin="548.064, -82.473, -63.856" target="6.021, 100.043, -43.679" up="0.273, 0.962, -0.009"/>
+        </transform>
+
+        <float name="fov" value="90"/>
+
+        <integer name="width" value="768"/>
+        <integer name="height" value="384"/>
+    </camera>
+
+    <!-- Volume-->
+    <mesh type="medium_mesh">
+        <medium type="voxel">
+            <string name="voxel_path" value="assets/voxel/wdas_cloud/wdas_cloud_half.vdb"/>
+            <float name="s_factor" value="1"/>
+            <float name="a_factor" value="0.0001"/>
+            <transform name="toWorld">
+                <scale value="0.65, 0.65, 0.65"/>
+            </transform>
+        </medium>
+    </mesh>
+
+    <mesh type="obj">
+        <string name="filename" value="assets/shape/sphere.obj"/>
+        <transform name="toWorld">
+            <scale value="1, 20, 20.0"/>
+            <translate value="-1500, 2500, 0"/>
+
+        </transform>
+        <emitter type="area">
+            <color name="radiance" value="8000 8000 8000"/>
+        </emitter>
+
+        <bsdf type="diffuse">
+            <color name="albedo" value="0.5 0.5 0.5"/>
+        </bsdf>
+    </mesh>
+</scene>

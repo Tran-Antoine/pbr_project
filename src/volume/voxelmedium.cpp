@@ -9,9 +9,10 @@ class VoxelMedium : public Medium {
 public:
     explicit VoxelMedium(const PropertyList &props) {
         trafo = props.getTransform("toWorld", Transform());
-        phase = new UniformPhase();
+        phase = new HenyeyGreensteinPhase(0.877);
         absorption = new VoxelReader(props.getString("voxel_path"), trafo, props.getFloat("a_factor", 1.f));
-        //absorption = new ConstantCoefficient(props.getFloat("d_factor"));
+        //scattering = new ScatteringVoxelReader(props.getFloat("s_factor", 1.f), new VoxelReader(props.getString("voxel_path"), trafo, props.getFloat("s_factor", 1.f)));
+        //scattering = new BinaryVoxelReader(0.01f, new VoxelReader(props.getString("voxel_path"), trafo, props.getFloat("s_factor", 1.f)));
         scattering = new VoxelReader(props.getString("voxel_path"), trafo, props.getFloat("s_factor", 1.f));
     }
 
@@ -20,7 +21,6 @@ public:
     }
 
     BoundingBox3f bounds() const override {
-        //return BoundingBox3f(Point3f(-1,-1,-1), Point3f(1,1,1));
         return static_cast<VoxelReader*>(absorption)->world_bounds();
     }
 
