@@ -353,10 +353,13 @@ float Warp::ratio_tracking(const Point3f& a, const Point3f& b, const Medium& med
 
     while(t < total_distance) {
         t += -log(1 - sampler->next1D()) / maj;
-        float omega_t = medium.bounds().contains(a + t*d)
-                ? medium.attenuation(a + d*t, d)
-                : 0.f;
+        bool contained = medium.bounds().contains(a + t*d);
 
+        if(!contained) {
+            break;
+        }
+
+        float omega_t = medium.attenuation(a + d*t, d);
         float null_amount = maj - omega_t;
         weight *= null_amount / maj;
     }

@@ -3,7 +3,7 @@
     </integrator>
 
     <sampler type="independent">
-        <integer name="sampleCount" value="8"/>
+        <integer name="sampleCount" value="64"/>
     </sampler>
 
     <camera type="perspective">
@@ -30,19 +30,8 @@
         </medium>
     </mesh>
 
-    <mesh type="obj">
-        <string name="filename" value="assets/shape/sphere.obj"/>
-        <transform name="toWorld">
-            <scale value="1, 20, 20.0"/>
-            <translate value="-1500, 2500, 0"/>
-
-        </transform>
-        <emitter type="area">
-            <color name="radiance" value="8000 8000 8000"/>
-        </emitter>
-
-        <bsdf type="diffuse">
-            <color name="albedo" value="0.5 0.5 0.5"/>
-        </bsdf>
-    </mesh>
+    <emitter type="directional">
+        <color name="radiance" value="220 220 230"/>
+        <vector name="direction" value="-0.5826 -0.7660 -0.2717"/>
+    </emitter>
 </scene>

@@ -7,13 +7,13 @@ NORI_NAMESPACE_BEGIN
 
 /// Volumetric integrator. Supports:
 /// - Heterogeneous medium absorption and scattering
+/// - Delta and Ratio tracking for unbiased transmittance importance sampling
+/// - Multiple medium in the scene but not multiple medium intersection
 /// - NEE + Indirect scattering with MIS
 /// - Both emitter and regular surfaces
 class Volum7Integrator : public Integrator {
 public:
-    explicit Volum7Integrator(const PropertyList &props) {
-        /* No parameters this time */
-    }
+    explicit Volum7Integrator(const PropertyList &props) {}
 
     constexpr static float Q = 0.1f;
     constexpr static int MAX_BOUNCES = 10;
@@ -32,6 +32,7 @@ public:
 
         while(roulette_success(sampler, bounces)) {
 
+            bounces++;
             beta /= (1-Q);
 
             // short circuit to avoid computation if the contribution is zero
@@ -114,7 +115,7 @@ public:
                     continue;
                 }
 
-                float weight = 1.f;//balancedMIS(light_point_angular_pdf, directional_pdf);
+                float weight = balancedMIS(light_point_angular_pdf, directional_pdf);
 
                 if(emitter->is_source_visible(scene, record)) {
                     add_illumination(Li, weight * direct_transmittance * beta * emitted * directional_cost * angular_distortion);
@@ -138,14 +139,13 @@ public:
             }
 
             last_specular = !scatters && !its.mesh->getBSDF()->isDiffuse(); // if no scattering, the BSDF must exist
-            bounces++;
             its.medium = MediumInteraction();
             found = scene->rayIntersect(current_ray, its);
 
 
             // Direct illumination with BRDF Importance Sampling
             // Done late as we need the collision result from the next step first
-            if(false && found && find_emitter(its)) {
+            if(found && find_emitter(its)) {
 
                 const Emitter* emitter_hit = find_emitter(its);
                 EmitterQueryRecord emitter_hit_record = recordForLateNEE(previous_ray,
@@ -169,10 +169,6 @@ public:
                 if(light_pdf + brdf_pdf == 0) {
                     continue;
                 }
-
-                float previous_tr_over = its.medium.is_present()
-                        ? its.medium.medium->attenuation(intersection_point, 0.f)
-                        : 1.0f;
 
                 float weight = balancedMIS(brdf_pdf, light_pdf);
                 add_illumination(Li,
@@ -287,7 +283,6 @@ public:
         // Medium found, but the ray still travelled all the way through it
         // Or, meaning the delta tracking didn't encounter a single non-zero value
         // Or, that the medium traversal had such a narrow window that it skipped it (and it's fine)
-        // TODO: Note: for now it doesn't work if a surface is inside a media - doesnt it?
         if(omega_t < 0 || t_travelled > t_max) {
             if(!contains_surface) {
                 // no surface hit, and the ray went through the medium

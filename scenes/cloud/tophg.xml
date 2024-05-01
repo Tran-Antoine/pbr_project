@@ -3,7 +3,7 @@
     </integrator>
 
     <sampler type="independent">
-        <integer name="sampleCount" value="16"/>
+        <integer name="sampleCount" value="256"/>
     </sampler>
 
     <camera type="perspective">
@@ -12,7 +12,7 @@
             <lookat origin="548.064, -82.473, -63.856" target="6.021, 100.043, -43.679" up="0.273, 0.962, -0.009"/>
         </transform>
 
-        <float name="fov" value="54"/>
+        <float name="fov" value="90"/>
 
         <integer name="width" value="768"/>
         <integer name="height" value="384"/>
@@ -22,27 +22,16 @@
     <mesh type="medium_mesh">
         <medium type="voxel">
             <string name="voxel_path" value="assets/voxel/wdas_cloud/wdas_cloud_half.vdb"/>
-            <float name="s_factor" value="0.3"/>
-            <float name="a_factor" value="0.001"/>
+            <float name="s_factor" value="0.75"/>
+            <float name="a_factor" value="0.00"/>
             <transform name="toWorld">
-                <scale value="0.65, 0.65, 0.65"/>
+                <scale value="0.6, 0.6, 0.6"/>
             </transform>
         </medium>
     </mesh>
 
-    <mesh type="obj">
-        <string name="filename" value="assets/shape/sphere.obj"/>
-        <transform name="toWorld">
-            <scale value="1, 20, 20.0"/>
-            <translate value="58000, 76000, 72000"/>
-
-        </transform>
-        <emitter type="area">
-            <color name="radiance" value="5e9 5e9 5e9"/>
-        </emitter>
-
-        <bsdf type="diffuse">
-            <color name="albedo" value="0.5 0.5 0.5"/>
-        </bsdf>
-    </mesh>
+    <emitter type="directional">
+        <color name="radiance" value="220 220 230"/>
+        <vector name="direction" value="-0.5826 -0.7660 -0.2717"/>
+    </emitter>
 </scene>

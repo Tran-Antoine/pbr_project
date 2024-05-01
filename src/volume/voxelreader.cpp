@@ -55,7 +55,7 @@ BinaryVoxelReader::BinaryVoxelReader(float value, const VoxelReader* child)
 }
 
 float BinaryVoxelReader::eval(const nori::Point3f &p, const nori::Vector3f &v) const {
-    return child->eval(p, v) > Epsilon
+    return child->eval(p, v) > 1e-6
         ? value
         : 0;
 }
