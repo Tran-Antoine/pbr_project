@@ -102,6 +102,8 @@ add_executable(nori
   include/nori/parser/lconfig.h
   include/nori/parser/lsystem.h
   include/nori/parser/turtle.h
+  include/nori/parser/obj.h
+  include/nori/parser/objutil.h
 
   include/nori/postprocessing/rfilter.h
 
@@ -175,6 +177,7 @@ add_executable(nori
   src/parser/lsystem.cpp
   src/parser/turtle.cpp
   src/parser/boundedmedium.cpp
+  src/parser/objutil.cpp
 
   src/postprocessing/rfilter.cpp
 

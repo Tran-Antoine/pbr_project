@@ -1,0 +1,70 @@
+<scene>
+    <!-- Use the simple point light integrator -->
+    <integrator type="volum7"/>
+    <!-- Independent sample generator, 32 samples per pixel -->
+    <sampler type="independent">
+        <integer name="sampleCount" value="4"/>
+    </sampler>
+
+    <camera type="perspective">
+        <float name="fov" value="60"/>
+        <transform name="toWorld">
+            <scale value="-1,1,1"/>
+            <lookat target="0, 2, 0" origin="0, 5, -5" up="0, 1, 0"/>
+        </transform>
+
+        <integer name="height" value="600"/>
+        <integer name="width" value="800"/>
+    </camera>
+
+    <mesh type="lsystem">
+        <string name="premise" value="wLF[WWWlllllllllll+G]FF[WWWlllllllllll-G]F"/>
+
+        <float name="width_factor" value="0.85"/>
+        <float name="length_factor" value="0.95"/>
+        <float name="pitch_term" value="90"/>
+        <float name="yaw_term" value="30"/>
+        <float name="seed" value="121654"/>
+
+        <integer name="evolutions" value="0"/>
+
+        <bsdf type="diffuse">
+            <diffusemap type="mtexture">
+                <diffusemap type="uniform">
+                    <color name="albedo" value="0.5 0.5 0.5"/>
+                </diffusemap>
+                <diffusemap type="uniform">
+                    <color name="albedo" value="0.5 0 0.5"/>
+                </diffusemap>
+            </diffusemap>
+        </bsdf>
+
+        <diffusemap type="mtexture">
+            <diffusemap type="uniform">
+                <color name="albedo" value="0.5 0.5 0.5"/>
+            </diffusemap>
+            <diffusemap type="uniform">
+                <color name="albedo" value="0.5 0 0.5"/>
+            </diffusemap>
+        </diffusemap>
+    </mesh>
+
+    <!--
+    <mesh type="obj">
+        <string name="filename" value="assets/shape/flower/lotus-flower.obj"/>
+        <bsdf type="diffuse">
+            <color name="albedo" value="0.5, 0.5, 0.5"/>
+        </bsdf>
+        <transform name="toWorld">
+            <scale value="0.2 0.2 0.2"/>
+        </transform>
+    </mesh> -->
+    <emitter type="env">
+        <string name="half1" value="assets/env/lowcontrast_left.exr"/>
+        <string name="half2" value="assets/env/lowcontrast_right.exr"/>
+        <float name="radius" value="500.0"/>
+        <point name="center" value="0,0,0"/>
+        <float name="intensity" value="1"/>
+    </emitter>
+
+</scene>

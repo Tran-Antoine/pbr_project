@@ -76,6 +76,16 @@ Emitter * Scene::pickEmitter() const {
     return m_emitters[index];
 }
 
+Emitter* Scene::pickUniformEmitter(float &pdf) const {
+    if(m_emitters.empty()) {
+        return nullptr;
+    }
+    int n_emitters = (int) m_emitters.size();
+    int index = clamp((int) (m_sampler->next1D() * (float) n_emitters), 0, n_emitters - 1);
+    pdf = 1.f / (float) n_emitters;
+    return m_emitters[index];
+}
+
 void Scene::addChild(NoriObject *obj) {
     switch (obj->getClassType()) {
         case EMesh: {

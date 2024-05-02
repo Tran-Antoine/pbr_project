@@ -1,11 +1,45 @@
 #pragma once
 
 #include <parser/turtle.h>
+#include <parser/objutil.h>
+#include <parser/obj.h>
 
 NORI_NAMESPACE_BEGIN
 
 int idealSmoothness(float radius) {
     return (int) (radius * 100);
+}
+
+void drawMesh(const std::string &filename, const Transform &trafo, std::vector<Vector3f> &positions,
+              std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) {
+
+    //std::vector<Vector3f> unused; BoundingBox3f unused2;
+    //load_obj_data(filename, trafo, positions, indices, unused, texcoords, unused2);
+    int starting_index = positions.size();
+
+    auto props = PropertyList();
+    props.setString("filename", filename);
+    props.setTransform("toWorld", trafo);
+
+    auto mesh = WavefrontOBJ(props);
+
+    auto positions_ = mesh.getVertexPositions();
+    for(int i = 0; i < positions_.cols(); i++) {
+        positions.push_back(positions_.col(i));
+    }
+
+    auto indices_ = mesh.getIndices();
+    for(int i = 0; i < indices_.cols(); i++) {
+        auto column = indices_.col(i);
+        indices.push_back(starting_index + column.x());
+        indices.push_back(starting_index + column.y());
+        indices.push_back(starting_index + column.z());
+    }
+
+    auto texcoords_ = mesh.getVertexTexCoords();
+    for(int i = 0; i < texcoords_.cols(); i++) {
+        texcoords.push_back(texcoords_.col(i));
+    }
 }
 
 void drawCylinder(float length, float yaw, float pitch, float in_thickness, float out_thickness,
