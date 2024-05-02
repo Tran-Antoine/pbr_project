@@ -5,6 +5,8 @@
 #include <parser/turtle.h>
 #include <pcg32.h>
 #include <stats/warp.h>
+#include <bsdf/multidiffusemap.h>
+#include <Eigen/Geometry>
 
 NORI_NAMESPACE_BEGIN
 
@@ -133,8 +135,9 @@ protected:
 class Config1 : public LGrammarConfig {
 
     public:
-        Config1(pcg32& random, float width_factor, float length_factor, float pitch_term, float yaw_term) : random(random),
-                                                                                                            LGrammarConfig(0.5f, 1.0f, width_factor, length_factor, pitch_term, yaw_term){}
+        Config1(pcg32& random, float width_factor, float length_factor, float pitch_term, float yaw_term)
+            : random(random),
+              LGrammarConfig(0.5f, 1.0f, width_factor, length_factor, pitch_term, yaw_term){}
 
         float randomizeYaw(float yaw, char c) override {
             return yaw + M_PI / 5 * Warp::lineToLogistic(random.nextFloat(), 0.6);
@@ -226,5 +229,60 @@ class Config1 : public LGrammarConfig {
         pcg32 random;
     };
 
+class Config2 : public LGrammarConfig {
+
+public:
+    Config2(MultiDiffuseMap* map, float width_factor, float length_factor, float pitch_term, float yaw_term)
+        : map(map),
+          LGrammarConfig(0.5f, 1.0f, width_factor, length_factor, pitch_term, yaw_term){}
+
+    int colorCount() override {
+        return 2;
+    }
+
+
+    Eigen::Matrix4f create_affine_matrix(float yaw, float pitch, const Vector3f& scale, const Vector3f& p) {
+
+        /*Vector3f direction = directional(pitch, yaw);
+        Vector3f test = Vector3f(-direction.y(), direction.x(), 0).normalized();
+        Vector3f test2 = direction.cross(test).normalized();
+        Frame frame(test, test2, direction);*/
+
+
+        Eigen::Affine3f transform;
+        transform.setIdentity();
+        transform = Eigen::DiagonalMatrix<float, 3>(scale) * transform;
+        transform = Eigen::Translation<float, 3>(p.x(), p.y(), p.z()) * transform;
+        /*transform = Eigen::AngleAxis<float>(angle, axis) * transform;
+        t = Eigen::Translation<float, 3>(trans);*/
+        return transform.matrix();
+    }
+
+    void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
+
+        float length = state.length;
+        float yaw = state.yaw, pitch = state.pitch;
+        float in_thickness = state.in_thickness;
+        float out_thickness = state.out_thickness;
+
+        std::vector<Vector2f> temp;
+
+        if (c == 'F') {
+            drawCylinder(length, yaw, pitch, in_thickness, out_thickness, positions, indices, temp, state);
+        } else {
+            auto trafo = Transform(create_affine_matrix(state.yaw, state.pitch, Vector3f(state.out_thickness, state.length, state.out_thickness), state.p));
+            drawMesh("assets/shape/sphere.obj", trafo, positions, indices, temp);
+        }
+
+        int index = c == 'F' ? 0 : 1;
+        for(auto t : temp) {
+            float x_mapped = map->map(t.x(), index);
+            texcoords.push_back(Vector2f(x_mapped, t.y()));
+        }
+    }
+
+protected:
+    MultiDiffuseMap* map = nullptr;
+};
 
 NORI_NAMESPACE_END

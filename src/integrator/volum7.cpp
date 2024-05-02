@@ -32,7 +32,6 @@ public:
 
         while(roulette_success(sampler, bounces)) {
 
-            bounces++;
             beta /= (1-Q);
 
             // short circuit to avoid computation if the contribution is zero
@@ -125,7 +124,7 @@ public:
             // Handle indirect lighting
             Ray3f previous_ray = current_ray;
             Intersection previous_its = its;
-
+            bounces++;
             // sample next direction and include loss of energy due to scattering
             Vector3f next_direction = sampleNextDirection(sampler, current_ray.d, scatters, its, beta);
             current_ray = Ray3f(intersection_point, next_direction);

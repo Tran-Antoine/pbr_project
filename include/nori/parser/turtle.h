@@ -3,6 +3,7 @@
 #include <core/common.h>
 #include <core/vector.h>
 #include <core/frame.h>
+#include <core/transform.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -20,6 +21,10 @@ struct TurtleState {
 };
 
 int idealSmoothness(float radius);
+
+void drawMesh(const std::string &filename, const Transform &trafo, std::vector<Vector3f> &positions,
+              std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords);
+
 void drawCylinder(float length, float yaw, float pitch, float in_thickness, float out_thickness,
                          std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f>& texcoords, TurtleState &state);
 

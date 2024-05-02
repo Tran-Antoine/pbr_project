@@ -100,6 +100,7 @@ private:
     }
     std::string premise;
     std::vector<std::string> rules;
+
 };
 
 

@@ -67,6 +67,8 @@ public:
     
     Emitter * pickEmitter() const;
 
+    Emitter* pickUniformEmitter(float& pdf) const;
+
     bool implicitRayIntersect(const Ray3f &ray, Intersection &its, bool shadow) const {
 
         bool found = false;

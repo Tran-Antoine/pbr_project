@@ -101,8 +101,7 @@ class LSystemMesh : public Mesh {
 public:
     explicit LSystemMesh(const PropertyList& propList) {
 
-        std::string premise = propList.getString("premise");
-        std::vector<std::string> rules;
+        premise = propList.getString("premise");
         for(int i = 0; i < 30; i++) {
             std::string tagName = "rule" + std::to_string(i);
             std::string rule = propList.getString(tagName, "");
@@ -111,20 +110,23 @@ public:
             rules.push_back(rule);
         }
 
-        int n = propList.getInteger("evolutions");
+        n = propList.getInteger("evolutions");
         random.seed((uint64_t) propList.getFloat("seed", 11111));
 
 
-        float width_factor = propList.getFloat("width_factor", 0.7f);
-        float length_factor = propList.getFloat("length_factor", 0.7f);
-        float pitch_term = degToRad(propList.getFloat("pitch_term", 45.f));
-        float yaw_term = degToRad(propList.getFloat("yaw_term", 45.f));
+        width_factor = propList.getFloat("width_factor", 0.7f);
+        length_factor = propList.getFloat("length_factor", 0.7f);
+        pitch_term = degToRad(propList.getFloat("pitch_term", 45.f));
+        yaw_term = degToRad(propList.getFloat("yaw_term", 45.f));
         bump_increase_factor = propList.getFloat("bump_accentuate", 1.f);
+        trafo = propList.getTransform("toWorld", Transform());
 
-        auto config = Config0(random, width_factor, length_factor, pitch_term, yaw_term);
+    }
+
+    void activate() override {
+        auto config = Config2(map, width_factor, length_factor, pitch_term, yaw_term);
         std::string mesh_string = LSystemGrammar(premise, rules).evolve(n, config);
 
-        Transform trafo = propList.getTransform("toWorld", Transform());
         Timer timer;
         std::vector<Vector3f>   positions;
         std::vector<uint32_t>   indices;
@@ -132,6 +134,9 @@ public:
 
         drawLSystem(mesh_string, config, positions, indices, texcoords);
 
+        for(const auto& p : positions) {
+            m_bbox.expandBy(p);
+        }
 
         m_F.resize(3, indices.size()/3);
 
@@ -161,12 +166,9 @@ public:
     }
 
     void addChild(nori::NoriObject *obj) override {
-        DiffuseMap* map;
         switch (obj->getClassType()) {
             case NoriObject::EDiffuseMap:
-                map = static_cast<DiffuseMap *>(obj);
-                if(map->getId() == "normal") normal_map = map;
-                else throw NoriException("Heightmap only supports normal maps");
+                map = static_cast<MultiDiffuseMap *>(obj);
                 break;
             default:
                 Mesh::addChild(obj);
@@ -177,7 +179,13 @@ public:
 protected:
 
     pcg32 random;
+    float width_factor, length_factor, pitch_term, yaw_term;
+    Transform trafo;
+    int n;
+    std::string premise;
+    std::vector<std::string> rules;
 
+    MultiDiffuseMap* map = nullptr;
 
     void drawLSystem(const std::string &seq, LGrammarConfig& config,
                      std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) {
