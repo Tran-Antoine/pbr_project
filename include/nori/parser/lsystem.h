@@ -15,7 +15,7 @@ public:
     /**
      * List of symbols:
      *
-     * F,G,H: Draw
+     * F,G,H,K: Draw
      * [,]: Push/Restore turtle state
      * +,-: Rotate in the XY plane
      * <,>: Rotate in the XZ plane

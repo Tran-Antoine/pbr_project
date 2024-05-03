@@ -124,7 +124,7 @@ public:
     }
 
     void activate() override {
-        auto config = Config3(map, width_factor, length_factor, pitch_term, yaw_term);
+        auto config = Config4(map, width_factor, length_factor, pitch_term, yaw_term);
         std::string mesh_string = LSystemGrammar(premise, rules).evolve(n, config);
 
         Timer timer;
@@ -215,6 +215,7 @@ protected:
                 case 'F':
                 case 'G':
                 case 'H':
+                case 'K':
                     config.drawSegment(instr, current_state, positions, indices, texcoords);
                     break;
                 case '+':
