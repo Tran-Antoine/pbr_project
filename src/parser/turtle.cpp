@@ -58,6 +58,17 @@ void drawCylinder(float length, float yaw, float pitch, float in_thickness, floa
     state.in_thickness = out_thickness;
 }
 
+void drawStraightCylinder(const Point3f& a, const Point3f& b, float in_thickness, float out_thickness,
+                          std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f>& texcoords, TurtleState &state) {
+
+    connect(a, b, (b-a).normalized(), in_thickness, out_thickness, idealSmoothness(std::max(in_thickness, out_thickness)),
+            positions, indices, texcoords);
+
+    state.p = b;
+    state.p_n = (b-a).normalized();
+    state.in_thickness = out_thickness;
+}
+
 void connect(const Point3f &a, const Point3f &b, const Vector3f &a_n, float in_thickness, float out_thickness,
                     int smoothness, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices,
                     std::vector<Vector2f> &texcoords) {

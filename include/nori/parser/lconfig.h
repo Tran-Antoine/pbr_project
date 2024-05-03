@@ -341,4 +341,58 @@ public:
 protected:
     MultiDiffuseMap* map = nullptr;
 };
+
+class Config4 : public LGrammarConfig {
+
+public:
+    Config4(MultiDiffuseMap* map, float width_factor, float length_factor, float pitch_term, float yaw_term)
+            : map(map),
+              LGrammarConfig(0.5f, 1.0f, width_factor, length_factor, pitch_term, yaw_term){}
+
+    int colorCount() override {
+        return 2;
+    }
+
+
+    Eigen::Matrix4f create_affine_matrix(float yaw, float pitch, const Vector3f& scale, const Vector3f& p) {
+
+        Eigen::Affine3f transform;
+        transform.setIdentity();
+        transform = Eigen::DiagonalMatrix<float, 3>(scale) * transform;
+        transform = Eigen::Translation<float, 3>(p.x(), p.y(), p.z()) * transform;
+        /*transform = Eigen::AngleAxis<float>(angle, axis) * transform;
+        t = Eigen::Translation<float, 3>(trans);*/
+        return transform.matrix();
+    }
+
+    void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
+
+        float length = state.length;
+        float yaw = state.yaw, pitch = state.pitch;
+        float out_thickness = state.out_thickness;
+
+        std::vector<Vector2f> temp;
+
+        if (c == 'F' || c == 'H') {
+
+            Point3f a = state.p;
+            Point3f b = a + directional(pitch, yaw) * length;
+            drawStraightCylinder(a, b, out_thickness, out_thickness, positions, indices, temp, state);
+        } else {
+            Point3f p_advanced = state.p + state.p_n * 1.5f*state.out_thickness;
+            auto trafo = Transform(create_affine_matrix(state.yaw, state.pitch, Vector3f(2.f*state.out_thickness), p_advanced));
+            drawMesh("assets/shape/sphere.obj", trafo, positions, indices, temp);
+        }
+
+        int index = c == 'F' || c == 'H' ? 0 : 1;
+        for(auto t : temp) {
+            float x_mapped = map->map(t.x(), index);
+            texcoords.push_back(Vector2f(x_mapped, t.y()));
+        }
+    }
+
+protected:
+    MultiDiffuseMap* map = nullptr;
+};
+
 NORI_NAMESPACE_END
