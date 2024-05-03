@@ -81,8 +81,11 @@ WavefrontOBJ::WavefrontOBJ(const nori::PropertyList &propList) {
         throw NoriException("Unable to open OBJ file \"%s\"!", filename);
     Transform trafo = propList.getTransform("toWorld", Transform());
 
-    cout << "Loading \"" << filename << "\" .. ";
-    cout.flush();
+    if(!propList.getBoolean("no-print", false)) {
+        cout << "Loading \"" << filename << "\" .. ";
+        cout.flush();
+    }
+
     Timer timer;
 
     std::vector<Vector3f> positions;
@@ -166,12 +169,14 @@ WavefrontOBJ::WavefrontOBJ(const nori::PropertyList &propList) {
         }
     }
 
-    m_name = filename.str();
-    cout << "done. (V=" << m_V.cols() << ", F=" << m_F.cols() << ", took "
-         << timer.elapsedString() << " and "
-         << memString(m_F.size() * sizeof(uint32_t) +
-                      sizeof(float) * (m_V.size() + m_N.size() + m_UV.size()))
-         << ")" << endl;
+    if(!propList.getBoolean("no-print", false)) {
+        m_name = filename.str();
+        cout << "done. (V=" << m_V.cols() << ", F=" << m_F.cols() << ", took "
+             << timer.elapsedString() << " and "
+             << memString(m_F.size() * sizeof(uint32_t) +
+                          sizeof(float) * (m_V.size() + m_N.size() + m_UV.size()))
+             << ")" << endl;
+    }
 }
 
 

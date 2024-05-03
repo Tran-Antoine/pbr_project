@@ -285,4 +285,60 @@ protected:
     MultiDiffuseMap* map = nullptr;
 };
 
+class Config3 : public LGrammarConfig {
+
+public:
+    Config3(MultiDiffuseMap* map, float width_factor, float length_factor, float pitch_term, float yaw_term)
+            : map(map),
+              LGrammarConfig(0.5f, 1.0f, width_factor, length_factor, pitch_term, yaw_term){}
+
+    int colorCount() override {
+        return 2;
+    }
+
+
+    Eigen::Matrix4f create_affine_matrix(float yaw, float pitch, const Vector3f& scale, const Vector3f& p) {
+
+        /*Vector3f direction = directional(pitch, yaw);
+        Vector3f test = Vector3f(-direction.y(), direction.x(), 0).normalized();
+        Vector3f test2 = direction.cross(test).normalized();
+        Frame frame(test, test2, direction);*/
+
+
+        Eigen::Affine3f transform;
+        transform.setIdentity();
+        transform = Eigen::DiagonalMatrix<float, 3>(scale) * transform;
+        transform = Eigen::Translation<float, 3>(p.x(), p.y(), p.z()) * transform;
+        /*transform = Eigen::AngleAxis<float>(angle, axis) * transform;
+        t = Eigen::Translation<float, 3>(trans);*/
+        return transform.matrix();
+    }
+
+    void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
+
+        float length = state.length;
+        float yaw = state.yaw, pitch = state.pitch;
+        float in_thickness = state.in_thickness;
+        float out_thickness = state.out_thickness;
+
+        std::vector<Vector2f> temp;
+
+        if (c == 'F') {
+            drawCylinder(length, yaw, pitch, in_thickness, out_thickness, positions, indices, temp, state);
+        } else {
+            Point3f p_advanced = state.p + state.p_n * 1.7f*state.out_thickness;
+            auto trafo = Transform(create_affine_matrix(state.yaw, state.pitch, Vector3f(10.f*state.out_thickness), p_advanced));
+            drawMesh("assets/shape/sphere.obj", trafo, positions, indices, temp);
+        }
+
+        int index = c == 'F' ? 0 : 1;
+        for(auto t : temp) {
+            float x_mapped = map->map(t.x(), index);
+            texcoords.push_back(Vector2f(x_mapped, t.y()));
+        }
+    }
+
+protected:
+    MultiDiffuseMap* map = nullptr;
+};
 NORI_NAMESPACE_END

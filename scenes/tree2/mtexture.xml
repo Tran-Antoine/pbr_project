@@ -1,5 +1,6 @@
 <scene>
     <!-- Use the simple point light integrator -->
+    <boolean name="save" value="false"/>
     <integrator type="volum7"/>
     <!-- Independent sample generator, 32 samples per pixel -->
     <sampler type="independent">
