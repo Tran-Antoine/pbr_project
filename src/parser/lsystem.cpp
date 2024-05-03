@@ -13,7 +13,8 @@
 
 NORI_NAMESPACE_BEGIN
 
-LSystemGrammar::LSystemGrammar(std::string premise, std::vector<std::string> rules) : premise(std::move(premise)), rules(std::move(rules)) {}
+LSystemGrammar::LSystemGrammar(std::string premise, std::vector<std::string> rules, pcg32& random) 
+    : premise(std::move(premise)), rules(std::move(rules)), random(random) {}
 
 std::vector<std::vector<std::string>> LSystemGrammar::get_stochastic_rules() {
     std::vector<std::vector<std::string>> stochastic_rules;
@@ -47,10 +48,13 @@ std::vector<std::string> LSystemGrammar::get_deterministic_rules() {
 }
 
 std::string LSystemGrammar::apply_det(const std::string& src, const std::string& rule) {
+
+    std::string chosen = pick_uniformly(rule.substr(2));
+
     std::string out;
     for(auto c : src) {
         if(rule.at(0) == c) {
-            out += rule.substr(2, rule.size());
+            out += chosen;
         } else {
             out += c;
         }
@@ -61,6 +65,7 @@ std::string LSystemGrammar::apply_det(const std::string& src, const std::string&
 
 
 std::string LSystemGrammar::apply_stoch(const std::string& src, const std::vector<std::string>& rule, LGrammarConfig& config) {
+
     std::string out;
     char target_char = rule[0].at(0);
 
@@ -68,7 +73,8 @@ std::string LSystemGrammar::apply_stoch(const std::string& src, const std::vecto
         if(c == target_char) {
             TurtleState state = simulate(out, config);
             const std::string& single_rule = rule[config.pickRule(c, state.in_thickness, state.length, state.depth)];
-            out += single_rule.substr(3);
+            std::string processed_rule = pick_uniformly(single_rule.substr(3));
+            out += processed_rule;
         } else {
             out += c;
         }
@@ -124,13 +130,15 @@ public:
     }
 
     void activate() override {
-        auto config = Config4(map, width_factor, length_factor, pitch_term, yaw_term);
-        std::string mesh_string = LSystemGrammar(premise, rules).evolve(n, config);
+        auto config = Config5(random, map, width_factor, length_factor, pitch_term, yaw_term);
+        std::string mesh_string = LSystemGrammar(premise, rules, random).evolve(n, config);
 
         Timer timer;
         std::vector<Vector3f>   positions;
         std::vector<uint32_t>   indices;
         std::vector<Vector2f>   texcoords;
+
+        std::cout << mesh_string << std::endl;
 
         drawLSystem(mesh_string, config, positions, indices, texcoords);
 

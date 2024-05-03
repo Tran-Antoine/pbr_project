@@ -5,6 +5,10 @@
 #include <parser/lconfig.h>
 #include <parser/turtle.h>
 #include <stack>
+#include <sstream> 
+#include <iostream> 
+#include <pcg32.h>
+#include <fstream>
 
 NORI_NAMESPACE_BEGIN
 
@@ -23,12 +27,13 @@ public:
      * l,L: Shrink/Increase length
      * r,d: Add/Remove noise feature to all values
      * D  : Increase depth marker
+     * ;  : Add multiple uniformly distributed options
      * s  : Declare rule as stochastic (configuration decides the weightage)
      *
      * @param premise initial string
      * @param rules evolutionary rules
      */
-    LSystemGrammar(std::string premise, std::vector<std::string> rules); //: premise(std::move(premise)), rules(std::move(rules)) {}
+    LSystemGrammar(std::string premise, std::vector<std::string> rules, pcg32& random); //: premise(std::move(premise)), rules(std::move(rules)) {}
 
     std::vector<std::vector<std::string>> get_stochastic_rules();
 
@@ -93,14 +98,137 @@ public:
         return current_state;
     }
 
+    static std::string subst(const std::string& src, std::map<std::string, std::string, std::function<bool(const std::string&, const std::string&)>>& substs) {
+        std::string out = src;
+        for (const auto &pair : substs) {
+            std::string key = pair.first;
+            std::string value = pair.second;
+            size_t pos = 0;
+
+            // Replace all occurrences of the current key
+            while ((pos = out.find(key, pos)) != std::string::npos) {
+                out.replace(pos, key.length(), value);
+                pos += value.length();
+            }
+        }
+        return out;
+    }
+
+    static void strip(std::string& s) {
+        s.erase(s.find_last_not_of(" \t\n\r\f\v") + 1);
+        s.erase(0, s.find_first_not_of(" \t\n\r\f\v"));
+        s.erase(remove_if(s.begin(), s.end(), isspace), s.end());
+    }
+
+    static bool split_statement(const std::string& src, std::string& lhs, std::string& rhs) {
+        std::istringstream iss(src);
+        if (std::getline(iss, lhs, '=') && std::getline(iss, rhs)) {
+            return true;
+        }
+        return false;
+    }
+
+    static LSystemGrammar fromConfig(pcg32& random, const std::string& filename) {
+        
+        // Open the file in read-only mode
+        std::ifstream file(filename);
+
+        if (!file.is_open()) {
+            std::cerr << "Error opening file at " << filename << std::endl;
+            throw NoriException("Crash due to IO error");
+        }
+
+        std::string premise;
+        std::vector<std::string> rules;
+        auto comp = [](const std::string& a, const std::string& b) {
+            if(a.size() != b.size()) {
+                return a.size() > b.size();
+            }
+            return a < b;
+        };
+        std::map<std::string, std::string, std::function<bool(const std::string&, const std::string&)>> sugar_map(comp);
+        bool reading_sugar = true;
+
+        std::string line;
+        // Read and print each line of the file
+        while (std::getline(file, line)) {
+
+            if (line.find("#RULES") == 0) {
+                reading_sugar = false;
+                continue;
+            }
+
+
+            std::string lhs, rhs;
+            bool valid_line = split_statement(line, lhs, rhs);
+
+            if(!valid_line) {
+                // Skip lines that aren't a statement
+                continue;
+            }
+
+            if (reading_sugar) {
+                strip(lhs); strip(rhs);
+                sugar_map[lhs] = rhs;
+                continue;
+            }
+
+            if(line.find("Premise") == 0) {
+                if(!premise.empty()) {
+                    throw NoriException("Multiple premises defined");
+                }
+                std::string premise_, unused;
+                if(!split_statement(line, unused, premise_)) {
+                    throw NoriException("Syntax error");
+                }
+                premise = subst(premise_, sugar_map);
+                strip(premise);
+                continue;
+            }
+
+            std::string left_rule  = subst(lhs, sugar_map); strip(left_rule);
+            std::string right_rule = subst(rhs, sugar_map); strip(right_rule);
+
+            rules.push_back(left_rule + "=" + right_rule);
+        }
+
+        // Close the file
+        file.close();
+
+        return LSystemGrammar(premise, rules, random);
+    }
+
 private:
 
     static bool isStochastic(std::string rule) {
         return rule.at(2) == 's';
     }
+
+    static std::vector<std::string> split(std::string in) {
+        // Create a stringstream object with the input string 
+        std::stringstream ss(in);
+    
+        // Tokenize the input string by comma delimiter 
+        std::string token; 
+        std::vector<std::string> tokens; 
+        char delimiter = ';'; 
+    
+        while (getline(ss, token, delimiter)) { 
+            tokens.push_back(token); 
+        }
+
+        return tokens; 
+    }
+
+    inline std::string pick_uniformly(std::string rule) {
+        auto options = split(rule);
+        int index = (int) (random.nextFloat() * options.size());
+        return options[index];
+    }
+
     std::string premise;
     std::vector<std::string> rules;
-
+    pcg32 random;
 };
 
 
