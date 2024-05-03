@@ -13,13 +13,13 @@ int idealSmoothness(float radius) {
 void drawMesh(const std::string &filename, const Transform &trafo, std::vector<Vector3f> &positions,
               std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) {
 
-    //std::vector<Vector3f> unused; BoundingBox3f unused2;
-    //load_obj_data(filename, trafo, positions, indices, unused, texcoords, unused2);
+
     int starting_index = positions.size();
 
     auto props = PropertyList();
     props.setString("filename", filename);
     props.setTransform("toWorld", trafo);
+    props.setBoolean("no-print", true);
 
     auto mesh = WavefrontOBJ(props);
 
