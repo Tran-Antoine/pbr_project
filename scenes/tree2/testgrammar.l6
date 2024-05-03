@@ -1,0 +1,29 @@
+#DEFS
+
+Branch       = B
+FlowerBranch = X
+FourFlowers  = A
+Flower       = H
+Node         = F
+BaseShape    = rwLL
+Depth        = D
+Cylinder     = G
+
+#RULES
+
+Premise = BaseShape Node
+
+Node =s Branch
+Node =s FlowerBranch
+Node =s Depth Branch - Node; Depth Branch + Node; Depth Branch +>>> Node; Depth Branch +<<< Node
+Node =s [Depth w+ Node][Depth w- Node]; [Depth w+>> Node][Depth w->> Node]
+Node =s [Depth w+ Node][Depth w+>> Node][Depth w+>> Node]
+
+Branch =s Cylinder
+Branch =s lll Cylinder Cylinder Cylinder LLL
+Branch =s llll Cylinder Cylinder Cylinder Cylinder Cylinder LLLL
+
+FlowerBranch =s lll Cylinder [FourFlowers] Cylinder [FourFlowers] Cylinder [FourFlowers]
+FlowerBranch =s lllll Cylinder [FourFlowers] Cylinder [FourFlowers] Cylinder [FourFlowers] Cylinder [FourFlowers]
+
+FourFlowers = [+Lww Cylinder Flower][-Lww Cylinder Flower][+>>Lww Cylinder Flower][+<<Lww Cylinder Flower]

@@ -4,7 +4,7 @@
     <integrator type="volum7"/>
     <!-- Independent sample generator, 32 samples per pixel -->
     <sampler type="independent">
-        <integer name="sampleCount" value="4"/>
+        <integer name="sampleCount" value="16"/>
     </sampler>
 
     <camera type="perspective">
@@ -19,15 +19,32 @@
     </camera>
 
     <mesh type="lsystem">
-        <string name="premise" value="rLLLG"/>
-        <string name="rule0" value="G=F[wl+G]wl-G"/>
-        <float name="width_factor" value="0.7"/>
-        <float name="length_factor" value="0.8"/>
-        <float name="pitch_term" value="30"/>
-        <float name="yaw_term" value="30"/>
+        <!--
+            F represents a non-terminal branch
+            B represents a terminal curved branch
+            G represents a terminal primitive cylinder
+            Requires Config5
+        -->
+        <string name="premise" value="rwLLF"/>
+        <string name="rule0" value="F=sB;lllG[A]G[A]G[A];lllllG[A]G[A]G[A]G[A]G[A]"/> <!-- branch terminates with flowers -->
+        <string name="rule1" value="F=sDB-F;DB+F;DB+>F;DB+<F"/> <!-- branch changes direction -->
+        <string name="rule2" value="F=sB[Dw+F][Dw-F];[Dw+>F][Dw->F];[Dw+<F][Dw-<F]"/> <!-- branch splits in two directions -->
+        <string name="rule3" value="F=sB+[DwF]>>[DwF]>>[DwF]"/> <!-- branch splits in 3 directions -->
 
-        <float name="seed" value="121654"/>
-        <integer name="evolutions" value="10"/>
+        <string name="rule4" value="B=sG"/>
+        <string name="rule5" value="B=slllGGGLLL"/>
+        <string name="rule6" value="B=sllllGGGGGLLLL"/>
+
+        <string name="rule7" value="A=[+LwGH][-LwGH][+>LwGH][->LwGH]"/> <!-- flowers -->
+
+
+        <float name="width_factor" value="0.8"/>
+        <float name="length_factor" value="0.8"/>
+        <float name="pitch_term" value="25"/>
+        <float name="yaw_term" value="20"/>
+
+        <float name="seed" value="000001"/>
+        <integer name="evolutions" value="6"/>
 
         <bsdf type="diffuse">
             <diffusemap type="mtexture">
