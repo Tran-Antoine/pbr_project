@@ -13,7 +13,7 @@ BaseConfig = --L
 
 #RULES
 
-Premise = BaseConfig Cylinder wD [+++ Cylinder l ++ Node] [++++++ Cylinder l- Node] - Cylinder +++ Node
+Premise = BaseConfig L Cylinder l wD [+++ Node] [++++++ Cylinder l- Node] - [Cylinder +++ Node] [L Node]
 
 Node =s Branch
 Node =s FlowerBranch

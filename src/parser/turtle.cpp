@@ -52,7 +52,7 @@ void drawCylinder(float length, float yaw, float pitch, float in_thickness, floa
     Vector3f b = a + length * direction;
     Vector3f b_n = (b-a).normalized();
 
-    if(abs(a_n.dot(b_n)) < 0.75) {
+    if(abs(a_n.dot(b_n)) < 0.5) {
         // start with the out thickness right away
         drawStraightCylinder(a, b, out_thickness, out_thickness, positions, indices, texcoords, state);
     }
