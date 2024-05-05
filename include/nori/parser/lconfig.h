@@ -401,7 +401,7 @@ public:
     Config5(pcg32& random, MultiDiffuseMap* map, float width_factor, float length_factor, float pitch_term, float yaw_term)
             : map(map),
               random(random),
-              LGrammarConfig(0.5f, 1.0f, width_factor, length_factor, pitch_term, yaw_term){}
+              LGrammarConfig(1.5f, 5.0f, width_factor, length_factor, pitch_term, yaw_term){}
 
     int colorCount() override {
         return 2;
@@ -428,7 +428,7 @@ public:
     }
 
     float randomizeYaw(float yaw, char c) override {
-        return yaw + M_PI / 5 * Warp::lineToLogistic(random.nextFloat(), 0.6);
+        return yaw + M_PI / 5 * Warp::lineToLogistic(random.nextFloat(), 0.06);
     }
 
     float randomizePitch(float pitch, char c) override {
@@ -437,16 +437,16 @@ public:
             return pitch / 2.f + 0.5f;
         }
 
-        return pitch * (1 + 0.2f * Warp::lineToLogistic(random.nextFloat(), 0.2));
+        return pitch * (1 + Warp::lineToLogistic(random.nextFloat(), 0.02));
     }
 
     float randomizeLength(float length, char c) override {
 
-        return length * (1 + 0.3f * Warp::lineToLogistic(random.nextFloat(), 0.6));
+        return length * (1 + Warp::lineToLogistic(random.nextFloat(), 0.06));
     }
     float randomizeThickness(float thickness, char c) override {
 
-        float randomized = thickness * (1 + 0.1f * Warp::lineToLogistic(random.nextFloat(), 0.6));
+        float randomized = thickness * (1 + Warp::lineToLogistic(random.nextFloat(), 0.06));
 
         if(thickness < 0.22) {
             randomized /= 1.5f;
@@ -457,20 +457,15 @@ public:
     int pickRule(char c, float thickness, float length, int depth) override {
         float sample = random.nextFloat();
 
-        if(c == 'B') {
-            if(depth <= 2) return pick(sample, 0.0, 0.5, 0.5);
-            if(depth <= 5) return pick(sample, 0.2, 0.6, 0.2);
-            else           return pick(sample, 0.7, 0.3, 0.0);
+        if(c == 'N') {
+            return 4;
+            if(depth <= 4) return pick(sample, 0.0, 0.0, 0.0, 0.2, 0.8);
+            if(depth <= 12) return pick(sample, 0.0, 0.7, 0.1, 0.1, 0.1);
+            else           return 1;
         }
 
-        if(c == 'F') {
-            if(depth <= 1) return pick(sample, 0.0, 0.2, 0.8);
-            if(depth <= 5) return pick(sample, 0.1, 0.1, 0.4, 0.4);
-            if(depth <= 8) return pick(sample, 0.2, 0.1, 0.4, 0.3);
-            else           return pick(sample, 0.5, 0.0, 0.4, 0.1);
-        }
-
-        throw NoriException("Unhandled stochastic rule");
+        return 0;
+        //throw NoriException("Unhandled stochastic rule");
     }
 
     void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
@@ -488,7 +483,75 @@ public:
         }
 
         std::vector<Vector2f> temp;
-        drawCylinder(length, yaw, pitch, in_thickness, out_thickness, positions, indices, temp, state);
+
+        if(c == 'G') {
+            drawCylinder(length, yaw, pitch, in_thickness, out_thickness, positions, indices, temp, state);
+        } else if (c == 'F') {
+            drawCylinder(length, yaw, pitch, in_thickness, out_thickness, 5, 0.001, random.nextFloat(), positions, indices, temp, state);
+        } else {
+            Point3f p_advanced = state.p + state.p_n * 0.75f*state.out_thickness;
+            auto trafo = Transform(create_affine_matrix(state.yaw, state.pitch, Vector3f(1.5f*state.out_thickness), p_advanced));
+            drawMesh("assets/shape/sphere.obj", trafo, positions, indices, temp);
+        }
+
+        int index = c != 'H' ? 0 : 1;
+        for(auto t : temp) {
+            float x_mapped = map->map(t.x(), index);
+            texcoords.push_back(Vector2f(x_mapped, t.y()));
+        }
+    }
+
+protected:
+    pcg32 random;
+    MultiDiffuseMap* map = nullptr;
+};
+
+class Config6 : public LGrammarConfig {
+
+public:
+    Config6(pcg32& random, MultiDiffuseMap* map, float width_factor, float length_factor, float pitch_term, float yaw_term)
+            : map(map),
+              random(random),
+              LGrammarConfig(0.3f, 2.0f, width_factor, length_factor, pitch_term, yaw_term){}
+
+    int colorCount() override {
+        return 2;
+    }
+
+    static int pick(float sample, float pa, float pb, float pc=0.f, float pd=0.f, float pe=0.f, float pf=0.f) {
+        if(sample < pa) return 0;
+        if(sample < pa + pb) return 1;
+        if(sample < pa + pb + pc) return 2;
+        if(sample < pa + pb + pc + pd) return 3;
+        if(sample < pa + pb + pc + pd + pe) return 4;
+        return 3;
+    }
+
+    Eigen::Matrix4f create_affine_matrix(float yaw, float pitch, const Vector3f& scale, const Vector3f& p) {
+
+        Eigen::Affine3f transform;
+        transform.setIdentity();
+        transform = Eigen::DiagonalMatrix<float, 3>(scale) * transform;
+        transform = Eigen::Translation<float, 3>(p.x(), p.y(), p.z()) * transform;
+        /*transform = Eigen::AngleAxis<float>(angle, axis) * transform;
+        t = Eigen::Translation<float, 3>(trans);*/
+        return transform.matrix();
+    }
+
+
+    void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
+
+        float length = state.length;
+        float yaw = state.yaw, pitch = state.pitch;
+        float in_thickness = state.in_thickness;
+        float out_thickness = state.out_thickness;
+
+
+        std::vector<Vector2f> temp;
+
+        drawCylinder(length, yaw, pitch, in_thickness, out_thickness, 3, 0.03, random.nextFloat(),
+                     positions, indices, texcoords, state);
+
 
         int index = 0;
         for(auto t : temp) {
@@ -501,4 +564,5 @@ protected:
     pcg32 random;
     MultiDiffuseMap* map = nullptr;
 };
+
 NORI_NAMESPACE_END

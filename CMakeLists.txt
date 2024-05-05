@@ -188,7 +188,7 @@ add_executable(nori
   src/volume/voxelreader.cpp
   src/volume/debugmedia.cpp
 
-  #src/main.cpp
+  src/main.cpp
   #test/readvoxel.cpp
   #test/medium_test.cpp
   #test/perlin_test.cpp
@@ -199,7 +199,7 @@ add_executable(nori
   #test/grass_test.cpp
   #test/grass_alias.cpp
   #test/smallterraintest.cpp
-  test/parseconfigtest.cpp
+  #test/parseconfigtest.cpp
 )
 
 # Link OpenCV libraries

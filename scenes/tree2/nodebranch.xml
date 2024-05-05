@@ -1,17 +1,17 @@
 <scene>
     <!-- Use the simple point light integrator -->
     <boolean name="save" value="false"/>
-    <integrator type="normals"/>
+    <integrator type="volum7"/>
     <!-- Independent sample generator, 32 samples per pixel -->
     <sampler type="independent">
-        <integer name="sampleCount" value="16"/>
+        <integer name="sampleCount" value="32"/>
     </sampler>
 
     <camera type="perspective">
         <float name="fov" value="60"/>
         <transform name="toWorld">
             <scale value="-1,1,1"/>
-            <lookat target="0, 6, 0" origin="0, 5, -50" up="0, 1, 0"/>
+            <lookat target="0, 5, 0" origin="0, 5, -15" up="0, 1, 0"/>
         </transform>
 
         <integer name="height" value="600"/>
@@ -19,34 +19,33 @@
     </camera>
 
     <mesh type="lsystem">
+        <string name="premise" value="LLLwF"/>
 
-        <string name="config" value="scenes/tree2/treegrammar2.l6"/>
+        <float name="width_factor" value="0.75"/>
+        <float name="length_factor" value="0.8"/>
+        <float name="pitch_term" value="30"/>
+        <float name="yaw_term" value="90"/>
 
-        <float name="width_factor" value="0.78"/>
-        <float name="length_factor" value="0.85"/>
-        <float name="pitch_term" value="15"/>
-        <float name="yaw_term" value="15"/>
-
-        <float name="seed" value="000011"/>
+        <float name="seed" value="121654"/>
         <integer name="evolutions" value="0"/>
 
         <bsdf type="diffuse">
             <diffusemap type="mtexture">
                 <diffusemap type="uniform">
-                    <color name="albedo" value="0.32 0.2 0.04"/>
+                    <color name="albedo" value="0.5 0.5 0.5"/>
                 </diffusemap>
                 <diffusemap type="uniform">
-                    <color name="albedo" value="0.6 0 0.6"/>
+                    <color name="albedo" value="0.7 0.4 0.7"/>
                 </diffusemap>
             </diffusemap>
         </bsdf>
 
         <diffusemap type="mtexture">
             <diffusemap type="uniform">
-                <color name="albedo" value="0.32 0.2 0.04"/>
+                <color name="albedo" value="0.5 0.5 0.5"/>
             </diffusemap>
             <diffusemap type="uniform">
-                <color name="albedo" value="0.6 0 0.6"/>
+                <color name="albedo" value="0.5 0 0.5"/>
             </diffusemap>
         </diffusemap>
     </mesh>

@@ -107,7 +107,7 @@ class LSystemMesh : public Mesh {
 public:
     explicit LSystemMesh(const PropertyList& propList) {
 
-        config_file = propList.getString("config");
+        config_file = propList.getString("config", "");
 
         if(config_file.empty()) {
             // manually fetch premise + rules
@@ -210,7 +210,7 @@ protected:
 
         TurtleState current_state = {
                 Vector3f(0.f), 0.f, M_PI / 2, Vector3f(0.f, 1.f, 0.f),
-                config.get_initial_width(), config.get_initial_width(), config.get_length_factor()
+                config.get_initial_width(), config.get_initial_width(), config.get_initial_length()
         };
 
         TurtleState copy;
