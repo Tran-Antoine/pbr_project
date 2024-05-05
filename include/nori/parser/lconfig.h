@@ -401,7 +401,7 @@ public:
     Config5(pcg32& random, MultiDiffuseMap* map, float width_factor, float length_factor, float pitch_term, float yaw_term)
             : map(map),
               random(random),
-              LGrammarConfig(1.5f, 5.0f, width_factor, length_factor, pitch_term, yaw_term){}
+              LGrammarConfig(1.7f, 8.0f, width_factor, length_factor, pitch_term, yaw_term){}
 
     int colorCount() override {
         return 2;
@@ -431,7 +431,11 @@ public:
         return yaw + M_PI / 5 * Warp::lineToLogistic(random.nextFloat(), 0.06);
     }
 
-    float randomizePitch(float pitch, char c) override {
+    float controlPitch(float pitch, int depth) {
+
+        if(pitch < 0.f && depth <= 6) {
+            return 0.1f;
+        }
 
         if(pitch < 0.f) {
             return pitch / 2.f + 0.5f;
@@ -478,7 +482,7 @@ public:
         if(state.random) {
             length = randomizeLength(length, c);
             yaw = randomizeYaw(yaw, c);
-            pitch = randomizePitch(pitch, c);
+            pitch = controlPitch(pitch, state.depth);
             out_thickness = randomizeThickness(out_thickness, c);
         }
 
