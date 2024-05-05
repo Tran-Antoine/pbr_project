@@ -107,18 +107,22 @@ class LSystemMesh : public Mesh {
 public:
     explicit LSystemMesh(const PropertyList& propList) {
 
-        premise = propList.getString("premise");
-        for(int i = 0; i < 30; i++) {
-            std::string tagName = "rule" + std::to_string(i);
-            std::string rule = propList.getString(tagName, "");
-            if(rule.empty()) break;
+        config_file = propList.getString("config");
 
-            rules.push_back(rule);
+        if(config_file.empty()) {
+            // manually fetch premise + rules
+            premise = propList.getString("premise");
+            for(int i = 0; i < 30; i++) {
+                std::string tagName = "rule" + std::to_string(i);
+                std::string rule = propList.getString(tagName, "");
+                if(rule.empty()) break;
+
+                rules.push_back(rule);
+            }
         }
 
         n = propList.getInteger("evolutions");
         random.seed((uint64_t) propList.getFloat("seed", 11111));
-
 
         width_factor = propList.getFloat("width_factor", 0.7f);
         length_factor = propList.getFloat("length_factor", 0.7f);
@@ -131,7 +135,10 @@ public:
 
     void activate() override {
         auto config = Config5(random, map, width_factor, length_factor, pitch_term, yaw_term);
-        std::string mesh_string = LSystemGrammar(premise, rules, random).evolve(n, config);
+        std::string mesh_string = (config_file.empty()
+                ? LSystemGrammar(premise, rules, random)
+                : LSystemGrammar::fromConfig(random, config_file))
+                    .evolve(n, config);
 
         Timer timer;
         std::vector<Vector3f>   positions;
@@ -190,6 +197,7 @@ protected:
     float width_factor, length_factor, pitch_term, yaw_term;
     Transform trafo;
     int n;
+    std::string config_file;
     std::string premise;
     std::vector<std::string> rules;
 
