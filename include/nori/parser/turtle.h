@@ -28,6 +28,12 @@ void drawMesh(const std::string &filename, const Transform &trafo, std::vector<V
 void drawCylinder(float length, float yaw, float pitch, float in_thickness, float out_thickness,
                          std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f>& texcoords, TurtleState &state);
 
+void drawCylinder(const Point3f& a, const Point3f& b, const Vector3f& a_n, const Vector3f& b_n, float in_thickness, float out_thickness,
+                  std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f>& texcoords, TurtleState &state);
+
+void drawCylinder(float length, float yaw, float pitch, float in_thickness, float out_thickness, int n_nodes, float variance, float sample,
+                  std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f>& texcoords, TurtleState &state);
+
 void drawStraightCylinder(const Point3f& a, const Point3f& b, float in_thickness, float out_thickness,
                           std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f>& texcoords, TurtleState &state);
 

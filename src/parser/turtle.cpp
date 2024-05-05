@@ -3,6 +3,7 @@
 #include <parser/turtle.h>
 #include <parser/objutil.h>
 #include <parser/obj.h>
+#include <stats/warp.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -51,11 +52,52 @@ void drawCylinder(float length, float yaw, float pitch, float in_thickness, floa
     Vector3f b = a + length * direction;
     Vector3f b_n = (b-a).normalized();
 
+    if(abs(a_n.dot(b_n)) < 0.75) {
+        // start with the out thickness right away
+        drawStraightCylinder(a, b, out_thickness, out_thickness, positions, indices, texcoords, state);
+    }
+
     connect(a, b, a_n, in_thickness, out_thickness, idealSmoothness(std::max(in_thickness, out_thickness)),
             positions, indices, texcoords);
     state.p = b;
     state.p_n = b_n;
     state.in_thickness = out_thickness;
+}
+
+void drawCylinder(const Point3f& a, const Point3f& b, const Vector3f& a_n, const Vector3f& b_n, float in_thickness, float out_thickness,
+                  std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f>& texcoords, TurtleState &state) {
+
+    connect(a, b, a_n, in_thickness, out_thickness, idealSmoothness(std::max(in_thickness, out_thickness)),
+            positions, indices, texcoords);
+    state.p = b;
+    state.p_n = b_n;
+    state.in_thickness = out_thickness;
+}
+
+static void addNoise(float& yaw, float& pitch, float sample, float variance) {
+    yaw *= 1 + Warp::lineToLogistic(sample, variance);
+    pitch *= 1 + Warp::lineToLogistic(sample, variance);
+}
+
+void drawCylinder(float length, float yaw, float pitch, float in_thickness, float out_thickness, int n_nodes, float variance, float sample,
+                  std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f>& texcoords, TurtleState &state) {
+    float dl = length / (float) n_nodes;
+    float dt = (out_thickness - in_thickness) / (float) n_nodes;
+
+    Vector3f end_point = state.p + length * directional(pitch, yaw);
+    Vector3f next;
+
+    state.in_thickness = in_thickness;
+
+    for(int i = 0; i < n_nodes - 1; i++) {
+
+        addNoise(yaw, pitch, sample, variance);
+        next = state.p + dl * directional(pitch, yaw);
+        drawCylinder(dl, yaw, pitch, state.in_thickness, state.in_thickness + dt, positions, indices, texcoords, state);
+    }
+
+    drawCylinder(state.p, end_point, state.p_n, (end_point - next).normalized(), state.in_thickness, out_thickness, positions, indices, texcoords, state);
+
 }
 
 void drawStraightCylinder(const Point3f& a, const Point3f& b, float in_thickness, float out_thickness,
