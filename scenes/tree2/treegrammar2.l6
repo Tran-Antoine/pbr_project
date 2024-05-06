@@ -9,19 +9,25 @@ Depth           = D
 Cylinder        = G
 TwistedCylinder = F
 ConnectedFlower = C
-BaseConfig = --rLLLLLLL
-90> = >>>>>>
-90< = <<<<<<
+BaseConfig = ------
+15> = >>>
+15< = <<<
+90> = >>>>>>>>>>>>>>>>>>
+90< = <<<<<<<<<<<<<<<<<<
+15+ = +++
+15- = ---
+30+ = ++++++
+30- = ------
 
 #RULES
 
-Premise = BaseConfig L Cylinder lww wD [+++ Node] [++++++<<< Cylinder l+ Node] - [WW Cylinder ww +++< Node] [L Node]
+Premise = BaseConfig Branch Branch [w 30- 15- 30< Branch Depth Node] [w 30- 30- 30- 30< 15< Branch Branch +++ Depth Node] 15+ Branch 15- ---- Depth w Node
 
 Node =s FlowerBranch
-Node =s Branch Depth -- Node; Branch Depth ++ Node; Branch Depth ++ 90> Node; Branch Depth ++ 90< Node
-Node =s Branch Depth [wl++ Node][wl-- Node]; Branch Depth [wl++ 90> Node][wl-- 90> Node]
-Node =s Branch Depth [wl++ FlowerBranch][wl-- Node]; [wl++ Node][wl-- FlowerBranch]; [wl++ 90> FlowerBranch][wl-- 90> Node]; [wl++ 90> Node][wl-- 90> FlowerBranch]
-Node =s Branch Depth [wl++ Node][wl-->>>> Node][wl-- Node]
+Node =s Branch Depth 30- Node; Branch Depth 30+ Node; Branch Depth 30+ 90> Node; Branch Depth 30+ 90< Node
+Node =s Branch Depth [wl 30+ Node][wl 30- Node]; Branch Depth [wl 30+ 90> Node][wl 30- 90> Node]
+Node =s Branch Depth [wl 30+ FlowerBranch][wl 30- Node]; [wl 30+ Node][wl 30- FlowerBranch]; [wl 30+ 90> FlowerBranch][wl 30- 90> Node]; [wl 30+ 90> Node][wl 30- 90> FlowerBranch]
+Node =s Branch Depth [wl 30+ Node][wl 30- >>>> Node][wl 30- Node]
 
 Branch = Cylinder; TwistedCylinder
 
