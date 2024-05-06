@@ -1,6 +1,6 @@
 <scene>
     <!-- Use the simple point light integrator -->
-    <boolean name="save" value="true"/>
+    <boolean name="save" value="false"/>
     <integrator type="volum7"/>
     <!-- Independent sample generator, 32 samples per pixel -->
     <sampler type="independent">
@@ -11,7 +11,7 @@
         <float name="fov" value="80"/>
         <transform name="toWorld">
             <scale value="-1,1,1"/>
-            <lookat target="0, 15, 0" origin="0, 5, -70" up="0, 1, 0"/>
+            <lookat target="0, 35, 0" origin="0, 25, -70" up="0, 1, 0"/>
         </transform>
 
         <integer name="height" value="600"/>
