@@ -7,6 +7,11 @@
 
 NORI_NAMESPACE_BEGIN
 
+using PosVec = std::vector<Vector3f>&;
+using IndVec = std::vector<uint32_t>&;
+using TexVec = std::vector<Vector2f>&;
+
+
 struct TurtleState {
 
     Vector3f p;
@@ -32,33 +37,34 @@ struct TurtleState {
 
         return p + length * toWorld;
     }
+
+    Vector3f normalOut() {
+        return (forward() - p).normalized();
+    }
 };
 
 int idealSmoothness(float radius);
 
-void drawMesh(const std::string &filename, const Transform &trafo, std::vector<Vector3f> &positions,
-              std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords);
+void drawMesh(const std::string &filename, const Transform &trafo,
+              PosVec ps, IndVec is, TexVec ts);
 
-void drawCylinder(float length, float yaw, float pitch, float in_thickness, float out_thickness,
-                         std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f>& texcoords, TurtleState &state);
+void drawCylinder(TurtleState &state, PosVec ps, IndVec is, TexVec ts);
 
 void drawCylinder(const Point3f& a, const Point3f& b, const Vector3f& a_n, const Vector3f& b_n, float in_thickness, float out_thickness,
-                  std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f>& texcoords, TurtleState &state);
+                  PosVec ps, IndVec is, TexVec ts, TurtleState &state);
 
-void drawCylinder(float length, float yaw, float pitch, float in_thickness, float out_thickness, int n_nodes, float variance, float sample,
-                  std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f>& texcoords, TurtleState &state);
+void drawCylinder(int n_nodes, float variance, float sample,
+                  PosVec ps, IndVec is, TexVec ts, TurtleState &state);
 
 void drawStraightCylinder(const Point3f& a, const Point3f& b, float in_thickness, float out_thickness,
-                          std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f>& texcoords, TurtleState &state);
+                          PosVec ps, IndVec is, TexVec ts, TurtleState &state);
 
-void connect(const Point3f &a, const Point3f &b, const Vector3f &a_n, float in_thickness, float out_thickness,
-                    int smoothness, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices,
-                    std::vector<Vector2f> &texcoords);
+void connect(const Point3f &a, const Point3f &b, const Vector3f &a_n, float in_thickness, float out_thickness, int smoothness,
+             PosVec ps, IndVec is, TexVec ts);
 
 std::vector<Vector3f> circle(const Vector3f& p, const Vector3f& p_n, float radius, int smoothness);
 
-void push_circle(std::vector<Vector3f> &circle_positions, const Vector3f &p, std::vector<Vector3f> &positions,
-                        std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords,
-                        bool fill_circle);
+void push_circle(PosVec circle_ps, const Vector3f &p, PosVec ps,
+                 IndVec is, TexVec ts, bool fill_circle);
 
 NORI_NAMESPACE_END
