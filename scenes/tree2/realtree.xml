@@ -22,13 +22,13 @@
 
         <string name="config" value="scenes/tree2/treegrammar2.l6"/>
 
-        <float name="width_factor" value="0.78"/>
+        <float name="width_factor" value="0.75"/>
         <float name="length_factor" value="0.95"/>
-        <float name="pitch_term" value="15"/>
-        <float name="yaw_term" value="15"/>
+        <float name="pitch_term" value="5"/>
+        <float name="yaw_term" value="5"/>
 
         <float name="seed" value="021211"/>
-        <integer name="evolutions" value="5"/>
+        <integer name="evolutions" value="7"/>
 
         <bsdf type="diffuse">
             <diffusemap type="mtexture">

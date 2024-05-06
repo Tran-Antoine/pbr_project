@@ -95,7 +95,9 @@ public:
         // otherwise, bump the direction up
         if(dir.y() < 0.3) {
             Vector3f bended = Vector3f(dir.x()/2.f, 1, dir.z()/2.f).normalized();
-            state.frame = Frame(bended);
+            Vector3f s = Vector3f(-bended.y(), bended.x(), 0).normalized();
+            Vector3f t = bended.cross(s).normalized();
+            state.frame = Frame(s,t,bended);
         }
     }
 
@@ -134,9 +136,9 @@ public:
 
         if(c == 'N') {
             if(depth <= 4)  return pick(sample, 0.0, 0.0, 0.8, 0.0, 0.2, 0.0);
-            /*if(depth <= 5)  return pick(sample, 0.0, 0.5, 0.2, 0.2, 0.1, 0.0);
+            if(depth <= 5)  return pick(sample, 0.0, 0.5, 0.2, 0.2, 0.1, 0.0);
             if(depth <= 8)  return pick(sample, 0.1, 0.0, 0.0, 0.3, 0.2, 0.5);
-            if(depth <= 12) return pick(sample, 0.8, 0.0, 0.0, 0.2, 0.0, 0.0);*/
+            if(depth <= 12) return pick(sample, 0.8, 0.0, 0.0, 0.2, 0.0, 0.0);
             return 1;
         }
 
@@ -157,7 +159,7 @@ public:
         std::vector<Vector2f> temp;
 
         if(c == 'G' || c == 'F') {
-            drawCylinder(2, 0.02, random.nextFloat(), positions, indices, temp, state);
+            drawCylinder(state,positions, indices, temp);
         } else {
             Point3f p_advanced = state.p + state.p_n * 0.7f;
             auto trafo = Transform(

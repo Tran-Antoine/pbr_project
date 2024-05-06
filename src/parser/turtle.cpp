@@ -67,7 +67,10 @@ void drawCylinder(const Point3f& a, const Point3f& b, const Vector3f& a_n, const
     state.p = b;
     state.p_n = b_n;
     state.in_thickness = out_thick;
-    state.frame = Frame(b_n);
+
+    Vector3f s = Vector3f(-b_n.y(), b_n.x(), 0).normalized();
+    Vector3f t = b_n.cross(s).normalized();
+    state.frame = Frame(s, t, b_n);
     state.resetOrientation();
 }
 
@@ -163,9 +166,9 @@ void connect(const Point3f &a, const Point3f &b, const Vector3f &a_n, float in_t
 std::vector<Vector3f> circle(const Vector3f& p, const Vector3f& p_n, float radius, int smoothness) {
 
     std::vector<Vector3f> pos(4 + smoothness);
-    Vector3f test = Vector3f(-p_n.y(), p_n.x(), 0).normalized();
-    Vector3f test2 = p_n.cross(test).normalized();
-    Frame frame(test, test2, p_n);
+    Vector3f x = Vector3f(-p_n.y(), p_n.x(), 0).normalized();
+    Vector3f y = p_n.cross(x).normalized();
+    Frame frame(x, y, p_n);
     Vector3f anchor = Vector3f(radius, 0, 0);
 
     for(int j = 0; j < smoothness + 4; j++) {

@@ -204,23 +204,6 @@ protected:
 
     MultiDiffuseMap* map = nullptr;
 
-    void rotPitch(float dpitch, TurtleState& state) {
-        Vector3f local = directional(dpitch, 0);
-        std::swap(local.x(), local.y()); // to be in accordance with the local frame (0, 0, 1)
-        std::swap(local.y(), local.z());
-
-        Vector3f toWorld = state.frame.toWorld(local);
-        state.frame = Frame(toWorld);
-    }
-
-    void rotYaw(float dyaw, TurtleState& state) {
-        Vector3f local = directional(0, dyaw);
-        std::swap(local.x(), local.y()); // to be in accordance with the local frame (0, 0, 1)
-        std::swap(local.y(), local.z());
-
-        Vector3f toWorld = state.frame.toWorld(local);
-        state.frame = Frame(toWorld);
-    }
 
     void drawLSystem(const std::string &seq, LGrammarConfig& config,
                      std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) {
