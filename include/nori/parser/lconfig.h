@@ -93,15 +93,16 @@ public:
             return;
         }
         // otherwise, bump the direction up
-        if(dir.y() < 0.3) {
+        /*if(dir.y() < -1) {
             Vector3f bended = Vector3f(dir.x()/2.f, 1, dir.z()/2.f).normalized();
             Vector3f s = Vector3f(-bended.y(), bended.x(), 0).normalized();
             Vector3f t = bended.cross(s).normalized();
             state.frame = Frame(s,t,bended);
-        }
+        }*/
     }
 
     void controlYaw(TurtleState &state, char c) override {
+        if(state.depth < 4) return;
         state.yaw += Warp::lineToLogistic(random.nextFloat(), 0.06);
     }
 
@@ -110,6 +111,7 @@ public:
     }
 
     void controlLength(TurtleState &state, char c) override {
+        if(state.depth < 4) return;
         if(state.depth > 7) {
             state.length *= 0.9;
         }
@@ -117,7 +119,7 @@ public:
     }
 
     void controlThickness(TurtleState &state, char c) override {
-
+        if(state.depth < 4) return;
         if(state.out_thickness < 0.01) {
             state.out_thickness = 0.01;
         } else {
@@ -137,6 +139,7 @@ public:
         if(c == 'N') {
             if(depth <= 4)  return pick(sample, 0.0, 0.0, 0.8, 0.0, 0.2, 0.0);
             if(depth <= 5)  return pick(sample, 0.0, 0.5, 0.2, 0.2, 0.1, 0.0);
+            return 0;
             if(depth <= 8)  return pick(sample, 0.1, 0.0, 0.0, 0.3, 0.2, 0.5);
             if(depth <= 12) return pick(sample, 0.8, 0.0, 0.0, 0.2, 0.0, 0.0);
             return 1;
@@ -161,10 +164,10 @@ public:
         if(c == 'G' || c == 'F') {
             drawCylinder(state,positions, indices, temp);
         } else {
-            Point3f p_advanced = state.p + state.p_n * 0.7f;
+            Point3f p_advanced = state.p + state.p_n * 1.2f;
             auto trafo = Transform(
-                    create_affine_matrix(state.yaw, state.pitch, Vector3f(0.9f), p_advanced));
-            drawMesh("assets/shape/flatcube.obj", trafo, positions, indices, temp);
+                    create_affine_matrix(state.yaw, state.pitch, Vector3f(1.5f), p_advanced));
+            drawMesh("assets/shape/sphere.obj", trafo, positions, indices, temp);
         }
 
         int index = colorIndex(c);
