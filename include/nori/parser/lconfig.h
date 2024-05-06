@@ -93,8 +93,8 @@ public:
             return;
         }
         // otherwise, bump the direction up
-        if(dir.y() < 0) {
-            Vector3f bended = Vector3f(dir.x(), 1, dir.z()).normalized();
+        if(dir.y() < 0.3) {
+            Vector3f bended = Vector3f(dir.x()/2.f, 1, dir.z()/2.f).normalized();
             state.frame = Frame(bended);
         }
     }
@@ -108,36 +108,35 @@ public:
     }
 
     void controlLength(TurtleState &state, char c) override {
+        if(state.depth > 7) {
+            state.length *= 0.9;
+        }
         state.length *= 1 + Warp::lineToLogistic(random.nextFloat(), 0.06);
     }
 
     void controlThickness(TurtleState &state, char c) override {
-        if(state.depth <= 5) {
-            state.out_thickness = (state.out_thickness + initial_width) / 2.0f;
-        } else if(state.out_thickness < 0.1) {
-            state.out_thickness = 0.1;
+
+        if(state.out_thickness < 0.01) {
+            state.out_thickness = 0.01;
         } else {
-            state.out_thickness *= (1 + Warp::lineToLogistic(random.nextFloat(), 0.06));
+            state.out_thickness *= (1 + Warp::lineToLogistic(random.nextFloat(), 0.01));
         }
     }
 
     int pickRule(char c, float thickness, float length, int depth) override {
         float sample = random.nextFloat();
 
-        // Node =s FlowerBranch
-        // Node =s FlowerBranch Depth -- Node; FlowerBranch Depth ++ Node; FlowerBranch Depth ++>>>>>> Node; FlowerBranch Depth ++<<<<<< Node
-        // Node =s Branch Depth [wl++ Node][wl-- Node]; Branch Depth [wl++>>>>>> Node][wl-->>>>>> Node]
-        // Node =s Branch Depth [wl++ Node][wl-->>>> Node][wl-- Node]
-        // Node =s FlowerBranch Depth [wl++ Node][wl-->>>> Node][wl-- Node]
-        if(c == 'N') {
-            if(depth <= 3)  return pick(sample, 0.0, 0.0, 1.0, 0.0, 0.0);
-            if(depth <= 5)  return pick(sample, 0.0, 0.6, 0.2, 0.2, 0.0);
-            if(depth <= 8)  return pick(sample, 0.4, 0.0, 0.0, 0.0, 0.6);
-            if(depth <= 12) return pick(sample, 0.8, 0.0, 0.0, 0.0, 0.2);
-            return 1;
-        }
+        //Node =s FlowerBranch
+        //Node =s Change direction
+        //Node =s Split in two
+        //Node =s Split in two, terminates one branch
+        //Node =s Split in three
 
-        if(c == 'X') {
+        if(c == 'N') {
+            if(depth <= 4)  return pick(sample, 0.0, 0.0, 0.8, 0.0, 0.2, 0.0);
+            /*if(depth <= 5)  return pick(sample, 0.0, 0.5, 0.2, 0.2, 0.1, 0.0);
+            if(depth <= 8)  return pick(sample, 0.1, 0.0, 0.0, 0.3, 0.2, 0.5);
+            if(depth <= 12) return pick(sample, 0.8, 0.0, 0.0, 0.2, 0.0, 0.0);*/
             return 1;
         }
 
@@ -158,12 +157,12 @@ public:
         std::vector<Vector2f> temp;
 
         if(c == 'G' || c == 'F') {
-            drawCylinder(state, positions, indices, temp);
+            drawCylinder(2, 0.02, random.nextFloat(), positions, indices, temp, state);
         } else {
-            Point3f p_advanced = state.p + state.p_n * 0.3f;
+            Point3f p_advanced = state.p + state.p_n * 0.7f;
             auto trafo = Transform(
-                    create_affine_matrix(state.yaw, state.pitch, Vector3f(0.5f), p_advanced));
-            //drawMesh("assets/shape/flatcube.obj", trafo, positions, indices, temp);
+                    create_affine_matrix(state.yaw, state.pitch, Vector3f(0.9f), p_advanced));
+            drawMesh("assets/shape/flatcube.obj", trafo, positions, indices, temp);
         }
 
         int index = colorIndex(c);

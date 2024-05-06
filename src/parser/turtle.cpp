@@ -57,7 +57,7 @@ void drawCylinder(TurtleState &state, PosVec ps, IndVec is, TexVec ts) {
 void drawCylinder(const Point3f& a, const Point3f& b, const Vector3f& a_n, const Vector3f& b_n, float in_thick, float out_thick,
                   PosVec ps, IndVec is, TexVec ts, TurtleState &state) {
 
-    if(abs(a_n.dot(b_n)) < 0.5) {
+    if(abs(a_n.dot(b_n)) < 0.4) {
         // start with the out thick right away
         drawCylinder(a, b, b_n, b_n, out_thick, out_thick, ps, is, ts, state);
     }
