@@ -8,10 +8,10 @@
     </sampler>
 
     <camera type="perspective">
-        <float name="fov" value="80"/>
+        <float name="fov" value="60"/>
         <transform name="toWorld">
             <scale value="-1,1,1"/>
-            <lookat target="0, 35, 0" origin="0, 25, -70" up="0, 1, 0"/>
+            <lookat target="0, 35, 0" origin="0, 25, -120" up="0, 1, 0"/>
         </transform>
 
         <integer name="height" value="600"/>
@@ -22,13 +22,13 @@
 
         <string name="config" value="scenes/tree2/treegrammar2.l6"/>
 
-        <float name="width_factor" value="0.68"/>
+        <float name="width_factor" value="0.78"/>
         <float name="length_factor" value="0.8"/>
         <float name="pitch_term" value="15"/>
         <float name="yaw_term" value="15"/>
 
-        <float name="seed" value="000011"/>
-        <integer name="evolutions" value="8"/>
+        <float name="seed" value="000111"/>
+        <integer name="evolutions" value="9"/>
 
         <bsdf type="diffuse">
             <diffusemap type="mtexture">

@@ -222,6 +222,12 @@ private:
 
     inline std::string pick_uniformly(std::string rule) {
         auto options = split(rule);
+
+        // avoid calculating a random sample for nothing
+        if(options.size() == 1) {
+            return options[0];
+        }
+
         int index = (int) (random.nextFloat() * options.size());
         return options[index];
     }

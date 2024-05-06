@@ -89,7 +89,7 @@ public:
         Vector3f dir = state.frame.n;
 
         // if true, it is okay to go down
-        if(state.p.y() > 2 * initial_length || state.depth > 5) {
+        if(state.p.y() > 3 * initial_length || state.depth > 7) {
             return;
         }
         // otherwise, bump the direction up
@@ -112,21 +112,33 @@ public:
     }
 
     void controlThickness(TurtleState &state, char c) override {
-        state.out_thickness *= (1 + Warp::lineToLogistic(random.nextFloat(), 0.06));
+        if(state.depth <= 5) {
+            state.out_thickness = (state.out_thickness + initial_width) / 2.0f;
+        } else if(state.out_thickness < 0.1) {
+            state.out_thickness = 0.1;
+        } else {
+            state.out_thickness *= (1 + Warp::lineToLogistic(random.nextFloat(), 0.06));
+        }
     }
 
     int pickRule(char c, float thickness, float length, int depth) override {
         float sample = random.nextFloat();
 
+        // Node =s FlowerBranch
+        // Node =s FlowerBranch Depth -- Node; FlowerBranch Depth ++ Node; FlowerBranch Depth ++>>>>>> Node; FlowerBranch Depth ++<<<<<< Node
+        // Node =s Branch Depth [wl++ Node][wl-- Node]; Branch Depth [wl++>>>>>> Node][wl-->>>>>> Node]
+        // Node =s Branch Depth [wl++ Node][wl-->>>> Node][wl-- Node]
+        // Node =s FlowerBranch Depth [wl++ Node][wl-->>>> Node][wl-- Node]
         if(c == 'N') {
-            if(depth <= 4)  return pick(sample, 0.0, 0.0, 0.0, 0.5, 0.5);
-            if(depth <= 8)  return pick(sample, 0.0, 0.2, 0.2, 0.3, 0.3);
-            if(depth <= 12) return pick(sample, 0.0, 0.4, 0.0, 0.3, 0.3);
+            if(depth <= 3)  return pick(sample, 0.0, 0.0, 1.0, 0.0, 0.0);
+            if(depth <= 5)  return pick(sample, 0.0, 0.6, 0.2, 0.2, 0.0);
+            if(depth <= 8)  return pick(sample, 0.4, 0.0, 0.0, 0.0, 0.6);
+            if(depth <= 12) return pick(sample, 0.8, 0.0, 0.0, 0.0, 0.2);
             return 1;
         }
 
         if(c == 'X') {
-            return 0;
+            return 1;
         }
 
         throw NoriException("Unhandled stochastic rule");
@@ -151,7 +163,7 @@ public:
             Point3f p_advanced = state.p + state.p_n * 0.3f;
             auto trafo = Transform(
                     create_affine_matrix(state.yaw, state.pitch, Vector3f(0.5f), p_advanced));
-            drawMesh("assets/shape/sphere.obj", trafo, positions, indices, temp);
+            //drawMesh("assets/shape/flatcube.obj", trafo, positions, indices, temp);
         }
 
         int index = colorIndex(c);
