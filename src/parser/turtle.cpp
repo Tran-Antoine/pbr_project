@@ -51,16 +51,7 @@ void drawCylinder(TurtleState &state, PosVec ps, IndVec is, TexVec ts) {
 
     float in_thick = state.in_thickness, out_thick = state.out_thickness;
 
-    if(abs(a_n.dot(b_n)) < 0.5) {
-        // start with the out thickness right away
-        drawStraightCylinder(a, b, out_thick, out_thick, ps, is, ts, state);
-    }
-
-    connect(a, b, a_n, in_thick, out_thick, idealSmoothness(std::max(in_thick, out_thick)),
-            ps, is, ts);
-    state.p = b;
-    state.p_n = b_n;
-    state.in_thickness = out_thick;
+    drawCylinder(a, b, a_n, b_n, in_thick, out_thick, ps, is, ts, state);
 }
 
 void drawCylinder(const Point3f& a, const Point3f& b, const Vector3f& a_n, const Vector3f& b_n, float in_thick, float out_thick,
@@ -76,6 +67,8 @@ void drawCylinder(const Point3f& a, const Point3f& b, const Vector3f& a_n, const
     state.p = b;
     state.p_n = b_n;
     state.in_thickness = out_thick;
+    state.frame = Frame(b_n);
+    state.resetOrientation();
 }
 
 static void addNoise(float& yaw, float& pitch, float sample, float variance) {

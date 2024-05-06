@@ -250,8 +250,7 @@ protected:
                 case 'G':
                 case 'H':
                 case 'K':
-                    current_state.frame = config.drawSegment(instr, current_state, positions, indices, texcoords);
-                    current_state.resetOrientation();
+                    config.drawSegment(instr, current_state, positions, indices, texcoords);
                     break;
                 case '+':
                     current_state.pitch += config.get_pitch_term();
