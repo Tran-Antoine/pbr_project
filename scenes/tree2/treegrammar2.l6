@@ -9,23 +9,22 @@ Depth           = D
 Cylinder        = G
 TwistedCylinder = F
 ConnectedFlower = C
-BaseConfig = --L
+BaseConfig = --rLLLLLLL
+90> = >>>>>>
+90< = <<<<<<
 
 #RULES
 
 Premise = BaseConfig L Cylinder lww wD [+++ Node] [++++++<<< Cylinder l+ Node] - [WW Cylinder ww +++< Node] [L Node]
 
 Node =s FlowerBranch
-Node =s FlowerBranch Depth -- Node; FlowerBranch Depth ++ Node; FlowerBranch Depth ++>>>>>> Node; FlowerBranch Depth ++<<<<<< Node
-Node =s Branch Depth [wl++ Node][wl-- Node]; Branch Depth [wl++>>>>>> Node][wl-->>>>>> Node]
+Node =s Branch Depth -- Node; Branch Depth ++ Node; Branch Depth ++ 90> Node; Branch Depth ++ 90< Node
+Node =s Branch Depth [wl++ Node][wl-- Node]; Branch Depth [wl++ 90> Node][wl-- 90> Node]
+Node =s Branch Depth [wl++ FlowerBranch][wl-- Node]; [wl++ Node][wl-- FlowerBranch]; [wl++ 90> FlowerBranch][wl-- 90> Node]; [wl++ 90> Node][wl-- 90> FlowerBranch]
 Node =s Branch Depth [wl++ Node][wl-->>>> Node][wl-- Node]
-Node =s FlowerBranch Depth [wl++ Node][wl-->>>> Node][wl-- Node]
 
 Branch = Cylinder; TwistedCylinder
 
-FlowerBranch =s lll Cylinder [FourFlowers] Cylinder [FourFlowers] Cylinder [FourFlowers] LLL
-FlowerBranch =s lllll Cylinder [FourFlowers] Cylinder [FourFlowers] Cylinder [FourFlowers] Cylinder [FourFlowers] LLLLL
-
-FourFlowers = [+ConnectedFlower][-ConnectedFlower][+>>>>>>ConnectedFlower][+<<<<<<ConnectedFlower]
+FlowerBranch = lll Cylinder Flower
 
 ConnectedFlower = Lww Flower
