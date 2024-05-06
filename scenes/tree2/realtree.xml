@@ -1,17 +1,17 @@
 <scene>
     <!-- Use the simple point light integrator -->
-    <boolean name="save" value="false"/>
-    <integrator type="normals"/>
+    <boolean name="save" value="true"/>
+    <integrator type="volum7"/>
     <!-- Independent sample generator, 32 samples per pixel -->
     <sampler type="independent">
         <integer name="sampleCount" value="16"/>
     </sampler>
 
     <camera type="perspective">
-        <float name="fov" value="60"/>
+        <float name="fov" value="80"/>
         <transform name="toWorld">
             <scale value="-1,1,1"/>
-            <lookat target="0, 15, 0" origin="0, 5, -50" up="0, 1, 0"/>
+            <lookat target="0, 15, 0" origin="0, 5, -70" up="0, 1, 0"/>
         </transform>
 
         <integer name="height" value="600"/>
@@ -23,12 +23,12 @@
         <string name="config" value="scenes/tree2/treegrammar2.l6"/>
 
         <float name="width_factor" value="0.68"/>
-        <float name="length_factor" value="0.85"/>
+        <float name="length_factor" value="0.8"/>
         <float name="pitch_term" value="15"/>
         <float name="yaw_term" value="15"/>
 
         <float name="seed" value="000011"/>
-        <integer name="evolutions" value="4"/>
+        <integer name="evolutions" value="8"/>
 
         <bsdf type="diffuse">
             <diffusemap type="mtexture">

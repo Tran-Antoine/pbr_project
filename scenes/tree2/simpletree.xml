@@ -11,7 +11,7 @@
         <float name="fov" value="60"/>
         <transform name="toWorld">
             <scale value="-1,1,1"/>
-            <lookat target="0, 2, 0" origin="0, 5, -35" up="0, 1, 0"/>
+            <lookat target="0, 22, 0" origin="0, 55, -105" up="0, 1, 0"/>
         </transform>
 
         <integer name="height" value="600"/>
@@ -19,7 +19,7 @@
     </camera>
 
     <mesh type="lsystem">
-        <string name="premise" value="rLLLG"/>
+        <string name="premise" value="LLLG"/>
         <string name="rule0" value="G=F[wl+G]wl-G"/>
         <float name="width_factor" value="0.7"/>
         <float name="length_factor" value="0.8"/>

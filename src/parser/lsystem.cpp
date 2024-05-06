@@ -134,7 +134,7 @@ public:
     }
 
     void activate() override {
-        auto config = Config6(random, map, width_factor, length_factor, pitch_term, yaw_term);
+        auto config = RealTreeConfig(random, map, width_factor, length_factor, pitch_term, yaw_term);
         std::string mesh_string = (config_file.empty()
                 ? LSystemGrammar(premise, rules, random)
                 : LSystemGrammar::fromConfig(random, config_file))

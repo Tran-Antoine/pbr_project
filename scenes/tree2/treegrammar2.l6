@@ -9,11 +9,11 @@ Depth           = D
 Cylinder        = G
 TwistedCylinder = F
 ConnectedFlower = C
-BaseConfig = --L
+BaseConfig = --rL
 
 #RULES
 
-Premise = BaseConfig L Cylinder l wD [+++ Node] [++++++ Cylinder l- Node] - [Cylinder +++ Node] [L Node]
+Premise = BaseConfig L Cylinder l wD [+++ Node] [++++++<<< Cylinder l- Node] - [Cylinder +++< Node] [L Node]
 
 Node =s Branch
 Node =s FlowerBranch
