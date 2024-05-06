@@ -79,25 +79,32 @@ static void addNoise(float& yaw, float& pitch, float sample, float variance) {
 void drawCylinder(int n_nodes, float variance, float sample,
                   PosVec ps, IndVec is, TexVec ts, TurtleState &state) {
 
-    float length = state.length;
+    float original_length = state.length;
     float in_thick = state.in_thickness, out_thick = state.out_thickness;
     float yaw = state.yaw, pitch = state.pitch;
-    float dl = length / (float) n_nodes;
+    float dl = original_length / (float) n_nodes;
     float dt = (out_thick - in_thick) / (float) n_nodes;
 
     Vector3f end_point = state.forward();
     Vector3f end_out_normal = state.normalOut();
     float    end_thickness = state.out_thickness;
 
+    state.out_thickness = state.in_thickness;
     state.length = dl;
 
     for(int i = 0; i < n_nodes - 1; i++) {
-        state.out_thickness += dt;
         addNoise(yaw, pitch, sample, variance);
+
+        state.yaw = yaw;
+        state.pitch = pitch;
+        state.out_thickness += dt;
+
         drawCylinder(state, ps, is, ts);
+        yaw = 0; pitch = M_PI / 2;
     }
 
-    drawCylinder(state.p, end_point, state.p_n, end_out_normal, in_thick, end_thickness, ps, is, ts, state);
+    drawCylinder(state.p, end_point, state.p_n, end_out_normal, state.in_thickness, end_thickness, ps, is, ts, state);
+    state.length = original_length;
 }
 
 void drawStraightCylinder(const Point3f& a, const Point3f& b, float in_thick, float out_thick,

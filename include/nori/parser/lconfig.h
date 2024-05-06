@@ -530,7 +530,7 @@ public:
     void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
 
         std::vector<Vector2f> temp;
-        drawCylinder(state,positions, indices, temp);
+        drawCylinder(7, 0.01, random.nextFloat(),positions, indices, temp, state);
 
         int index = 0;
         for(auto t : temp) {

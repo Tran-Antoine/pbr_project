@@ -145,7 +145,8 @@ public:
         std::vector<uint32_t>   indices;
         std::vector<Vector2f>   texcoords;
 
-        std::cout << mesh_string << std::endl;
+        std::cout << "LSystem successfully generated:\n";
+        std::cout << mesh_string.substr(0, 100) << "..." << std::endl;
 
         drawLSystem(mesh_string, config, positions, indices, texcoords);
 

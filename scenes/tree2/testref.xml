@@ -19,7 +19,7 @@
     </camera>
 
     <mesh type="lsystem">
-        <string name="premise" value="++G[++G][++>>G][++>>>>G]"/>
+        <string name="premise" value="++G[++[F++>>F]][++>>G][++>>>>G]"/>
 
         <float name="width_factor" value="0.75"/>
         <float name="length_factor" value="0.8"/>
