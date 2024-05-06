@@ -9,7 +9,7 @@ Depth           = D
 Cylinder        = G
 TwistedCylinder = F
 ConnectedFlower = C
-BaseConfig = --rL
+BaseConfig = --L
 
 #RULES
 

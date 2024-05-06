@@ -148,9 +148,9 @@ public:
         if(c == 'G' || c == 'F') {
             drawCylinder(state, positions, indices, temp);
         } else {
-            Point3f p_advanced = state.p + state.p_n * 2.f * state.out_thickness;
+            Point3f p_advanced = state.p + state.p_n * 0.3f;
             auto trafo = Transform(
-                    create_affine_matrix(state.yaw, state.pitch, Vector3f(3.f * state.out_thickness), p_advanced));
+                    create_affine_matrix(state.yaw, state.pitch, Vector3f(0.5f), p_advanced));
             drawMesh("assets/shape/sphere.obj", trafo, positions, indices, temp);
         }
 
