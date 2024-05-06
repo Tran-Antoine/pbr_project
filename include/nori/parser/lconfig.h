@@ -25,7 +25,7 @@ public:
     virtual int pickRule(char c, float thickness, float length, int depth) { return 0; }
     virtual int colorIndex(char c) { return 0; }
     virtual int colorCount() { return 0; }
-    virtual void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) {}
+    virtual Frame drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) { return Frame(); }
 
     float get_initial_width() const { return initial_width; }
     float get_initial_length() const { return initial_length; }
@@ -110,7 +110,7 @@ public:
         return 2;
     }
 
-    void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
+    Frame drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
         bool randomization = state.random;
 
         float length = state.length;
@@ -207,7 +207,8 @@ class Config1 : public LGrammarConfig {
             return 2;
         }
 
-        void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
+        Frame
+        drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
             bool randomization = state.random;
 
             float length = state.length;
@@ -258,7 +259,7 @@ public:
         return transform.matrix();
     }
 
-    void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
+    Frame drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
 
         float length = state.length;
         float yaw = state.yaw, pitch = state.pitch;
@@ -314,7 +315,7 @@ public:
         return transform.matrix();
     }
 
-    void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
+    Frame drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
 
         float length = state.length;
         float yaw = state.yaw, pitch = state.pitch;
@@ -365,7 +366,7 @@ public:
         return transform.matrix();
     }
 
-    void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
+    Frame drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
 
         float length = state.length;
         float yaw = state.yaw, pitch = state.pitch;
@@ -472,7 +473,7 @@ public:
         //throw NoriException("Unhandled stochastic rule");
     }
 
-    void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
+    Frame drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
 
         float length = state.length;
         float yaw = state.yaw, pitch = state.pitch;
@@ -487,9 +488,12 @@ public:
         }
 
         std::vector<Vector2f> temp;
-
+        // TODO: make tree go up by biasing randomPitch if at low depth
+        // Idea: use transform so that pitch and yaw are always with respect to up=(0,1,0)
+        // or a frame
         if(c == 'G') {
-            drawCylinder(length, yaw, pitch, in_thickness, out_thickness, positions, indices, temp, state);
+            Point3f b = state.p + state.frame.n * length;
+            drawCylinder(state.p, b, state.p_n, (b-state.p).normalized(), in_thickness, out_thickness, positions, indices, temp, state);
         } else if (c == 'F') {
             drawCylinder(length, yaw, pitch, in_thickness, out_thickness, 5, 0.001, random.nextFloat(), positions, indices, temp, state);
         } else {
@@ -522,39 +526,22 @@ public:
         return 2;
     }
 
-    static int pick(float sample, float pa, float pb, float pc=0.f, float pd=0.f, float pe=0.f, float pf=0.f) {
-        if(sample < pa) return 0;
-        if(sample < pa + pb) return 1;
-        if(sample < pa + pb + pc) return 2;
-        if(sample < pa + pb + pc + pd) return 3;
-        if(sample < pa + pb + pc + pd + pe) return 4;
-        return 3;
-    }
 
-    Eigen::Matrix4f create_affine_matrix(float yaw, float pitch, const Vector3f& scale, const Vector3f& p) {
-
-        Eigen::Affine3f transform;
-        transform.setIdentity();
-        transform = Eigen::DiagonalMatrix<float, 3>(scale) * transform;
-        transform = Eigen::Translation<float, 3>(p.x(), p.y(), p.z()) * transform;
-        /*transform = Eigen::AngleAxis<float>(angle, axis) * transform;
-        t = Eigen::Translation<float, 3>(trans);*/
-        return transform.matrix();
-    }
-
-
-    void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
+    Frame drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
 
         float length = state.length;
         float yaw = state.yaw, pitch = state.pitch;
         float in_thickness = state.in_thickness;
         float out_thickness = state.out_thickness;
 
+        Point3f a = state.p;
+        Vector3f a_n = state.p_n;
+        Point3f b = state.forward();
+        Point3f b_n = (b-a).normalized();
 
         std::vector<Vector2f> temp;
 
-        drawCylinder(length, yaw, pitch, in_thickness, out_thickness, 3, 0.03, random.nextFloat(),
-                     positions, indices, texcoords, state);
+        drawCylinder(a, b, a_n, b_n, in_thickness, out_thickness,positions, indices, texcoords, state);
 
 
         int index = 0;
@@ -562,6 +549,8 @@ public:
             float x_mapped = map->map(t.x(), index);
             texcoords.push_back(Vector2f(x_mapped, t.y()));
         }
+
+        return Frame(b_n);
     }
 
 protected:

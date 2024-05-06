@@ -49,7 +49,7 @@ public:
 
         std::stack<TurtleState> turtle_states;
         TurtleState current_state = {
-                Vector3f(0.f), 0.f, M_PI / 2, Vector3f(0.f, 1.f, 0.f),
+                Vector3f(0.f), Vector3f(0, 1, 0), 0.f, M_PI / 2, Vector3f(0.f, 1.f, 0.f),
                 config.get_initial_width(), config.get_initial_width(), config.get_length_factor()
         };
         TurtleState copy;

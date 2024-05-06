@@ -134,7 +134,7 @@ public:
     }
 
     void activate() override {
-        auto config = Config5(random, map, width_factor, length_factor, pitch_term, yaw_term);
+        auto config = Config6(random, map, width_factor, length_factor, pitch_term, yaw_term);
         std::string mesh_string = (config_file.empty()
                 ? LSystemGrammar(premise, rules, random)
                 : LSystemGrammar::fromConfig(random, config_file))
@@ -203,13 +203,31 @@ protected:
 
     MultiDiffuseMap* map = nullptr;
 
+    void rotPitch(float dpitch, TurtleState& state) {
+        Vector3f local = directional(dpitch, 0);
+        std::swap(local.x(), local.y()); // to be in accordance with the local frame (0, 0, 1)
+        std::swap(local.y(), local.z());
+
+        Vector3f toWorld = state.frame.toWorld(local);
+        state.frame = Frame(toWorld);
+    }
+
+    void rotYaw(float dyaw, TurtleState& state) {
+        Vector3f local = directional(0, dyaw);
+        std::swap(local.x(), local.y()); // to be in accordance with the local frame (0, 0, 1)
+        std::swap(local.y(), local.z());
+
+        Vector3f toWorld = state.frame.toWorld(local);
+        state.frame = Frame(toWorld);
+    }
+
     void drawLSystem(const std::string &seq, LGrammarConfig& config,
                      std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) {
 
         std::stack<TurtleState> turtle_states;
 
         TurtleState current_state = {
-                Vector3f(0.f), 0.f, M_PI / 2, Vector3f(0.f, 1.f, 0.f),
+                Vector3f(0.f), Frame(Vector3f(0, 1, 0)), 0.f, M_PI / 2, Vector3f(0, 1, 0),
                 config.get_initial_width(), config.get_initial_width(), config.get_initial_length()
         };
 
@@ -232,7 +250,8 @@ protected:
                 case 'G':
                 case 'H':
                 case 'K':
-                    config.drawSegment(instr, current_state, positions, indices, texcoords);
+                    current_state.frame = config.drawSegment(instr, current_state, positions, indices, texcoords);
+                    current_state.resetOrientation();
                     break;
                 case '+':
                     current_state.pitch += config.get_pitch_term();

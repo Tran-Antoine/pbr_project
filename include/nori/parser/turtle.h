@@ -10,6 +10,7 @@ NORI_NAMESPACE_BEGIN
 struct TurtleState {
 
     Vector3f p;
+    Frame frame;
     float yaw, pitch;
     Vector3f p_n;
     float in_thickness;
@@ -18,6 +19,19 @@ struct TurtleState {
     bool random = false;
     int depth = 0;
 
+    void resetOrientation() {
+        yaw = 0;
+        pitch = M_PI / 2;
+    }
+
+    Point3f forward() {
+        Vector3f localDirection = directional(pitch, yaw);
+        std::swap(localDirection.y(), localDirection.z());
+
+        Vector3f toWorld = frame.toWorld(localDirection);
+
+        return p + length * toWorld;
+    }
 };
 
 int idealSmoothness(float radius);
