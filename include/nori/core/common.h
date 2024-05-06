@@ -251,7 +251,7 @@ inline float balancedMIS(float p, float other) {
 inline Eigen::Vector3f directional(float pitch, float yaw) {
     float x = cos(yaw)*cos(pitch);
     float y = sin(pitch);
-    float z = sin(yaw)*cos(pitch);
+    float z = sin(-yaw)*cos(pitch);
     return Eigen::Vector3f(x, y, z);
 }
 
@@ -277,7 +277,7 @@ inline void rotateXZ(Eigen::Vector3f& current, float angle) {
     );
 }
 
-inline std::string vstr(Eigen::Vector3f& v) {
+inline std::string vstr(Eigen::Vector3f v) {
     return std::to_string(v.x()) + ", " + std::to_string(v.y()) + ", " + std::to_string(v.z());
 }
 

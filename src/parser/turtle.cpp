@@ -67,6 +67,11 @@ void drawCylinder(float length, float yaw, float pitch, float in_thickness, floa
 void drawCylinder(const Point3f& a, const Point3f& b, const Vector3f& a_n, const Vector3f& b_n, float in_thickness, float out_thickness,
                   std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f>& texcoords, TurtleState &state) {
 
+    if(abs(a_n.dot(b_n)) < 0.5) {
+        // start with the out thickness right away
+        drawStraightCylinder(a, b, out_thickness, out_thickness, positions, indices, texcoords, state);
+    }
+
     connect(a, b, a_n, in_thickness, out_thickness, idealSmoothness(std::max(in_thickness, out_thickness)),
             positions, indices, texcoords);
     state.p = b;
