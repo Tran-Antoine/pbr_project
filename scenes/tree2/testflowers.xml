@@ -1,0 +1,49 @@
+<scene>
+    <!-- Use the simple point light integrator -->
+    <boolean name="save" value="false"/>
+    <integrator type="volum7"/>
+    <!-- Independent sample generator, 32 samples per pixel -->
+    <sampler type="independent">
+        <integer name="sampleCount" value="32"/>
+    </sampler>
+
+    <camera type="perspective">
+        <float name="fov" value="60"/>
+        <transform name="toWorld">
+            <scale value="-1,1,1"/>
+            <lookat origin="0, 0, -5" target="0, 0, 0" up="0, 1, 0"/>
+        </transform>
+
+        <integer name="height" value="600"/>
+        <integer name="width" value="800"/>
+    </camera>
+
+    <mesh type="medium_mesh">
+        <medium type="voxel">
+            <string name="voxel_path" value="assets/voxel/procedural/test.vdb"/>
+            <float name="s_factor" value="1"/>
+            <float name="a_factor" value="0"/>
+            <transform name="toWorld">
+                <scale value="0.9 0.4 0.9"/>
+                <rotate axis="1, 0, 0" angle="30"/>
+            </transform>
+        </medium>
+    </mesh>
+
+    <mesh type="obj">
+        <string name="filename" value="assets/shape/sphere.obj"/>
+        <transform name="toWorld">
+            <scale value="1, 1, 1"/>
+            <translate value="0, 5, 0"/>
+
+        </transform>
+        <emitter type="area">
+            <color name="radiance" value="30.11 30.17 30.2"/>
+        </emitter>
+
+        <bsdf type="diffuse">
+            <color name="albedo" value="0.5 0.5 0.5"/>
+        </bsdf>
+    </mesh>
+
+</scene>

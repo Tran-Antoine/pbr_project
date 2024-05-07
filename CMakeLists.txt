@@ -111,6 +111,7 @@ add_executable(nori
   include/nori/volume/phase.h
   include/nori/volume/coefficient.h
   include/nori/volume/vdbutil.h
+  include/nori/volume/procedural.h
   
   
   # Source code files
@@ -187,6 +188,7 @@ add_executable(nori
   src/volume/voxelmedium.cpp
   src/volume/voxelreader.cpp
   src/volume/debugmedia.cpp
+  src/volume/procedural.cpp
 
   src/main.cpp
   #test/readvoxel.cpp
@@ -200,6 +202,7 @@ add_executable(nori
   #test/grass_alias.cpp
   #test/smallterraintest.cpp
   #test/parseconfigtest.cpp
+  #test/manual_cloud.cpp
 )
 
 # Link OpenCV libraries

@@ -9,7 +9,7 @@
     <camera type="perspective">
         <!-- Camera-to-world coordinate system transformation -->
         <transform name="toWorld">
-            <lookat origin="548.064, -82.473, -63.856" target="6.021, 100.043, -43.679" up="0.273, 0.962, -0.009"/>
+            <lookat origin="0, 0, -10" target="0, 0.5, 0" up="0, 1, 0"/>
         </transform>
 
         <float name="fov" value="90"/>
@@ -30,8 +30,5 @@
         </medium>
     </mesh>
 
-    <emitter type="directional">
-        <color name="radiance" value="220 220 230"/>
-        <vector name="direction" value="-0.5826 -0.7660 -0.2717"/>
-    </emitter>
+
 </scene>

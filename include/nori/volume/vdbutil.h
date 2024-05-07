@@ -33,8 +33,10 @@ inline openvdb::FloatGrid::Ptr from_file(const std::string& path, const Transfor
 
     openvdb::math::Mat4d mat = openvdb::math::Mat4d::identity();
     mat.setColumns(c0, c1, c2, openvdb::math::Vec4d(0,0,0,1));
-    openvdb::math::Transform::Ptr vdb_transform = openvdb::math::Transform::createLinearTransform(mat);
 
+    mat = baseGrid->transformPtr()->baseMap()->getAffineMap()->getConstMat4() * mat;
+
+    openvdb::math::Transform::Ptr vdb_transform = openvdb::math::Transform::createLinearTransform(mat);
     vdb_transform->postTranslate(c3.getVec3());
     baseGrid->setTransform(vdb_transform);
 
