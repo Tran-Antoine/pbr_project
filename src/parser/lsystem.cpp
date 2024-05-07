@@ -10,6 +10,7 @@
 #include <stack>
 #include <pcg32.h>
 #include <parser/lconfig.h>
+#include <volume/procedural.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -153,6 +154,11 @@ public:
         for(const auto& p : positions) {
             m_bbox.expandBy(p);
         }
+
+        ProceduralMetadata data = {1.2f, config.flower_bounds, Vector3i(120),
+                                   "assets/voxel/procedural/flowers.vdb"};
+
+        //write_vdb(config.flower_anchors, data);
 
         m_F.resize(3, indices.size()/3);
 

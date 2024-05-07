@@ -7,6 +7,7 @@
 #include <stats/warp.h>
 #include <bsdf/multidiffusemap.h>
 #include <Eigen/Geometry>
+#include <core/bbox.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -46,7 +47,7 @@ public:
     RealTreeConfig(pcg32& random, MultiDiffuseMap* map, float width_factor, float length_factor, float pitch_term, float yaw_term)
             : map(map),
               random(random),
-              LGrammarConfig(1.7f, 8.0f, width_factor, length_factor, pitch_term, yaw_term){}
+              LGrammarConfig(2.0f, 5.0f, width_factor, length_factor, pitch_term, yaw_term){}
 
     int colorCount() override {
         return 2;
@@ -120,8 +121,8 @@ public:
 
     void controlThickness(TurtleState &state, char c) override {
         if(state.depth < 4) return;
-        if(state.out_thickness < 0.01) {
-            state.out_thickness = 0.01;
+        if(state.out_thickness < 0.2) {
+            state.out_thickness = 0.2;
         } else {
             state.out_thickness *= (1 + Warp::lineToLogistic(random.nextFloat(), 0.01));
         }
@@ -138,7 +139,8 @@ public:
 
         if(c == 'N') {
             if(depth <= 4)  return pick(sample, 0.0, 0.0, 0.8, 0.0, 0.2, 0.0);
-            if(depth <= 5)  return pick(sample, 0.0, 0.5, 0.2, 0.2, 0.1, 0.0);
+            if(depth <= 6)  return pick(sample, 0.0, 0.4, 0.3, 0.2, 0.0, 0.0);
+            if(depth <= 8)  return pick(sample, 0.0, 0.1, 0.4, 0.4, 0.1, 0.0);
             return 0;
             if(depth <= 8)  return pick(sample, 0.1, 0.0, 0.0, 0.3, 0.2, 0.5);
             if(depth <= 12) return pick(sample, 0.8, 0.0, 0.0, 0.2, 0.0, 0.0);
@@ -151,6 +153,10 @@ public:
     void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
 
         controlFrame(state, c);
+
+        if(state.depth > 7) {
+            state.length *= 0.9;
+        }
 
         if(state.random) {
             controlLength(state, c);
@@ -165,9 +171,8 @@ public:
             drawCylinder(state,positions, indices, temp);
         } else {
             Point3f p_advanced = state.p + state.p_n * 1.2f;
-            auto trafo = Transform(
-                    create_affine_matrix(state.yaw, state.pitch, Vector3f(1.5f), p_advanced));
-            drawMesh("assets/shape/sphere.obj", trafo, positions, indices, temp);
+            //flower_anchors.push_back(p_advanced);
+            //flower_bounds.expandBy(p_advanced);
         }
 
         int index = colorIndex(c);
@@ -175,11 +180,32 @@ public:
             float x_mapped = map->map(t.x(), index);
             texcoords.push_back(Vector2f(x_mapped, t.y()));
         }
+
+        if(false &&state.depth > 6) {
+            temp.clear();
+            for(int i = 0; i < 6; i++) {
+                float dx = 2 * random.nextFloat() - 1;
+                float dy = 2 * random.nextFloat() - 1;
+                float dz = 2 * random.nextFloat() - 1;
+                Point3f sphere_point = 3*Vector3f(dx, dy, dz) + state.p;
+                flower_anchors.push_back(sphere_point);
+                flower_bounds.expandBy(sphere_point);
+            }
+            int flower_index = colorIndex('H');
+            for(auto t : temp) {
+                float x_mapped = map->map(t.x(), flower_index);
+                texcoords.push_back(Vector2f(x_mapped, t.y()));
+            }
+        }
     }
+
+    std::vector<Point3f> flower_anchors;
+    BoundingBox3f flower_bounds;
 
 protected:
     pcg32 random;
     MultiDiffuseMap* map = nullptr;
+
 };
 
 class Config6 : public LGrammarConfig {
