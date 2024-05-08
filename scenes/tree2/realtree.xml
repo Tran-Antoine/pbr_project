@@ -4,14 +4,14 @@
     <integrator type="volum7"/>
     <!-- Independent sample generator, 32 samples per pixel -->
     <sampler type="independent">
-        <integer name="sampleCount" value="1"/>
+        <integer name="sampleCount" value="4"/>
     </sampler>
 
     <camera type="perspective">
         <float name="fov" value="90"/>
         <transform name="toWorld">
             <scale value="-1,1,1"/>
-            <lookat target="0, 15, 0" origin="0, 3, -50" up="0, 1, 0"/>
+            <lookat target="7, 20, 0" origin="0, 3, -80" up="0, 1, 0"/>
         </transform>
 
         <integer name="height" value="600"/>
@@ -51,14 +51,14 @@
         </diffusemap>
     </mesh>
 
-
     <mesh type="medium_mesh">
         <medium type="voxel">
-            <string name="voxel_path" value="assets/voxel/procedural/flowers_highres.vdb"/>
-            <float name="s_factor" value="0.06"/>
-            <float name="a_factor" value="0.01"/>
+            <string name="voxel_path" value="assets/voxel/procedural/flowers.vdb"/>
+            <float name="s_factor" value="0.75"/>
+            <float name="a_factor" value="0.1"/>
         </medium>
     </mesh>
+
 
     <emitter type="env">
         <string name="half1" value="assets/env/lowcontrast_left.exr"/>

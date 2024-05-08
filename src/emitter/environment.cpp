@@ -83,7 +83,7 @@ Color3f EnvironmentEmitter::getEmittance(const EmitterQueryRecord &rec) const {
 
     const MipMap& map = is_on_map1(rec) ? map1 : map2;
 
-    return map.color(uv, lerp);
+    return intensity * map.color(uv, lerp);
 }
 
 void EnvironmentEmitter::samplePoint(Sampler &sampler, EmitterQueryRecord &rec, float &pdf, EMeasure unit) const {

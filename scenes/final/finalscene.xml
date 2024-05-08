@@ -1,0 +1,52 @@
+<scene>
+    <!-- Use the simple point light integrator -->
+    <boolean name="save" value="true"/>
+    <integrator type="volum7"/>
+    <!-- Independent sample generator, 32 samples per pixel -->
+    <sampler type="independent">
+        <integer name="sampleCount" value="4"/>
+    </sampler>
+
+    <camera type="perspective">
+        <float name="fov" value="90"/>
+        <transform name="toWorld">
+            <scale value="-1,1,1"/>
+            <lookat target="7, 20, 0" origin="-52.8, 35, 9.4" up="0, 1, 0"/>
+        </transform>
+
+        <integer name="height" value="600"/>
+        <integer name="width" value="800"/>
+    </camera>
+
+    <mesh type="obj">
+        <string name="filename" value="meshes/Grid.obj"/>
+        <bsdf type="diffuse">
+            <color name="albedo" value="0.5 0.5 0.5"/>
+        </bsdf>
+    </mesh>
+
+    <mesh type="obj">
+        <string name="filename" value="meshes/Plane.obj"/>
+        <bsdf type="diffuse">
+            <color name="albedo" value="0.5 0.5 0.5"/>
+        </bsdf>
+    </mesh>
+
+    <mesh type="obj">
+        <string name="filename" value="meshes/Sphere.obj"/>
+        <bsdf type="diffuse">
+            <color name="albedo" value="0.5 0.5 0.5"/>
+        </bsdf>
+    </mesh>
+
+    <mesh type="obj">
+        <string name="filename" value="meshes/Tree_V10_Final.obj"/>
+        <bsdf type="diffuse">
+            <color name="albedo" value="0.5 0.5 0.5"/>
+        </bsdf>
+    </mesh>
+
+
+
+
+</scene>

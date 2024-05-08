@@ -57,15 +57,15 @@ protected:
 
 class BinaryVoxelReader : public MediumCoefficient {
 public:
-    BinaryVoxelReader(float value, const VoxelReader* child);
+    BinaryVoxelReader(Color3f value, const VoxelReader* child);
 
     BoundingBox3i index_bounds() const { return child->index_bounds(); }
     BoundingBox3f world_bounds() const { return child->world_bounds(); }
-    float maj() const override { return value; }
+    float maj() const override { return value.maxCoeff(); }
     Color3f eval(const Point3f& p, const Vector3f& v) const override;
 
 private:
-    float value;
+    Color3f value;
     const VoxelReader* child = nullptr;
 };
 

@@ -44,9 +44,11 @@ protected:
 class RealTreeConfig : public LGrammarConfig {
 
 public:
-    RealTreeConfig(pcg32& random, MultiDiffuseMap* map, float width_factor, float length_factor, float pitch_term, float yaw_term)
+    RealTreeConfig(pcg32& random, MultiDiffuseMap* map, float width_factor, float length_factor, float pitch_term, float yaw_term,
+                   const Transform& trafo)
             : map(map),
               random(random),
+              trafo(trafo),
               LGrammarConfig(2.0f, 5.0f, width_factor, length_factor, pitch_term, yaw_term){}
 
     int colorCount() override {
@@ -167,12 +169,27 @@ public:
 
         std::vector<Vector2f> temp;
 
+        if(state.depth >= 4) {
+            for(int i = 0; i < 10; i++) {
+                float dx = 2 * random.nextFloat() - 1;
+                float dy = 2 * random.nextFloat() - 1;
+                float dz = 2 * random.nextFloat() - 1;
+                Point3f sphere_point = 1.5f * Vector3f(dx, dy, dz) + state.p;
+                sphere_point = trafo * sphere_point;
+
+                flower_anchors.push_back(sphere_point);
+                flower_bounds.expandBy(sphere_point);
+            }
+        }
+
         if(c == 'G' || c == 'F') {
             drawCylinder(state,positions, indices, temp);
         } else {
             Point3f p_advanced = state.p + state.p_n * 1.2f;
-            //flower_anchors.push_back(p_advanced);
-            //flower_bounds.expandBy(p_advanced);
+            p_advanced = trafo * p_advanced;
+
+            flower_anchors.push_back(p_advanced);
+            flower_bounds.expandBy(p_advanced);
         }
 
         int index = colorIndex(c);
@@ -180,29 +197,13 @@ public:
             float x_mapped = map->map(t.x(), index);
             texcoords.push_back(Vector2f(x_mapped, t.y()));
         }
-
-        if(false &&state.depth > 6) {
-            temp.clear();
-            for(int i = 0; i < 6; i++) {
-                float dx = 2 * random.nextFloat() - 1;
-                float dy = 2 * random.nextFloat() - 1;
-                float dz = 2 * random.nextFloat() - 1;
-                Point3f sphere_point = 3*Vector3f(dx, dy, dz) + state.p;
-                flower_anchors.push_back(sphere_point);
-                flower_bounds.expandBy(sphere_point);
-            }
-            int flower_index = colorIndex('H');
-            for(auto t : temp) {
-                float x_mapped = map->map(t.x(), flower_index);
-                texcoords.push_back(Vector2f(x_mapped, t.y()));
-            }
-        }
     }
 
     std::vector<Point3f> flower_anchors;
     BoundingBox3f flower_bounds;
 
 protected:
+    Transform trafo;
     pcg32 random;
     MultiDiffuseMap* map = nullptr;
 
@@ -214,7 +215,7 @@ public:
     Config6(pcg32& random, MultiDiffuseMap* map, float width_factor, float length_factor, float pitch_term, float yaw_term)
             : map(map),
               random(random),
-              LGrammarConfig(0.3f, 2.0f, width_factor, length_factor, pitch_term, yaw_term){}
+              LGrammarConfig(0.3f, 2.5f, width_factor, length_factor, pitch_term, yaw_term){}
 
     int colorCount() override {
         return 2;

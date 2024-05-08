@@ -51,12 +51,12 @@ Color3f VoxelReader::eval(const nori::Point3f &p, const nori::Vector3f &v) const
     return albedo * d_factor * sampler.wsSample(openvdb::Vec3R(ip.x(), ip.y(), ip.z()));
 }
 
-BinaryVoxelReader::BinaryVoxelReader(float value, const VoxelReader* child)
-    : value(value), child(child) {
+BinaryVoxelReader::BinaryVoxelReader(Color3f value, const VoxelReader* child)
+    : value(std::move(value)), child(child) {
 }
 
 Color3f BinaryVoxelReader::eval(const nori::Point3f &p, const nori::Vector3f &v) const {
-    return child->eval(p, v).x() > 1e-6
+    return child->eval(p, v).maxCoeff() > 1e-6
         ? value
         : 0;
 }

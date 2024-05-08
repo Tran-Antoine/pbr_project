@@ -26,7 +26,7 @@ Premise = BaseConfig Branch Branch [ww 30- 15- 30< Branch Depth Node] [ww 30- 30
 Node =s FlowerBranch
 Node =s Branch Depth 30- Node; Branch Depth 30+ Node; Branch Depth 30+ 90> Node; Branch Depth 30+ 90< Node
 Node =s Branch Depth [wl 30+ Node][wl 30- Node]; Branch Depth [wl 30+ 90> Node][wl 30- 90> Node]
-Node =s Branch Depth [wl 30+ FlowerBranch][wl 30- Node]; [wl 30+ Node][wl 30- FlowerBranch]; [wl 30+ 90> FlowerBranch][wl 30- 90> Node]; [wl 30+ 90> Node][wl 30- 90> FlowerBranch]
+Node =s Branch Depth [wl 30+ FlowerBranch][wl 30- Node]; Branch Depth [wl 30+ Node][wl 30- FlowerBranch]; Branch Depth [wl 30+ 90> FlowerBranch][wl 30- 90> Node]; Branch Depth [wl 30+ 90> Node][wl 30- 90> FlowerBranch]
 Node =s Branch Depth [wl 30+ Node][wl 30- >>>> Node][wl 30- Node]
 
 Branch = Cylinder; TwistedCylinder
