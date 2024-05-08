@@ -46,7 +46,7 @@ public:
 
             bool scatters;
             Point3f intersection_point;
-            float tr_over_pdf;
+            Color3f tr_over_pdf;
 
             bool any_intersection = sampleIntersection(found, current_ray, its, sampler,
                                                        scatters, tr_over_pdf, intersection_point);
@@ -104,7 +104,7 @@ public:
                 }
 
                 // Transmittance of NEE. Potentially 1.0 if there is no media blocking the path
-                float direct_transmittance = eval_transmittance(direct_its.medium.medium, record, sampler);
+                Color3f direct_transmittance = eval_transmittance(direct_its.medium.medium, record, sampler);
 
                 // evaluate hypothetical phase function / BRDF pdf for MIS
                 float light_point_angular_pdf = emitter->to_angular(record, light_point_pdf);
@@ -156,7 +156,7 @@ public:
 
                 Color3f emitted = emitter_hit->getEmittance(emitter_hit_record);
                 Color3f directional_term = directionalChangeTerm(scatters, previous_its, emitter_hit_record);
-                float direct_transmittance = eval_transmittance(its.medium.medium, emitter_hit_record, sampler);
+                Color3f direct_transmittance = eval_transmittance(its.medium.medium, emitter_hit_record, sampler);
 
                 if(emitted.isZero()) {
                     continue;
@@ -180,7 +180,7 @@ public:
     static Color3f directionalChangeTerm(bool scattering, const Intersection& its, const EmitterQueryRecord& rec) {
 
         if(scattering) {
-            float omega_s = its.medium.medium->out_scattering(rec.p, 0.f);
+            Color3f omega_s = its.medium.medium->out_scattering(rec.p, 0.f);
             return omega_s * its.medium.medium->evalPhase(rec.wi, rec.wo());
         } else {
             BSDFQueryRecord bsdf_query(rec.wi, rec.wo(), its.shFrame, EMeasure::ESolidAngle, its.uv);
@@ -248,7 +248,7 @@ public:
     }
 
     static bool sampleIntersection(bool contains_surface, const Ray3f& ray, const Intersection& its, Sampler* sampler,
-                                   bool& scattering, float& tr_over_pdf, Point3f& intersection) {
+                                   bool& scattering, Color3f& tr_over_pdf, Point3f& intersection) {
 
         const MediumInteraction& mits = its.medium;
 
@@ -274,7 +274,7 @@ public:
         // but any point outside its defined spectrum has infinite density. This stopping condition allows us to
         // still define the normalization pdf factor as omega_t(stopping point), as P(tmax > t) = p(tmax), as the pdf
         // becomes a dirac delta on the edges
-        float omega_t;
+        Color3f omega_t;
         float t_through_media = Warp::sampleHeterogeneousDistance(sampler, medium_entrance, ray.d, *mits.medium, omega_t);
         float t_travelled = mits.mint + t_through_media;
 
@@ -282,7 +282,7 @@ public:
         // Medium found, but the ray still travelled all the way through it
         // Or, meaning the delta tracking didn't encounter a single non-zero value
         // Or, that the medium traversal had such a narrow window that it skipped it (and it's fine)
-        if(omega_t < 0 || t_travelled > t_max) {
+        if(omega_t.maxCoeff() < 0 || t_travelled > t_max) {
             if(!contains_surface) {
                 // no surface hit, and the ray went through the medium
                 return false;
@@ -322,6 +322,7 @@ public:
     static Color3f emittance(const Intersection& its) {
         const Emitter* emitter = its.emitter ? its.emitter : its.mesh->getEmitter();
         if(!emitter) {
+            std::cout << "Can't find emittance as the intersection is not an emitter" << std::endl;
             throw NoriException("Can't find emittance as the intersection is not an emitter");
         }
         return emitter->getEmittance(EmitterQueryRecord(nullptr, 0.f, 0.f, 0.f, its.p, its.shFrame.n, its.uv));
@@ -333,6 +334,7 @@ public:
 
     static void add_illumination(Color3f& src, const Color3f& val) {
         if(!val.isValid()) {
+            std::cout << "Invalid radiance" << std::endl;
             throw NoriException("Invalid radiance");
         }
         src += val;
@@ -342,7 +344,7 @@ public:
         return sampler->next1D() > Q && bounces <= MAX_BOUNCES;
     }
 
-    static float eval_transmittance(const Medium* medium, const EmitterQueryRecord& record, Sampler* sampler) {
+    static Color3f eval_transmittance(const Medium* medium, const EmitterQueryRecord& record, Sampler* sampler) {
         if(!medium) {
             return 1.0f;
         }

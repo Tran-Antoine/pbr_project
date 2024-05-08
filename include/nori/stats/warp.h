@@ -96,7 +96,7 @@ public:
 
     static float lineToLogisticPdf(float t, float std);
 
-    static float sampleHeterogeneousDistance(Sampler *sampler, const Point3f &x, const Vector3f &d, const Medium &medium, float& omega_t);
+    static float sampleHeterogeneousDistance(Sampler *sampler, const Point3f &x, const Vector3f &d, const Medium &medium, Color3f& omega_t);
 
     static float sampleToHeterogeneousDistancePdf(const Point3f& a, const Point3f& b, const Medium &medium, Sampler* sampler);
 
@@ -104,7 +104,7 @@ public:
 
     static float sampleHeterogeneousDistanceFromMajorantPdf(float s, float maj);
 
-    static float ratio_tracking(const Point3f &a, const Point3f &b, const Medium &medium, Sampler *sampler);
+    static Color3f ratio_tracking(const Point3f &a, const Point3f &b, const Medium &medium, Sampler *sampler);
 
     static Vector3f squareToHenyeyGreenstein(const Point2f& sample, float g);
 

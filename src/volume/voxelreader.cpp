@@ -1,6 +1,6 @@
 #include <volume/coefficient.h>
 #include <volume/vdbutil.h>
-
+#include <core/color.h>
 #include <utility>
 
 NORI_NAMESPACE_BEGIN
@@ -10,11 +10,12 @@ static void compute_bounds(float x0, float x1, float y0, float y1, float z0, flo
     max = Point3f(std::max(x0, x1), std::max(y0, y1), std::max(z0, z1));
 }
 
-VoxelReader::VoxelReader(const std::string &path, Transform trafo, float d_factor)
+VoxelReader::VoxelReader(const std::string &path, Transform trafo, float d_factor, const Color3f& albedo)
     : transform(std::move(trafo)),
       voxel_data(from_file(path, trafo)),
       sampler(VSampler(*voxel_data)),
-      d_factor(d_factor) {
+      d_factor(d_factor),
+      albedo(albedo) {
 
     auto min = voxel_data->metaValue<openvdb::Vec3i>("file_bbox_min");
     auto max = voxel_data->metaValue<openvdb::Vec3i>("file_bbox_max");
@@ -44,18 +45,18 @@ VoxelReader::VoxelReader(const std::string &path, Transform trafo, float d_facto
     inv_transform = transform.inverse();
 }
 
-float VoxelReader::eval(const nori::Point3f &p, const nori::Vector3f &v) const {
+Color3f VoxelReader::eval(const nori::Point3f &p, const nori::Vector3f &v) const {
     // TODO: use cache version to optimize this
     Vector3f ip = p;
-    return d_factor * sampler.wsSample(openvdb::Vec3R(ip.x(), ip.y(), ip.z()));
+    return albedo * d_factor * sampler.wsSample(openvdb::Vec3R(ip.x(), ip.y(), ip.z()));
 }
 
 BinaryVoxelReader::BinaryVoxelReader(float value, const VoxelReader* child)
     : value(value), child(child) {
 }
 
-float BinaryVoxelReader::eval(const nori::Point3f &p, const nori::Vector3f &v) const {
-    return child->eval(p, v) > 1e-6
+Color3f BinaryVoxelReader::eval(const nori::Point3f &p, const nori::Vector3f &v) const {
+    return child->eval(p, v).x() > 1e-6
         ? value
         : 0;
 }
@@ -63,10 +64,10 @@ float BinaryVoxelReader::eval(const nori::Point3f &p, const nori::Vector3f &v) c
 ScatteringVoxelReader::ScatteringVoxelReader(float max, const nori::VoxelReader *child) : max(max), child(child) {}
 
 
-float ScatteringVoxelReader::eval(const nori::Point3f &p, const nori::Vector3f &v) const {
-    float cv = child->eval(p, v);
-    if(cv < Epsilon) return 0.f;
-    if(cv < max / 3.f) return max;
+Color3f ScatteringVoxelReader::eval(const nori::Point3f &p, const nori::Vector3f &v) const {
+    auto cv = child->eval(p, v);
+    if(cv.x() < Epsilon) return 0.f;
+    if(cv.x() < max / 3.f) return max;
     return max / 2;
 }
 NORI_NAMESPACE_END

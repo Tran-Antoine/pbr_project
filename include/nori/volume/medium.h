@@ -6,6 +6,7 @@
 #include <volume/phase.h>
 #include <volume/coefficient.h>
 #include <core/bbox.h>
+#include <core/color.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -27,10 +28,10 @@ public:
 
     EClassType getClassType() const override { return EMedium; }
 
-    float attenuation(const Point3f& p, const Vector3f& v) const { return absorption->eval(p, v) + scattering->eval(p, v); }
-    float in_scattering(const Point3f& p, const Vector3f& v) const { return scattering->eval(p, v); }
-    float out_scattering(const Point3f& p, const Vector3f& v) const { return scattering->eval(p, v); }
-    float emission(const Point3f& p, const Vector3f& v) const { return absorption->eval(p, v); }
+    Color3f attenuation(const Point3f& p, const Vector3f& v) const { return absorption->eval(p, v) + scattering->eval(p, v); }
+    Color3f in_scattering(const Point3f& p, const Vector3f& v) const { return scattering->eval(p, v); }
+    Color3f out_scattering(const Point3f& p, const Vector3f& v) const { return scattering->eval(p, v); }
+    Color3f emission(const Point3f& p, const Vector3f& v) const { return absorption->eval(p, v); }
     void samplePhase(Sampler* sampler, const Vector3f& in, Vector3f& out, float& pdf) const { phase->sample(sampler, in, out, pdf); }
     Color3f evalPhase(const Vector3f& in, const Vector3f& out) const { return phase->eval(in, out); }
     float phasePdf(const Vector3f& in, const Vector3f& out) const { return phase->pdf(in, out); }

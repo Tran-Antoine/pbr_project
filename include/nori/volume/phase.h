@@ -2,6 +2,7 @@
 
 #include <core/common.h>
 #include <core/object.h>
+#include <core/color.h>
 
 NORI_NAMESPACE_BEGIN
 

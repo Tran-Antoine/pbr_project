@@ -25,6 +25,7 @@
 #include <iomanip>
 #include <stats/dpdf.h>
 #include <Eigen/Geometry>
+#include <core/color.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -309,7 +310,7 @@ float Warp::lineToLogisticPdf(float t, float std) {
     throw NoriException("Not implemented yet");
 }
 
-float Warp::sampleHeterogeneousDistance(Sampler *sampler, const Point3f &x, const Vector3f &d, const Medium &medium, float& omega_t) {
+float Warp::sampleHeterogeneousDistance(Sampler *sampler, const Point3f &x, const Vector3f &d, const Medium &medium, Color3f& omega_t) {
 
     float eta1 = sampler->next1D();
     float maj = medium.majorant();
@@ -328,13 +329,14 @@ float Warp::sampleHeterogeneousDistance(Sampler *sampler, const Point3f &x, cons
 
         t += distance_travelled;
 
-        float current_omega_t = medium.attenuation(x + t * d, d);
+        // TODO
+        Color3f current_omega_t = medium.attenuation(x + t * d, d);
 
-        if(current_omega_t > 10e-4) {
+        if(current_omega_t.maxCoeff() > 10e-4) {
             omega_t = current_omega_t;
         }
 
-        p_real_interaction = current_omega_t / maj;
+        p_real_interaction = current_omega_t.maxCoeff() / maj;
 
         // remapping
         eta1 = (eta1 - p_real_interaction) / (1 - p_real_interaction);
@@ -343,12 +345,12 @@ float Warp::sampleHeterogeneousDistance(Sampler *sampler, const Point3f &x, cons
     return t;
 }
 
-float Warp::ratio_tracking(const Point3f& a, const Point3f& b, const Medium& medium, Sampler* sampler) {
+Color3f Warp::ratio_tracking(const Point3f& a, const Point3f& b, const Medium& medium, Sampler* sampler) {
     Vector3f d = (b-a).normalized();
     float total_distance = (b-a).norm();
     float maj = medium.majorant();
 
-    float weight = 1.f;
+    Color3f weight = 1.f;
     float t = 0.f;
 
     while(t < total_distance) {
@@ -359,8 +361,9 @@ float Warp::ratio_tracking(const Point3f& a, const Point3f& b, const Medium& med
             break;
         }
 
-        float omega_t = medium.attenuation(a + d*t, d);
-        float null_amount = maj - omega_t;
+        // TODO: maybe not use max coeff
+        Color3f omega_t = medium.attenuation(a + d*t, d);
+        Color3f null_amount = Color3f(maj) - omega_t;
         weight *= null_amount / maj;
     }
 

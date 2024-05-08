@@ -8,7 +8,7 @@ class Debug0Coeff : public MediumCoefficient {
 public:
     explicit Debug0Coeff(float coeff1, float coeff2) : coeff1(coeff1), coeff2(coeff2) {}
 
-    float eval(const Point3f& p, const Vector3f& v) const override {
+    Color3f eval(const Point3f& p, const Vector3f& v) const override {
         if(p.x() < 0) return coeff1;
         return coeff2;
     }
@@ -22,7 +22,7 @@ class Debug1Coeff : public MediumCoefficient {
 public:
     explicit Debug1Coeff() {}
 
-    float eval(const Point3f& p, const Vector3f& v) const override {
+    Color3f eval(const Point3f& p, const Vector3f& v) const override {
         return p.x() + 2.f;
     }
     float maj() const override { return 3.f; }
@@ -33,7 +33,7 @@ class Debug2Coeff : public MediumCoefficient {
 public:
     explicit Debug2Coeff() {}
 
-    float eval(const Point3f& p, const Vector3f& v) const override {
+    Color3f eval(const Point3f& p, const Vector3f& v) const override {
         if(p.norm() < 0.5) {
             return 0.f;
         }
@@ -130,8 +130,8 @@ public:
     explicit Debug4Medium(const PropertyList &props) {
         phase = new UniformPhase();
         //absorption = new VoxelReader(props.getString("voxel_path"), trafo, props.getFloat("d_factor", 1.f));
-        absorption = new ConstantCoefficient(0.6f);
-        scattering = new ConstantCoefficient(0.3f);
+        absorption = new ConstantCoefficient(Color3f(0.01, 0.0001, 0.01));
+        scattering = new ConstantCoefficient(Color3f(0.3, 0.0001, 0.3));
     }
 
     std::string toString() const override {
