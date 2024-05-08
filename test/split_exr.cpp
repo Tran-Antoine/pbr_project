@@ -7,7 +7,7 @@
 
 using namespace nori;
 
-static std::string PATH = "./assets/env/highcontrast.exr";
+static std::string PATH = "./assets/env/bluesky.exr";
 
 
 int main(int argc, char **argv) {
@@ -31,11 +31,11 @@ int main(int argc, char **argv) {
         }
     }
 
-    Imf::RgbaOutputFile fileLeft("./assets/env/highcontrast_left.exr", width / 2, height, Imf::WRITE_RGBA);
+    Imf::RgbaOutputFile fileLeft("./assets/env/bluesky_left.exr", width / 2, height, Imf::WRITE_RGBA);
     fileLeft.setFrameBuffer(&left[0][0], 1, width / 2);
     fileLeft.writePixels(height);
 
-    Imf::RgbaOutputFile fileRight("./assets/env/highcontrast_right.exr", width / 2, height, Imf::WRITE_RGBA);
+    Imf::RgbaOutputFile fileRight("./assets/env/bluesky_right.exr", width / 2, height, Imf::WRITE_RGBA);
     fileRight.setFrameBuffer(&right[0][0], 1, width / 2);
     fileRight.writePixels(height);
 }

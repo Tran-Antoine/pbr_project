@@ -14,7 +14,10 @@ public:
         absorption = new VoxelReader(props.getString("voxel_path"), trafo, props.getFloat("a_factor", 1.f), Color3f(0.1, 1, 0.1));
         //scattering = new ScatteringVoxelReader(props.getFloat("s_factor", 1.f), new VoxelReader(props.getString("voxel_path"), trafo, props.getFloat("s_factor", 1.f)));
         //scattering = new BinaryVoxelReader(0.01f, new VoxelReader(props.getString("voxel_path"), trafo, props.getFloat("s_factor", 1.f)));
-        scattering = new VoxelReader(props.getString("voxel_path"), trafo, props.getFloat("s_factor", 1.f), Color3f(0.1, 1, 0.1));
+        scattering = new VoxelReader(props.getString("voxel_path"),
+                                     trafo,
+                                     props.getFloat("s_factor", 1.f),
+                                     Color3f(0.1, 1, 0.1));
     }
 
     std::string toString() const override {

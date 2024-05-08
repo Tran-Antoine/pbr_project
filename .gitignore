@@ -34,3 +34,4 @@ ext/opencv
 /scenes/ibl/**/*.exr
 /scenes/ptextures/**/*.exr
 assets
+/scenes/final/**/*.obj

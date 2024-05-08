@@ -1,0 +1,95 @@
+<?xml version="1.0" ?>
+<scene>
+	<integrator type="volum7"/>
+	<sampler type="independent">
+		<integer name="sampleCount" value="4"/>
+	</sampler>
+	<camera type="perspective">
+		<float name="fov" value="60.28277150129064"/>
+		<float name="nearClip" value="0.10000000149011612"/>
+		<float name="farClip" value="10000.0"/>
+		<integer name="width" value="960"/>
+		<integer name="height" value="540"/>
+		<transform name="toWorld">
+			<matrix value="0.35719624161720276,-0.11725964397192001,0.9266397953033447,-52.81961441040039,0.0039512538351118565,0.9922692775726318,0.12404147535562515,9.467779159545898,-0.9340211153030396,-0.04064575582742691,0.3548981249332428,-35.097808837890625,0.0,0.0,0.0,1.0"/>
+		</transform>
+	</camera>
+
+	<mesh type="obj">
+		<string name="filename" value="meshes/Grid.obj"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.3,0.3,0.3"/>
+		</bsdf>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value="meshes/Plane.obj"/>
+		<bsdf type="microfacet">
+			<float name="intIOR" value="1.7"/>
+			<color name="kd" value="0.1 0.1 0.8"/>
+			<float name="alpha" value="0.2"/>
+		</bsdf>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value="meshes/Sphere.obj"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.25,0.25,0.25"/>
+		</bsdf>
+	</mesh>
+
+	<emitter type="env">
+		<string name="half1" value="assets/env/bluesky_left.exr"/>
+		<string name="half2" value="assets/env/bluesky_right.exr"/>
+		<float name="radius" value="500.0"/>
+		<point name="center" value="0,0,0"/>
+		<float name="intensity" value="0.2"/>
+	</emitter>
+
+	<mesh type="lsystem">
+
+		<transform name="toWorld">
+			<rotate axis="0 1 0" angle="-90"/>
+			<scale value="0.2 0.2 0.2"/>
+			<translate value="-31.420002 8.069998 -27.230001"/>
+		</transform>
+		<string name="config" value="scenes/tree2/treegrammar2.l6"/>
+
+		<float name="width_factor" value="0.75"/>
+		<float name="length_factor" value="0.95"/>
+		<float name="pitch_term" value="5"/>
+		<float name="yaw_term" value="5"/>
+
+		<float name="seed" value="221211"/>
+		<integer name="evolutions" value="13"/>
+
+		<bsdf type="diffuse">
+			<diffusemap type="mtexture">
+				<diffusemap type="uniform">
+					<color name="albedo" value="0.16 0.1 0.02"/>
+				</diffusemap>
+				<diffusemap type="uniform">
+					<color name="albedo" value="0.6 0 0.6"/>
+				</diffusemap>
+			</diffusemap>
+		</bsdf>
+
+		<diffusemap type="mtexture">
+			<diffusemap type="uniform">
+				<color name="albedo" value="0.32 0.2 0.04"/>
+			</diffusemap>
+			<diffusemap type="uniform">
+				<color name="albedo" value="0.6 0 0.6"/>
+			</diffusemap>
+		</diffusemap>
+	</mesh>
+
+	<mesh type="medium_mesh">
+		<medium type="voxel">
+			<string name="voxel_path" value="assets/voxel/procedural/final-flowers.vdb"/>
+			<float name="s_factor" value="0.7"/>
+			<float name="a_factor" value="0.01"/>
+		</medium>
+	</mesh>
+
+</scene>

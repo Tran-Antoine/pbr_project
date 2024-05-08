@@ -139,7 +139,7 @@ public:
     }
 
     BoundingBox3f bounds() const override {
-        return BoundingBox3f(Point3f(-1,-1,-1), Point3f(1,1,1));
+        return BoundingBox3f(Point3f(-10,20,-5), Point3f(50,50,50));
     }
 };
 

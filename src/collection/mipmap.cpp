@@ -116,9 +116,13 @@ static Color3f lerp(float dx, float dy, const Color3f& current, const Color3f& r
 
 Color3f MipMap::color(float x, float y, bool do_lerp) const {
 
-    if(x < 0 || y < 0 || x > 1 || y > 1) {
+    if(x < -Epsilon || y < -Epsilon || x > 1 + Epsilon || y > 1 + Epsilon) {
+        std::cout << "Invalid color indices provided" << std::endl;
         throw NoriException("Invalid color indices provided");
     }
+
+    x = clamp(x, 0.f, 1.f);
+    y = clamp(y, 0.f, 1.f);
 
     float x_mapped = x * max_param();
     float y_mapped = y * max_param();

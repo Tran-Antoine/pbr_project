@@ -135,7 +135,7 @@ public:
     }
 
     void activate() override {
-        auto config = RealTreeConfig(random, map, width_factor, length_factor, pitch_term, yaw_term);
+        auto config = RealTreeConfig(random, map, width_factor, length_factor, pitch_term, yaw_term, trafo);
         std::string mesh_string = (config_file.empty()
                 ? LSystemGrammar(premise, rules, random)
                 : LSystemGrammar::fromConfig(random, config_file))
@@ -151,14 +151,11 @@ public:
 
         drawLSystem(mesh_string, config, positions, indices, texcoords);
 
-        for(const auto& p : positions) {
-            m_bbox.expandBy(p);
-        }
 
-        ProceduralMetadata data = {1.2f, config.flower_bounds, Vector3i(120),
-                                   "assets/voxel/procedural/flowers.vdb"};
+        ProceduralMetadata data = {0.4 * 0.75f, config.flower_bounds, Vector3i(70),
+                                   "assets/voxel/procedural/final-flowers.vdb"};
+        write_vdb(config.flower_anchors, data);
 
-        //write_vdb(config.flower_anchors, data);
 
         m_F.resize(3, indices.size()/3);
 
@@ -168,9 +165,14 @@ public:
             m_F.col(i).z() = indices[3*i+2];
         }
 
+        std::cout << trafo.getMatrix() << "\n";
+
         m_V.resize(3, positions.size());
         for (uint32_t i = 0; i < positions.size(); ++i) {
-            m_V.col(i) = trafo * positions[i];
+            Point3f p = positions[i];
+            p = trafo * p;
+            m_V.col(i) = p;
+            m_bbox.expandBy(p);
         }
 
         if (!texcoords.empty()) {
