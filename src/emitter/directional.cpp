@@ -49,7 +49,7 @@ void DirectionalEmitter::samplePoint(Sampler &sampler, EmitterQueryRecord &rec, 
     //scene_bounds.rayIntersect(dir_ray, nearT, farT);
 
     //std::cout << nearT << ", " << farT << "\n";
-    rec.l = dir_ray.o + 10000.f * dir_ray.d;
+    rec.l = dir_ray.o + 1000.f * dir_ray.d;
     rec.n_l = direction; // normal in the same direction as the ray
     pdf = 1.f;
 }

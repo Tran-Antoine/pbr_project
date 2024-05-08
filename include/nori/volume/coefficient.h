@@ -8,24 +8,27 @@
 #include <openvdb/tools/Interpolation.h>
 #include <core/bbox.h>
 #include <core/transform.h>
+#include <core/color.h>
+
+#include <utility>
 
 NORI_NAMESPACE_BEGIN
 
 class MediumCoefficient {
 
 public:
-    virtual float eval(const Point3f& p, const Vector3f& v) const { return 0.f; }
+    virtual Color3f eval(const Point3f& p, const Vector3f& v) const { return 0.f; }
     virtual float maj() const { return 0.f; };
 };
 
 class ConstantCoefficient : public MediumCoefficient {
 public:
-    explicit ConstantCoefficient(float coeff) : coeff(coeff) {}
+    explicit ConstantCoefficient(Color3f coeff) : coeff(std::move(coeff)) {}
 
-    float eval(const Point3f& p, const Vector3f& v) const override { return coeff; }
-    float maj() const override { return coeff; }
+    Color3f eval(const Point3f& p, const Vector3f& v) const override { return coeff; }
+    float maj() const override { return coeff.maxCoeff(); }
 private:
-    float coeff;
+    Color3f coeff;
 };
 
 using VGrid = openvdb::FloatGrid;
@@ -33,8 +36,8 @@ using VSampler = openvdb::tools::GridSampler<VGrid, openvdb::tools::BoxSampler>;
 
 class VoxelReader : public MediumCoefficient {
 public:
-    VoxelReader(const std::string &path, Transform  transform, float d_factor);
-    float eval(const Point3f& p, const Vector3f& v) const override;
+    VoxelReader(const std::string &path, Transform transform, float d_factor, const Color3f& albedo=Color3f(1));
+    Color3f eval(const Point3f& p, const Vector3f& v) const override;
 
     BoundingBox3i index_bounds() const { return bounds_i; }
     BoundingBox3f world_bounds() const { return bounds_w; }
@@ -49,6 +52,7 @@ protected:
     float majorant;
     BoundingBox3i bounds_i;
     BoundingBox3f bounds_w;
+    Color3f albedo;
 };
 
 class BinaryVoxelReader : public MediumCoefficient {
@@ -58,7 +62,7 @@ public:
     BoundingBox3i index_bounds() const { return child->index_bounds(); }
     BoundingBox3f world_bounds() const { return child->world_bounds(); }
     float maj() const override { return value; }
-    float eval(const Point3f& p, const Vector3f& v) const override;
+    Color3f eval(const Point3f& p, const Vector3f& v) const override;
 
 private:
     float value;
@@ -72,7 +76,7 @@ public:
     BoundingBox3i index_bounds() const { return child->index_bounds(); }
     BoundingBox3f world_bounds() const { return child->world_bounds(); }
     float maj() const override { return max; }
-    float eval(const Point3f& p, const Vector3f& v) const override;
+    Color3f eval(const Point3f& p, const Vector3f& v) const override;
 
 private:
     float max;

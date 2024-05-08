@@ -1,0 +1,53 @@
+<scene>
+    <integrator type="volum7">
+    </integrator>
+
+    <sampler type="independent">
+        <integer name="sampleCount" value="64"/>
+    </sampler>
+
+    <camera type="perspective">
+        <!-- Camera-to-world coordinate system transformation -->
+        <transform name="toWorld">
+            <lookat origin="0.1, 0.01, -5" target="0, 0, 0" up="0, 1, 0"/>
+        </transform>
+
+        <float name="fov" value="90"/>
+
+        <integer name="width" value="768"/>
+        <integer name="height" value="384"/>
+    </camera>
+
+    <!-- Volume-->
+    <mesh type="medium_mesh">
+        <medium type="debug4"/>
+    </mesh>
+
+    <mesh type="obj">
+        <string name="filename" value="assets/shape/sphere.obj"/>
+        <transform name="toWorld">
+            <scale value="0.2, 0.2, 0.2"/>
+            <translate value="0, 0, 0"/>
+
+        </transform>
+        <bsdf type="diffuse">
+            <color name="albedo" value="0.5 0.5 0.5"/>
+        </bsdf>
+    </mesh>
+
+    <mesh type="obj">
+        <string name="filename" value="assets/shape/sphere.obj"/>
+        <transform name="toWorld">
+            <scale value="0.5, 0.5, 0.5"/>
+            <translate value="0, 1, 3"/>
+
+        </transform>
+        <emitter type="area">
+            <color name="radiance" value="1000.4 1000.4 1000.4"/>
+        </emitter>
+
+        <bsdf type="diffuse">
+            <color name="albedo" value="0.5 0.5 0.5"/>
+        </bsdf>
+    </mesh>
+</scene>

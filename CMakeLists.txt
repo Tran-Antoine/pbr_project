@@ -156,13 +156,13 @@ add_executable(nori
   src/integrator/path_mis.cpp
   src/integrator/direct.cpp
   src/integrator/env_only.cpp
-  src/integrator/volumetric.cpp
-  src/integrator/volum1.cpp
-  src/integrator/volum2.cpp
-  src/integrator/volum3.cpp
-  src/integrator/volum4.cpp
-  src/integrator/volum5.cpp
-  src/integrator/volum6.cpp
+  #src/integrator/volumetric.cpp
+  #src/integrator/volum1.cpp
+  #src/integrator/volum2.cpp
+  #src/integrator/volum3.cpp
+  #src/integrator/volum4.cpp
+  #src/integrator/volum5.cpp
+  #src/integrator/volum6.cpp
   src/integrator/volum7.cpp
 
   src/emitter/area.cpp
