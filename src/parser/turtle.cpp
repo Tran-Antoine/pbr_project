@@ -10,6 +10,10 @@ int idealSmoothness(float radius) {
     return (int) (radius * 100);
 }
 
+void drawPopulatedCylinder(TurtleState &state, PosVec ps, IndVec is, TexVec ts) {
+    std::cout << "drawPopulatedCylinder not implemented" << std::endl;
+}
+
 void drawMesh(const std::string &filename, const Transform &trafo,
               PosVec ps, IndVec is, std::vector<Vector2f> &ts) {
 

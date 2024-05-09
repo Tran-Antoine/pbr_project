@@ -170,29 +170,40 @@ public:
         std::vector<Vector2f> temp;
 
         if(state.depth >= 4) {
-            for(int i = 0; i < 10; i++) {
-                float dx = 2 * random.nextFloat() - 1;
-                float dy = 2 * random.nextFloat() - 1;
-                float dz = 2 * random.nextFloat() - 1;
-                Point3f sphere_point = 1.5f * Vector3f(dx, dy, dz) + state.p;
-                sphere_point = trafo * sphere_point;
+            int n_divisions = 10;
+            for(int i = 0; i < n_divisions; i++) {
+                float t = state.length * i / (n_divisions + 1);
 
-                flower_anchors.push_back(sphere_point);
-                flower_bounds.expandBy(sphere_point);
+                Point3f current_point = state.forward(t);
+                float dx = random.nextFloat() * 2 - 1;
+                float dy = random.nextFloat() * 2 - 1;
+                float dz = random.nextFloat() * 2 - 1;
+                Point3f random_point = current_point + 2.5 * Vector3f(dx, dy, dz);
+
+                flower_anchors.push_back(current_point);
+                bg_anchors.push_back(random_point);
+                flower_bounds.expandBy(current_point);
+                flower_bounds.expandBy(random_point);
             }
+            int index = 1;
+            for(auto t : temp) {
+                float x_mapped = map->map(t.x(), index);
+                texcoords.push_back(Vector2f(x_mapped, t.y()));
+            }
+            temp.clear();
         }
 
         if(c == 'G' || c == 'F') {
             drawCylinder(state,positions, indices, temp);
         } else {
-            Point3f p_advanced = state.p + state.p_n * 1.2f;
+            /*Point3f p_advanced = state.p + state.p_n * 0.2f;
             p_advanced = trafo * p_advanced;
 
             flower_anchors.push_back(p_advanced);
-            flower_bounds.expandBy(p_advanced);
+            flower_bounds.expandBy(p_advanced);*/
         }
 
-        int index = colorIndex(c);
+        int index = 0;
         for(auto t : temp) {
             float x_mapped = map->map(t.x(), index);
             texcoords.push_back(Vector2f(x_mapped, t.y()));
@@ -200,6 +211,7 @@ public:
     }
 
     std::vector<Point3f> flower_anchors;
+    std::vector<Point3f> bg_anchors;
     BoundingBox3f flower_bounds;
 
 protected:

@@ -152,9 +152,9 @@ public:
         drawLSystem(mesh_string, config, positions, indices, texcoords);
 
 
-        ProceduralMetadata data = {0.4 * 0.75f, config.flower_bounds, Vector3i(70),
-                                   "assets/voxel/procedural/final-flowers.vdb"};
-        write_vdb(config.flower_anchors, data);
+        ProceduralMetadata data = { 0.8f, 1.7f,config.flower_bounds, Vector3i(120),
+                                   "assets/voxel/procedural/flowers.vdb"};
+        //write_vdb(config.flower_anchors, config.bg_anchors, data);
 
 
         m_F.resize(3, indices.size()/3);
@@ -164,8 +164,6 @@ public:
             m_F.col(i).y() = indices[3*i+1];
             m_F.col(i).z() = indices[3*i+2];
         }
-
-        std::cout << trafo.getMatrix() << "\n";
 
         m_V.resize(3, positions.size());
         for (uint32_t i = 0; i < positions.size(); ++i) {

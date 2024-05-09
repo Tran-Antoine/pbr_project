@@ -2,7 +2,7 @@
 <scene>
 	<integrator type="volum7"/>
 	<sampler type="independent">
-		<integer name="sampleCount" value="4"/>
+		<integer name="sampleCount" value="32"/>
 	</sampler>
 	<camera type="perspective">
 		<float name="fov" value="60.28277150129064"/>
@@ -23,11 +23,16 @@
 	</mesh>
 
 	<mesh type="obj">
+		<diffusemap type="texture">
+			<string name="id" value="normal"/>
+			<string name="filename" value="assets/normal/waterhigh.exr"/>
+		</diffusemap>
+		<float name="bump_accentuate" value="0.1"/>
 		<string name="filename" value="meshes/Plane.obj"/>
-		<bsdf type="microfacet">
+		<bsdf type="mirror">
 			<float name="intIOR" value="1.7"/>
 			<color name="kd" value="0.1 0.1 0.8"/>
-			<float name="alpha" value="0.2"/>
+			<float name="alpha" value="0.02"/>
 		</bsdf>
 	</mesh>
 
@@ -43,14 +48,14 @@
 		<string name="half2" value="assets/env/bluesky_right.exr"/>
 		<float name="radius" value="500.0"/>
 		<point name="center" value="0,0,0"/>
-		<float name="intensity" value="0.2"/>
+		<float name="intensity" value="0.5"/>
 	</emitter>
 
 	<mesh type="lsystem">
 
 		<transform name="toWorld">
 			<rotate axis="0 1 0" angle="-90"/>
-			<scale value="0.2 0.2 0.2"/>
+			<scale value="0.1 0.1 0.1"/>
 			<translate value="-31.420002 8.069998 -27.230001"/>
 		</transform>
 		<string name="config" value="scenes/tree2/treegrammar2.l6"/>
@@ -61,7 +66,7 @@
 		<float name="yaw_term" value="5"/>
 
 		<float name="seed" value="221211"/>
-		<integer name="evolutions" value="13"/>
+		<integer name="evolutions" value="6"/>
 
 		<bsdf type="diffuse">
 			<diffusemap type="mtexture">
@@ -87,9 +92,22 @@
 	<mesh type="medium_mesh">
 		<medium type="voxel">
 			<string name="voxel_path" value="assets/voxel/procedural/final-flowers.vdb"/>
-			<float name="s_factor" value="0.7"/>
+			<float name="s_factor" value="0.3"/>
 			<float name="a_factor" value="0.01"/>
+			<color name="albedo" value="0.1 1 0.1"/>
 		</medium>
 	</mesh>
 
+	<mesh type="medium_mesh">
+		<medium type="voxel">
+			<string name="voxel_path" value="assets/voxel/wdas_cloud/wdas_cloud_eighth.vdb"/>
+			<float name="s_factor" value="0.2"/>
+			<float name="a_factor" value="0.01"/>
+			<transform name="toWorld">
+				<scale value="0.06, 0.06, 0.06"/>
+				<translate value="18.420002 27.069998 -15.230001"/>
+			</transform>
+			<color name="albedo" value="1 1 1"/>
+		</medium>
+	</mesh>
 </scene>

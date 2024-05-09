@@ -1,23 +1,24 @@
 <scene>
     <!-- Use the simple point light integrator -->
-    <boolean name="save" value="true"/>
+    <boolean name="save" value="false"/>
     <integrator type="volum7"/>
     <!-- Independent sample generator, 32 samples per pixel -->
     <sampler type="independent">
-        <integer name="sampleCount" value="4"/>
+        <integer name="sampleCount" value="32"/>
     </sampler>
 
     <camera type="perspective">
         <float name="fov" value="90"/>
         <transform name="toWorld">
             <scale value="-1,1,1"/>
-            <lookat target="7, 20, 0" origin="0, 3, -80" up="0, 1, 0"/>
+            <lookat target="7, 40, 0" origin="0, 23, -30" up="0, 1, 0"/>
         </transform>
 
         <integer name="height" value="600"/>
         <integer name="width" value="800"/>
     </camera>
 
+    <!--
     <mesh type="lsystem">
 
         <string name="config" value="scenes/tree2/treegrammar2.l6"/>
@@ -28,7 +29,7 @@
         <float name="yaw_term" value="5"/>
 
         <float name="seed" value="021211"/>
-        <integer name="evolutions" value="13"/>
+        <integer name="evolutions" value="8"/>
 
         <bsdf type="diffuse">
             <diffusemap type="mtexture">
@@ -49,13 +50,14 @@
                 <color name="albedo" value="0.6 0 0.6"/>
             </diffusemap>
         </diffusemap>
-    </mesh>
+    </mesh>-->
 
     <mesh type="medium_mesh">
         <medium type="voxel">
             <string name="voxel_path" value="assets/voxel/procedural/flowers.vdb"/>
             <float name="s_factor" value="0.75"/>
             <float name="a_factor" value="0.1"/>
+            <color name="albedo" value="0.1 1 0.1"/>
         </medium>
     </mesh>
 

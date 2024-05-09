@@ -32,7 +32,7 @@ private:
 };
 
 using VGrid = openvdb::FloatGrid;
-using VSampler = openvdb::tools::GridSampler<VGrid, openvdb::tools::BoxSampler>;
+using VSampler = openvdb::tools::GridSampler<VGrid, openvdb::tools::PointSampler>;
 
 class VoxelReader : public MediumCoefficient {
 public:
