@@ -154,7 +154,9 @@ public:
 
         ProceduralMetadata data = { 1.5f, 0.f,config.flower_bounds, Vector3i(50),
                                    "assets/voxel/procedural/flowers.vdb"};
-        write_vdb(config.flower_anchors, config.bg_anchors, data);
+        //write_vdb(config.flower_anchors, config.bg_anchors, data);
+
+        std::cout << "Counter : " << config.counter << std::endl;
 
 
         m_F.resize(3, indices.size()/3);
