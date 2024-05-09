@@ -13,7 +13,7 @@ class MultiDiffuseMap : public DiffuseMap {
 
 public:
     explicit MultiDiffuseMap(const PropertyList &propList);
-    Color3f T(float s, float t) const override;
+    Color3f T(float s, float t) override;
     float map(float s, int index) const;
     void unmap(float m, float& s, int& index) const;
 

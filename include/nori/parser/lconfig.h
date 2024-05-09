@@ -21,7 +21,7 @@ public:
 
     virtual void controlFrame(TurtleState& state, char c) { }
     virtual void controlYaw(TurtleState &state, char c) {  }
-    virtual void controlPitch(float pitch, char c) {  }
+    virtual void controlPitch(TurtleState &state, char c) {  }
     virtual void controlLength(TurtleState &state, char c) {  }
     virtual void controlThickness(TurtleState &state, char c) {  }
     virtual int pickRule(char c, float thickness, float length, int depth) { return 0; }
@@ -170,20 +170,21 @@ public:
         std::vector<Vector2f> temp;
 
         if(state.depth >= 4) {
-            int n_divisions = 10;
-            for(int i = 0; i < n_divisions; i++) {
-                float t = state.length * i / (n_divisions + 1);
+            int n = 10;
+            for(int i = 0; i < n; i++) {
 
-                Point3f current_point = state.forward(t);
+                Point3f current_point = state.forward(state.length * random.nextFloat());
                 float dx = random.nextFloat() * 2 - 1;
                 float dy = random.nextFloat() * 2 - 1;
                 float dz = random.nextFloat() * 2 - 1;
-                Point3f random_point = current_point + 2.5 * Vector3f(dx, dy, dz);
 
-                flower_anchors.push_back(current_point);
-                bg_anchors.push_back(random_point);
-                flower_bounds.expandBy(current_point);
-                flower_bounds.expandBy(random_point);
+                Point3f flower_point = current_point + 0.5 * Vector3f(dx, dy, dz);
+
+                drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.7, flower_point),
+                         positions, indices, temp);
+
+                flower_anchors.push_back(flower_point);
+                flower_bounds.expandBy(flower_point);
             }
             int index = 1;
             for(auto t : temp) {
@@ -220,6 +221,89 @@ protected:
     MultiDiffuseMap* map = nullptr;
 
 };
+
+class OneBranchConfig : public LGrammarConfig {
+
+public:
+    OneBranchConfig(pcg32& random, MultiDiffuseMap* map, float width_factor, float length_factor, float pitch_term, float yaw_term,
+                    const Transform& trafo)
+                : map(map),
+                  random(random),
+                  trafo(trafo),
+                  LGrammarConfig(0.05f, 1.0f, width_factor, length_factor, pitch_term, yaw_term){}
+
+        int colorCount() override {
+            return 2;
+        }
+
+        int colorIndex(char c) override {
+            switch (c) {
+                case 'F':
+                    return 0;
+                case 'H':
+                    return 1;
+                default:
+                    throw NoriException("Unhandled color index");
+            }
+        }
+
+        Eigen::Matrix4f create_affine_matrix(float yaw, float pitch, const Vector3f& scale, const Vector3f& p) {
+
+            Eigen::Affine3f transform;
+            transform.setIdentity();
+            transform = Eigen::AngleAxis<float>(0.4, Vector3f(0, 0, 1)) * transform;
+            transform = Eigen::DiagonalMatrix<float, 3>(scale) * transform;
+            transform = Eigen::Translation<float, 3>(p.x(), p.y(), p.z()) * transform;
+
+            return transform.matrix();
+        }
+
+
+        void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
+
+            std::vector<Vector2f> temp;
+
+            if(state.depth >= 4) {
+                int n_divisions = 10;
+                for(int i = 0; i < n_divisions; i++) {
+                    float t = state.length * i / (n_divisions + 1);
+
+                    Point3f current_point = state.forward(t);
+                    float dx = random.nextFloat() * 2 - 1;
+                    float dy = random.nextFloat() * 2 - 1;
+                    float dz = random.nextFloat() * 2 - 1;
+
+                    Point3f flower_point = current_point + Vector3f(0.2, 0.0, 0.0);
+                    float scale = 20.f;
+                    drawMesh("assets/shape/flower/petal_lowres.obj",
+                             create_affine_matrix(0, 0, scale, flower_point),
+                             positions, indices, temp);
+
+                }
+                int index = 1;
+                for(auto t : temp) {
+                    float x_mapped = map->map(t.x(), index);
+                    texcoords.push_back(Vector2f(x_mapped, t.y()));
+                }
+                temp.clear();
+            }
+
+            if(c == 'G' || c == 'F') {
+                drawCylinder(state,positions, indices, temp);
+            }
+            int index = 0;
+            for(auto t : temp) {
+                float x_mapped = map->map(t.x(), index);
+                texcoords.push_back(Vector2f(x_mapped, t.y()));
+            }
+        }
+
+    protected:
+        Transform trafo;
+        pcg32 random;
+        MultiDiffuseMap* map = nullptr;
+
+    };
 
 class Config6 : public LGrammarConfig {
 

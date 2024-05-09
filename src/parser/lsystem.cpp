@@ -152,9 +152,9 @@ public:
         drawLSystem(mesh_string, config, positions, indices, texcoords);
 
 
-        ProceduralMetadata data = { 0.8f, 1.7f,config.flower_bounds, Vector3i(120),
+        ProceduralMetadata data = { 1.5f, 0.f,config.flower_bounds, Vector3i(50),
                                    "assets/voxel/procedural/flowers.vdb"};
-        //write_vdb(config.flower_anchors, config.bg_anchors, data);
+        write_vdb(config.flower_anchors, config.bg_anchors, data);
 
 
         m_F.resize(3, indices.size()/3);

@@ -5,7 +5,7 @@
 
 NORI_NAMESPACE_BEGIN
 
-Color3f MountainMap::map(float gray) const {
+Color3f MountainMap::map(float gray) {
     if(gray < grass_thr) {
         float max_r = 0.1f;
         float max_g = 0.2f;
