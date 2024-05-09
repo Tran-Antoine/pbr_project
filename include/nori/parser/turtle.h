@@ -38,6 +38,13 @@ struct TurtleState {
         return p + length * toWorld;
     }
 
+    Point3f forward(float len) {
+        Vector3f localDirection = directional(pitch, yaw);
+        std::swap(localDirection.y(), localDirection.z());
+        Vector3f toWorld = frame.toWorld(localDirection);
+        return p + len * toWorld;
+    }
+
     Vector3f normalOut() {
         return (forward() - p).normalized();
     }
@@ -47,6 +54,8 @@ int idealSmoothness(float radius);
 
 void drawMesh(const std::string &filename, const Transform &trafo,
               PosVec ps, IndVec is, TexVec ts);
+
+void drawPopulatedCylinder(TurtleState &state, PosVec ps, IndVec is, TexVec ts);
 
 void drawCylinder(TurtleState &state, PosVec ps, IndVec is, TexVec ts);
 
