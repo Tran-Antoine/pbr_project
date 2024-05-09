@@ -178,12 +178,12 @@ public:
 
                 Point3f pos = state.forward(t) + 1.0f * Vector3f(dx, dy, dz);
 
-                drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.25, pos), positions, indices, temp);
+                drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.22, pos), positions, indices, temp);
                 flower_anchors.push_back(pos);
                 flower_bounds.expandBy(1.1 * pos);
             }
             for(auto t : temp) {
-                float x_mapped = map->map(t.x(), 1);
+                float x_mapped = map->map(t.x(), 1 + (int) (2 * random.nextFloat()));
                 texcoords.push_back(Vector2f(x_mapped, t.y()));
             }
             temp.clear();

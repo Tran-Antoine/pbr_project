@@ -1,10 +1,10 @@
 <scene>
     <!-- Use the simple point light integrator -->
-    <boolean name="save" value="false"/>
+    <boolean name="save" value="true"/>
     <integrator type="volum7"/>
     <!-- Independent sample generator, 32 samples per pixel -->
     <sampler type="independent">
-        <integer name="sampleCount" value="16"/>
+        <integer name="sampleCount" value="64"/>
     </sampler>
 
     <camera type="perspective">
