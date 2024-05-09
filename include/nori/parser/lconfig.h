@@ -52,7 +52,7 @@ public:
               LGrammarConfig(2.0f, 5.0f, width_factor, length_factor, pitch_term, yaw_term){}
 
     int colorCount() override {
-        return 2;
+        return 4;
     }
 
     int colorIndex(char c) override {
@@ -139,7 +139,7 @@ public:
         //Node =s Split in two, terminates one branch
         //Node =s Split in three
 
-        if(c == 'N') {
+        if(c == 'K') {
             if(depth <= 4)  return pick(sample, 0.0, 0.0, 0.8, 0.0, 0.2, 0.0);
             if(depth <= 6)  return pick(sample, 0.0, 0.4, 0.3, 0.2, 0.0, 0.0);
             if(depth <= 8)  return pick(sample, 0.0, 0.1, 0.4, 0.4, 0.1, 0.0);
@@ -169,23 +169,17 @@ public:
 
         std::vector<Vector2f> temp;
 
-        if(state.depth >= 4) {
-            int n = 10;
-            for(int i = 0; i < n; i++) {
+        if(c == 'K' || (state.depth >= 4 && random.nextFloat() < 0.5)) {
 
-                Point3f current_point = state.forward(state.length * random.nextFloat());
-                float dx = random.nextFloat() * 2 - 1;
-                float dy = random.nextFloat() * 2 - 1;
-                float dz = random.nextFloat() * 2 - 1;
+            counter += 1;
 
-                Point3f flower_point = current_point + 0.5 * Vector3f(dx, dy, dz);
+            Point3f current_point = state.forward(state.length / 1.5f);
 
-                drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.7, flower_point),
-                         positions, indices, temp);
+            float scale = std::max(1, 12 - state.depth);
 
-                flower_anchors.push_back(flower_point);
-                flower_bounds.expandBy(flower_point);
-            }
+            drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, scale, current_point),
+                     positions, indices, temp);
+
             int index = 1;
             for(auto t : temp) {
                 float x_mapped = map->map(t.x(), index);
@@ -196,12 +190,6 @@ public:
 
         if(c == 'G' || c == 'F') {
             drawCylinder(state,positions, indices, temp);
-        } else {
-            /*Point3f p_advanced = state.p + state.p_n * 0.2f;
-            p_advanced = trafo * p_advanced;
-
-            flower_anchors.push_back(p_advanced);
-            flower_bounds.expandBy(p_advanced);*/
         }
 
         int index = 0;
@@ -214,6 +202,7 @@ public:
     std::vector<Point3f> flower_anchors;
     std::vector<Point3f> bg_anchors;
     BoundingBox3f flower_bounds;
+    int counter = 0;
 
 protected:
     Transform trafo;
