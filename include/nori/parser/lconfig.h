@@ -169,20 +169,21 @@ public:
 
         std::vector<Vector2f> temp;
 
-        if(c == 'K' || (state.depth >= 4 && random.nextFloat() < 0.5)) {
+        if (state.depth >= 3) {
+            for(int i = 0; i < 15; i++) {
+                float t = random.nextFloat() * state.length;
+                float dx = 2 * random.nextFloat() - 1;
+                float dy = 2 * random.nextFloat() - 1;
+                float dz = 2 * random.nextFloat() - 2.5;
 
-            counter += 1;
+                Point3f pos = state.forward(t) + 1.0f * Vector3f(dx, dy, dz);
 
-            Point3f current_point = state.forward(state.length / 1.5f);
-
-            float scale = std::max(1, 12 - state.depth);
-
-            drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, scale, current_point),
-                     positions, indices, temp);
-
-            int index = 1;
+                drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.25, pos), positions, indices, temp);
+                flower_anchors.push_back(pos);
+                flower_bounds.expandBy(1.1 * pos);
+            }
             for(auto t : temp) {
-                float x_mapped = map->map(t.x(), index);
+                float x_mapped = map->map(t.x(), 1);
                 texcoords.push_back(Vector2f(x_mapped, t.y()));
             }
             temp.clear();

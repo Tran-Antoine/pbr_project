@@ -4,7 +4,7 @@
     <integrator type="volum7"/>
     <!-- Independent sample generator, 32 samples per pixel -->
     <sampler type="independent">
-        <integer name="sampleCount" value="32"/>
+        <integer name="sampleCount" value="16"/>
     </sampler>
 
     <camera type="perspective">
@@ -62,15 +62,15 @@
     </mesh>
 
 
-    <!--
+
     <mesh type="medium_mesh">
         <medium type="voxel">
             <string name="voxel_path" value="assets/voxel/procedural/flowers.vdb"/>
-            <float name="s_factor" value="0.05"/>
-            <float name="a_factor" value="0.01"/>
+            <float name="s_factor" value="1.5"/>
+            <float name="a_factor" value="0.1"/>
             <color name="albedo" value="0.1 1 0.1"/>
         </medium>
-    </mesh>-->
+    </mesh>
 
 
     <emitter type="env">
