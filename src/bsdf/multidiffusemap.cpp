@@ -6,7 +6,7 @@ NORI_NAMESPACE_BEGIN
 
 MultiDiffuseMap::MultiDiffuseMap(const PropertyList &propList) : DiffuseMap(propList) { }
 
-Color3f MultiDiffuseMap::T(float s, float t) const {
+Color3f MultiDiffuseMap::T(float s, float t) {
     int index;
     float remapped;
     unmap(s, remapped, index);

@@ -14,7 +14,7 @@ BlendMap::BlendMap(const PropertyList& propList) : DiffuseMap(propList) {
     height = pixels.height();
 }
 
-Color3f BlendMap::T(float s, float t) const {
+Color3f BlendMap::T(float s, float t) {
 
     if(s > 1 || t > 1 || s < 0 || t < 0) {
         throw NoriException("Texture coordinates out of range [0, 1]");

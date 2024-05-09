@@ -13,7 +13,7 @@ class TextureDiffuseMap : public DiffuseMap {
 
 public:
     explicit TextureDiffuseMap(const PropertyList &propList);
-    Color3f T(float s, float t) const override;
+    Color3f T(float s, float t) override;
     std::string toString() const override;
 
 private:

@@ -11,25 +11,25 @@ NORI_NAMESPACE_BEGIN
 class GrayMap : public DiffuseMap {
 
 public:
-    explicit GrayMap(const DiffuseMap* child) : child(child), DiffuseMap("graymap") {}
+    explicit GrayMap(DiffuseMap* child) : child(child), DiffuseMap("graymap") {}
 
-    virtual Color3f map(float gray) const = 0;
+    virtual Color3f map(float gray) = 0;
 
-    Color3f T(float s, float t) const override {
+    Color3f T(float s, float t) override {
 
         float gray = child->T(s, t).r();
         return map(gray);
     }
 
 private:
-    const DiffuseMap* child;
+    DiffuseMap* child;
 };
 
 class IdentityMap : public GrayMap {
 
-    explicit IdentityMap(const DiffuseMap* child) : GrayMap(child) {}
+    explicit IdentityMap(DiffuseMap* child) : GrayMap(child) {}
 
-    Color3f map(float gray) const override {
+    Color3f map(float gray) override {
         return Color3f(gray);
     }
 };

@@ -7,7 +7,7 @@ NORI_NAMESPACE_BEGIN
 UniformDiffuseMap::UniformDiffuseMap(const PropertyList& propList)
     : DiffuseMap(propList), albedo(propList.getColor("albedo")) {}
 
-Color3f UniformDiffuseMap::T(float s, float t) const {
+Color3f UniformDiffuseMap::T(float s, float t) {
     return albedo;
 }
 

@@ -9,10 +9,10 @@ NORI_NAMESPACE_BEGIN
 class MountainMap : public GrayMap {
 
 public:
-    explicit MountainMap(const DiffuseMap* child, float grass_thr, float rock_thr)
+    explicit MountainMap(DiffuseMap* child, float grass_thr, float rock_thr)
             : GrayMap(child), grass_thr(grass_thr), rock_thr(rock_thr) {}
 
-    Color3f map(float gray) const override;
+    Color3f map(float gray) override;
 
 private:
     float grass_thr, rock_thr;

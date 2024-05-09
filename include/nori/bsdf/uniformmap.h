@@ -14,7 +14,7 @@ class UniformDiffuseMap : public DiffuseMap {
 public:
     explicit UniformDiffuseMap(Color3f albedo) : albedo(std::move(albedo)), DiffuseMap("albedo") {}
     explicit UniformDiffuseMap(const PropertyList& propList);
-    Color3f T(float s, float t) const override;
+    Color3f T(float s, float t) override;
 
     std::string toString() const override;
 

@@ -15,7 +15,7 @@ TextureDiffuseMap::TextureDiffuseMap(const PropertyList &propList) : DiffuseMap(
     repeat = propList.getFloat("repeat", 1.0f);
 }
 
-Color3f TextureDiffuseMap::T(float s, float t) const {
+Color3f TextureDiffuseMap::T(float s, float t) {
 
     if(s > 1 + Epsilon || t > 1 + Epsilon || s < -Epsilon || t < -Epsilon) {
         throw NoriException("Texture coordinates out of range [0, 1]");

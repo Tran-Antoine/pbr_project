@@ -16,9 +16,9 @@ public:
     explicit DiffuseMap(std::string  id) : id(std::move(id)) {}
     explicit DiffuseMap(const PropertyList& propList) : id(propList.getString("id", "no-id")) {}
 
-    virtual Color3f T(float s, float t) const = 0;
+    virtual Color3f T(float s, float t) = 0;
 
-    inline Color3f T(Point2f p) const {
+    inline Color3f T(Point2f p) {
         return T(p.x(), p.y());
     }
 

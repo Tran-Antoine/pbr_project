@@ -52,11 +52,7 @@ void write_vdb(const std::vector<Point3f>& positions, const ProceduralMetadata& 
                 openvdb::math::Vec3 pos = trafo->indexToWorld(xyz);
 
                 int occurrences = count(positions, pos, metadata.radius);
-                int noise = occurrences == 0
-                        ? 0
-                        : (int) (7 * random.nextFloat()) - 3;
-
-                accessor.setValue(xyz, std::max(0, occurrences + noise));
+                accessor.setValue(xyz, std::max(0, occurrences));
             }
         }
     }
@@ -111,11 +107,8 @@ void write_vdb(const std::vector<Point3f>& main_positions, const std::vector<Poi
                 int main_occurrences = count(main_positions, pos, metadata.radius);
                 int bg_occurrences = count(bg_positions, pos, metadata.radius_bg);
 
-                int noise = main_occurrences == 0
-                            ? 0
-                            : (int) (7 * random.nextFloat()) - 3;
 
-                accessor.setValue(xyz, std::max(0.f, main_occurrences + noise + 0.05f * bg_occurrences));
+                accessor.setValue(xyz, std::max(0.f, main_occurrences + 0.05f * bg_occurrences));
             }
         }
     }

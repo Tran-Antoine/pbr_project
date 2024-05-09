@@ -13,7 +13,7 @@ class BlendMap : public DiffuseMap {
 
 public:
     explicit BlendMap(const PropertyList& propList);
-    Color3f T(float s, float t) const override;
+    Color3f T(float s, float t) override;
     std::string toString() const override;
 
     void addChild(nori::NoriObject *child) override;
