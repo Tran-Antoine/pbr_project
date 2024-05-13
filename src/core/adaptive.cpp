@@ -12,8 +12,8 @@
 #include <tbb/blocked_range.h>
 #include <tbb/task_scheduler_init.h>
 
-int N_RADIUS = 10;
-int P_RADIUS = 3;
+int N_RADIUS = 5;
+int P_RADIUS = 2;
 
 NORI_NAMESPACE_BEGIN
 
@@ -33,10 +33,11 @@ Color3f sqr(const Color3f& c) {
 std::vector<Point2i> neighbors(const Point2i& p) {
     std::vector<Point2i> pixels((2*N_RADIUS + 1) * (2*N_RADIUS + 1));
 
+    int k = 0;
     for(int i = -N_RADIUS; i <= N_RADIUS; i++) {
         for(int j = -N_RADIUS; j <= N_RADIUS; j++) {
             Vector2i pos = p + Vector2i(i, j);
-            pixels[i++] = pos;
+            pixels[k++] = pos;
         }
     }
     return pixels;
@@ -44,11 +45,13 @@ std::vector<Point2i> neighbors(const Point2i& p) {
 
 
 Color3f color(const Point2i& p, const ImageData& image) {
-    return image(p.y(), p.x()).color;
+    Point2i clamped = Point2i(clamp(p.x(), 0, image.cols()-1), clamp(p.y(), 0, image.rows()-1));
+    return image(clamped.y(), clamped.x()).color;
 }
 
 Color3f variance(const Point2i &p, const ImageData& image) {
-    return image(p.y(), p.x()).var;
+    Point2i clamped = Point2i(clamp(p.x(), 0, image.cols()-1), clamp(p.y(), 0, image.rows()-1));
+    return image(clamped.y(), clamped.x()).var;
 }
 
 Color3f variance(const Point2i& a, const Point2i& b, const ImageData& image) {
@@ -87,8 +90,9 @@ void split(const ImageData& in, ImageData& bufferA, ImageData& bufferB) {
     for(int i = 0; i < in.rows(); i++) {
         for(int j = 0; j < in.cols(); j++) {
             auto data = in(i, j);
-            PixelData copy = {data.color, data.totalSamplesUsed, data.currentSampleCount / 2, data.var};
+            PixelData copy = {data.color, data.totalSamplesUsed, std::max(1,data.currentSampleCount / 2), data.var};
             bufferA(i, j) = copy;
+            bufferB(i, j) = copy;
         }
     }
 }
@@ -99,22 +103,13 @@ Color3f nonLocalFilter(const Point2i& p, float alpha, float k, const ImageData& 
     float normalization = 0;
 
     for(const auto& neighbor : neighbors(p)) {
-        float w = weight(p, neighbor, k, alpha, other);
+        float w = weight(p, neighbor, alpha, k, other);
 
         normalization += w;
         out += color(neighbor, buffer) * w;
     }
 
     return (1.0 / normalization) * out;
-}
-
-void applyFilter(float k, float alpha, ImageData& buffer, const ImageData& other) {
-    for(int i = 0; i < buffer.rows(); i++) {
-        for(int j = 0; j < buffer.cols(); j++) {
-            Color3f newColor = nonLocalFilter(Point2i(j, i), alpha, k, buffer, other);
-            buffer(i, j).color = newColor;
-        }
-    }
 }
 
 void merge(const ImageData& a, const ImageData& b, ImageData& out) {
@@ -126,19 +121,89 @@ void merge(const ImageData& a, const ImageData& b, ImageData& out) {
             const PixelData& pb = b(i, j);
 
             out(i, j) = {
-						(pa.color + pb.color) / 2.0f,
-                        current.totalSamplesUsed + pa.currentSampleCount + pb.currentSampleCount,
-                        pa.currentSampleCount + pb.currentSampleCount,
-                        (pa.var + pb.var) / 2.0f
-                        };
+                    (pa.color + pb.color) / 2.0f,
+                    current.totalSamplesUsed + pa.currentSampleCount + pb.currentSampleCount,
+                    pa.currentSampleCount + pb.currentSampleCount,
+                    (pa.var + pb.var) / 2.0f
+            };
         }
     }
 }
 
-int filterStep(float k, float alpha, ImageData& bufferA, ImageData& bufferB, ImageData& image) {
+static void filterBlock(const ImageBlock &block, ImageData &imageData, const ImageData &other, float alpha, float k) {
 
-    applyFilter(k, alpha, bufferA, bufferB);
-    applyFilter(k, alpha, bufferB, bufferA);
+
+    Point2i offset = block.getOffset();
+    Vector2i size  = block.getSize();
+
+    /* For each pixel and pixel sample sample */
+    for (int y=0; y<size.y(); ++y) {
+        for (int x=0; x<size.x(); ++x) {
+
+            Point2i absCoordinates = Point2i(x + offset.x(), y + offset.y());
+            PixelData pixel = imageData(absCoordinates.y(), absCoordinates.x());
+            Color3f newColor = nonLocalFilter(Point2i(absCoordinates.x(), absCoordinates.y()), alpha, k, imageData, other);
+            pixel.color = newColor;
+            imageData(absCoordinates.y(), absCoordinates.x()) = pixel;
+        }
+    }
+}
+
+static void filterAll(Scene* scene, ImageData& imageData, const ImageData &other, float alpha, float k) {
+
+    const Camera *camera = scene->getCamera();
+    Vector2i outputSize = camera->getOutputSize();
+
+    /* Create a block generator (i.e. a work scheduler) */
+    BlockGenerator blockGenerator(outputSize, NORI_BLOCK_SIZE);
+
+    /* Allocate memory for the entire output image and clear it */
+    ImageBlock result(outputSize, camera->getReconstructionFilter());
+    result.clear();
+
+    /* Do the following in parallel and asynchronously */
+    std::thread render_thread([&] {
+        tbb::task_scheduler_init init(tbb::task_scheduler_init::automatic);
+
+        tbb::blocked_range<int> range(0, blockGenerator.getBlockCount());
+
+        auto map = [&](const tbb::blocked_range<int> &range) {
+            /* Allocate memory for a small image block to be rendered
+               by the current thread */
+            ImageBlock block(Vector2i(NORI_BLOCK_SIZE),
+                             camera->getReconstructionFilter());
+
+            /* Create a clone of the sampler for the current thread */
+            std::unique_ptr<Sampler> sampler(scene->getSampler()->clone());
+
+            for (int i=range.begin(); i<range.end(); ++i) {
+                /* Request an image block from the block generator */
+                blockGenerator.next(block);
+
+                /* Inform the sampler about the block to be rendered */
+                sampler->prepare(block);
+
+                /* Render all contained pixels */
+                filterBlock(block, imageData, other, alpha, k);
+
+                /* The image block has been processed. Now add it to
+                   the "big" block that represents the entire image */
+                result.put(block);
+            }
+        };
+
+        /// Default: parallel rendering
+        tbb::parallel_for(range, map);
+
+    });
+    render_thread.join();
+}
+
+
+int filterStep(Scene* scene, float k, float alpha, ImageData& bufferA, ImageData& bufferB, ImageData& image) {
+
+    filterAll(scene, bufferA, bufferB,k, alpha);
+    filterAll(scene, bufferB, bufferA, k, alpha);
 
     merge(bufferA, bufferB, image);
 
@@ -186,7 +251,7 @@ static void renderBlock(const Scene *scene, Sampler *sampler, const ImageBlock &
 
             Color3f output;
 
-            for (uint32_t i=0; i< pixel.currentSampleCount; ++i) {
+            for (uint32_t i=0; i < pixel.currentSampleCount; ++i) {
                 Point2f pixelSample = Point2f((float) (x + offset.x()), (float) (y + offset.y())) + sampler->next2D();
                 Point2f apertureSample = sampler->next2D();
 
@@ -272,7 +337,7 @@ static ImageData getInitialBuffer(Scene* scene, int samplingBudget) {
     Vector2i outputSize = camera->getOutputSize();
     scene->getIntegrator()->preprocess(scene);
 
-    int initialBudget = samplingBudget / (20 * outputSize.x() * outputSize.y());
+    int initialBudget = samplingBudget / (4 * outputSize.x() * outputSize.y());
 
     return initBuffer(outputSize.x(), outputSize.y(), initialBudget);
 }
@@ -280,7 +345,7 @@ static ImageData getInitialBuffer(Scene* scene, int samplingBudget) {
 void render(Scene *scene, const std::string &filename, int samplingBudget) {
 
     int usedBudget = 0;
-    float k = 0, alpha = 0;
+    float k = 0.15f, alpha = 0.1;
 
     ImageData current = getInitialBuffer(scene, samplingBudget);
     ImageData bufferA, bufferB;
@@ -294,9 +359,11 @@ void render(Scene *scene, const std::string &filename, int samplingBudget) {
 
         estimateVariance(k, alpha, bufferA, bufferB);
 
-        filterStep(k, alpha, bufferA, bufferB, current);
+        filterStep(scene, k, alpha, bufferA, bufferB, current);
 
         usedBudget += cost(current);
+
+        std::cout << "Finished one step with " << samplingBudget - usedBudget << " remaining." << std::endl;
     }
 
     Bitmap result(Vector2i(current.cols(), current.rows()));
@@ -306,9 +373,14 @@ void render(Scene *scene, const std::string &filename, int samplingBudget) {
         }
     }
 
+    std::string outputName = filename;
+    size_t lastdot = outputName.find_last_of(".");
+    if (lastdot != std::string::npos)
+        outputName.erase(lastdot, std::string::npos);
+
     if(scene->saveResult()) {
-        result.saveEXR(filename);
-        result.savePNG(filename);
+        result.saveEXR(outputName);
+        result.savePNG(outputName);
     }
 }
 

@@ -64,6 +64,7 @@ add_executable(nori
   include/nori/core/transform.h
   include/nori/core/vector.h
   include/nori/core/scene.h
+  include/nori/core/adaptive.h
 
   include/nori/shape/implicit.h
   include/nori/shape/cylinder.h
@@ -121,6 +122,7 @@ add_executable(nori
   src/core/mesh.cpp
   src/core/perspective.cpp
   src/core/scene.cpp
+  src/core/adaptive.cpp
 
   src/shape/cylinder.cpp
   src/shape/sphere.cpp
