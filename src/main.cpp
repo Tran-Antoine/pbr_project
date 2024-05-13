@@ -31,6 +31,8 @@
 #include <filesystem/resolver.h>
 #include <thread>
 
+#include <core/adaptive.h>
+
 using namespace nori;
 
 static int threadCount = -1;
@@ -71,8 +73,13 @@ static void render(Scene *scene, const std::string &filename) {
 
     std::cout << "Start rendering" << std::endl;
 
+
     const Camera *camera = scene->getCamera();
     Vector2i outputSize = camera->getOutputSize();
+
+    render(scene, filename, 100 * outputSize.x() * outputSize.y());
+
+    return;
     scene->getIntegrator()->preprocess(scene);
 
     /* Create a block generator (i.e. a work scheduler) */
