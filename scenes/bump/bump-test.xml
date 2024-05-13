@@ -15,7 +15,7 @@
 	</camera>
 
 	<sampler type="independent">
-		<integer name="sampleCount" value="128"/>
+		<integer name="currentSampleCount" value="128"/>
 	</sampler>
 
 	<mesh type="hmap">
