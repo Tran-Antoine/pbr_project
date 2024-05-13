@@ -26,7 +26,7 @@
 		<float name="fov" value="16"/>
 
 		<!-- 768 x 768 pixels -->
-		<integer name="width" value="768"/>
-		<integer name="height" value="768"/>
+		<integer name="width" value="512"/>
+		<integer name="height" value="512"/>
 	</camera>
 </scene>

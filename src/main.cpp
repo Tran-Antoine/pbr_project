@@ -77,9 +77,8 @@ static void render(Scene *scene, const std::string &filename) {
     const Camera *camera = scene->getCamera();
     Vector2i outputSize = camera->getOutputSize();
 
-    render(scene, filename, 100 * outputSize.x() * outputSize.y());
-
-    return;
+    /*render(scene, filename, 5 * outputSize.x() * outputSize.y());
+    return;*/
     scene->getIntegrator()->preprocess(scene);
 
     /* Create a block generator (i.e. a work scheduler) */
