@@ -1,0 +1,49 @@
+<scene>
+    <integrator type="volum7">
+    </integrator>
+
+    <sampler type="independent">
+        <integer name="sampleCount" value="256"/>
+    </sampler>
+
+    <camera type="perspective">
+        <!-- Camera-to-world coordinate system transformation -->
+        <transform name="toWorld">
+            <lookat origin="0, 0, -50" target="0, 7, 0" up="0, 1, 0"/>
+        </transform>
+
+        <float name="fov" value="90"/>
+
+        <integer name="width" value="768"/>
+        <integer name="height" value="384"/>
+    </camera>
+
+    <emitter type="directional">
+        <color name="radiance" value="100 100 100"/>
+        <vector name="direction" value="0 -0.8 -0.1"/>
+    </emitter>
+
+    <!-- Volume-->
+    <mesh type="medium_mesh">
+        <medium type="mvoxel">
+            <medium type="voxel">
+                <string name="voxel_path" value="assets/voxel/wdas_cloud/wdas_cloud_eighth.vdb"/>
+                <float name="s_factor" value="0.3"/>
+                <float name="a_factor" value="0.1"/>
+                <transform name="toWorld">
+                    <scale value="0.1 0.1 0.1"/>
+                    <translate value="0 10 0"/>
+                </transform>
+            </medium>
+            <medium type="homogeneous">
+                <float name="absorption" value="0.01"/>
+                <float name="scattering" value="0.01"/>
+                <point name="bounds_min" value="-15, -30, -15"/>
+                <point name="bounds_max" value="15, 8, 15"/>
+            </medium>
+        </medium>
+    </mesh>
+
+
+
+</scene>

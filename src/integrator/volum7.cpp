@@ -117,6 +117,10 @@ public:
                 float weight = balancedMIS(light_point_angular_pdf, directional_pdf);
 
                 if(emitter->is_source_visible(scene, record)) {
+                    Color3f t = weight * direct_transmittance * beta * emitted * directional_cost * angular_distortion;
+                    if(!t.isValid()) {
+                        std::cout << "t";
+                    }
                     add_illumination(Li, weight * direct_transmittance * beta * emitted * directional_cost * angular_distortion);
                 }
             }
