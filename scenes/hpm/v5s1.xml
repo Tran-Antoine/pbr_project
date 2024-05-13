@@ -16,7 +16,7 @@
     </camera>
 
     <sampler type="independent">
-        <integer name="currentSampleCount" value="16"/>
+        <integer name="sampleCount" value="16"/>
     </sampler>
 
     <!-- Volume -->
