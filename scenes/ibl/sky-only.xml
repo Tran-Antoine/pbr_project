@@ -3,7 +3,7 @@
     </integrator>
 
     <sampler type="independent">
-        <integer name="currentSampleCount" value="4"/>
+        <integer name="sampleCount" value="4"/>
     </sampler>
 
     <camera type="perspective">

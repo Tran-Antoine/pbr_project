@@ -3,7 +3,7 @@
     <integrator type="normals"/>
     <!-- Independent sample generator, 32 samples per pixel -->
     <sampler type="independent">
-        <integer name="currentSampleCount" value="16"/>
+        <integer name="sampleCount" value="16"/>
     </sampler>
 
     <mesh type="lsystem">

@@ -1,7 +1,7 @@
 <scene>
     <integrator type="volum6"/>
     <sampler type="independent">
-        <integer name="currentSampleCount" value="1024"/>
+        <integer name="sampleCount" value="1024"/>
     </sampler>
 
     <mesh type="obj">
