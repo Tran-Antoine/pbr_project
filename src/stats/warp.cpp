@@ -312,8 +312,10 @@ float Warp::lineToLogisticPdf(float t, float std) {
 
 float Warp::sampleHeterogeneousDistance(Sampler *sampler, const Point3f &x, const Vector3f &d, const Medium &medium, Color3f& omega_t) {
 
+    Ray3f ray = Ray3f(x, d);
+
     float eta1 = sampler->next1D();
-    float maj = medium.majorant();
+    float maj = medium.majorant(ray);
 
     float t = Epsilon;
     float p_real_interaction = 0.f;
@@ -346,9 +348,12 @@ float Warp::sampleHeterogeneousDistance(Sampler *sampler, const Point3f &x, cons
 }
 
 Color3f Warp::ratio_tracking(const Point3f& a, const Point3f& b, const Medium& medium, Sampler* sampler) {
+
+    Ray3f ray = Ray3f(a, (b-a).normalized(), Epsilon, (b-a).norm());
+
     Vector3f d = (b-a).normalized();
     float total_distance = (b-a).norm();
-    float maj = medium.majorant();
+    float maj = medium.majorant(ray);
 
     Color3f weight = 1.f;
     float t = 0.f;
@@ -365,6 +370,11 @@ Color3f Warp::ratio_tracking(const Point3f& a, const Point3f& b, const Medium& m
         Color3f omega_t = medium.attenuation(a + d*t, d);
         Color3f null_amount = Color3f(maj) - omega_t;
         weight *= null_amount / maj;
+
+        if(weight.minCoeff() < 0) {
+            medium.majorant(ray);
+            medium.attenuation(a + d*t, d);
+        }
     }
 
     return weight;

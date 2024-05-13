@@ -193,6 +193,8 @@ add_executable(nori
   src/volume/voxelreader.cpp
   src/volume/debugmedia.cpp
   src/volume/procedural.cpp
+  src/volume/multicoefficient.cpp
+  src/volume/multimedium.cpp
 
   src/main.cpp
   #test/readvoxel.cpp

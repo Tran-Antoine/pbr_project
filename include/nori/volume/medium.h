@@ -36,7 +36,7 @@ public:
     Color3f evalPhase(const Vector3f& in, const Vector3f& out) const { return phase->eval(in, out); }
     float phasePdf(const Vector3f& in, const Vector3f& out) const { return phase->pdf(in, out); }
     virtual BoundingBox3f bounds() const { return BoundingBox3f(); }
-    float majorant() const { return absorption->maj() + scattering->maj();}
+    virtual float majorant(const Ray3f& ray) const { return absorption->maj(ray) + scattering->maj(ray);}
     /// Register a child object (e.g. a BSDF) with the mesh
     void addChild(NoriObject *obj) override {
         switch (obj->getClassType()) {
@@ -47,15 +47,18 @@ public:
                 phase = static_cast<PhaseFunction *>(obj);
                 break;
             default:
-                throw NoriException("Mesh::addChild(<%s>) is not supported!",
+                throw NoriException("Medium::addChild(<%s>) is not supported!",
                                     classTypeName(obj->getClassType()));
         }
     }
 
+    MediumCoefficient* getAbsorption() const { return absorption; }
+    MediumCoefficient* getScattering() const { return scattering; }
+
 protected:
     PhaseFunction* phase = nullptr;
-    MediumCoefficient* absorption = nullptr;
     MediumCoefficient* scattering = nullptr;
+    MediumCoefficient* absorption = nullptr;
 };
 
 NORI_NAMESPACE_END

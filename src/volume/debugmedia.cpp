@@ -12,7 +12,7 @@ public:
         if(p.x() < 0) return coeff1;
         return coeff2;
     }
-    float maj() const override { return coeff1 > coeff2 ? coeff1 : coeff2; }
+    float maj(const Ray3f& ray) const override { return coeff1 > coeff2 ? coeff1 : coeff2; }
 private:
     float coeff1;
     float coeff2;
@@ -25,7 +25,7 @@ public:
     Color3f eval(const Point3f& p, const Vector3f& v) const override {
         return p.x() + 2.f;
     }
-    float maj() const override { return 3.f; }
+    float maj(const Ray3f& ray) const override { return 3.f; }
 
 };
 
@@ -44,7 +44,7 @@ public:
 
         return 1.f;
     }
-    float maj() const override { return 1.f; }
+    float maj(const Ray3f& ray) const override { return 1.f; }
 
 };
 
