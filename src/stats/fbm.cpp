@@ -1,13 +1,13 @@
 #include "stats/fbm.h"
 
 
-void nori::FBM::init_generators() {
+void nori::FBM::init_generators(const Generator& gen) {
 
     int freq_x = base_freq_x;
     int freq_z = base_freq_z;
 
     for(int i = 0; i < n_octaves; ++i) {
-        auto generator = new PerlinGenerator(freq_x, freq_z, initstate, initseq);
+        auto generator = gen(freq_x, freq_z, initstate, initseq);
         generator->init_gradients();
         perlins.push_back(generator);
 

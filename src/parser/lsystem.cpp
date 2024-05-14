@@ -135,7 +135,7 @@ public:
     }
 
     void activate() override {
-        auto config = RealTreeConfig(random, map, width_factor, length_factor, pitch_term, yaw_term, trafo);
+        auto config = OneTrunkConfig(random, map, width_factor, length_factor, pitch_term, yaw_term, trafo);
         std::string mesh_string = (config_file.empty()
                 ? LSystemGrammar(premise, rules, random)
                 : LSystemGrammar::fromConfig(random, config_file))
@@ -152,11 +152,11 @@ public:
         drawLSystem(mesh_string, config, positions, indices, texcoords);
 
 
-        ProceduralMetadata data = { 0.7f, 0.f,config.flower_bounds, Vector3i(100, 100, 10),
+        /*ProceduralMetadata data = { 0.7f, 0.f,config.flower_bounds, Vector3i(100, 100, 10),
                                    "assets/voxel/procedural/flowers.vdb"};
         write_vdb(config.flower_anchors, config.bg_anchors, data);
 
-        std::cout << "Counter : " << config.counter << std::endl;
+        std::cout << "Counter : " << config.counter << std::endl;*/
 
 
         m_F.resize(3, indices.size()/3);
