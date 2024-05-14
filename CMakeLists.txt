@@ -209,6 +209,7 @@ add_executable(nori
   #test/smallterraintest.cpp
   #test/parseconfigtest.cpp
   #test/manual_cloud.cpp
+  #test/procedural_cloud.cpp
 )
 
 # Link OpenCV libraries
