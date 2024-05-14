@@ -90,6 +90,7 @@ add_executable(nori
   include/nori/stats/warp.h
   include/nori/stats/perlin.h
   include/nori/stats/fbm.h
+  include/nori/stats/stripeperlin.h
 
   include/nori/integrator/integrator.h
 
@@ -151,6 +152,7 @@ add_executable(nori
   src/stats/warp.cpp
   src/stats/perlin.cpp
   src/stats/fbm.cpp
+  src/stats/stripeperlin.cpp
 
   src/integrator/pointlight.cpp
   src/integrator/normals.cpp

@@ -58,6 +58,87 @@ void drawCylinder(TurtleState &state, PosVec ps, IndVec is, TexVec ts) {
     drawCylinder(a, b, a_n, b_n, in_thick, out_thick, ps, is, ts, state);
 }
 
+static Vector3f tilt(const Vector3f &a, const Vector3f &b, float ratio) {
+    return ((1 - ratio) * a + ratio * b).normalized();
+}
+
+static void distortCircle(PosVec circle, std::vector<float>& distortions, const Point3f& center,
+                          float height, float strength, float h_start, float h_end, FBM& hmap) {
+
+    for(int i = 0; i < circle.size(); i++) {
+        float angle = i / (float) circle.size();
+        float map_value = hmap.get(angle, h_start + height * (h_end - h_start));
+        float displacement = i >= distortions.size()
+                ? map_value
+                : 0.3 * map_value + 0.7 * distortions[i];
+
+        //circle[i] = displacement * strength * (circle[i] - center).normalized();
+        circle[i] = center + (1 + displacement * strength) * (circle[i] - center);
+
+        if(i >= distortions.size()) {
+            distortions.push_back(displacement);
+        } else {
+            distortions[i] = displacement;
+        }
+    }
+}
+
+void drawCylinder(TurtleState &state, FBM &hmap, float h_start, float h_end, const Vector2i& resolution, PosVec ps, IndVec is, TexVec ts) {
+
+    Point3f current_center = state.p;
+    Vector3f current_normal = state.p_n;
+
+    Point3f end_center = state.forward();
+    Vector3f end_normal = state.normalOut();
+
+    if(current_normal.dot(end_normal) < 0) {
+        current_normal = -current_normal;
+    }
+
+    float in_thick = state.in_thickness, out_thick = state.out_thickness;
+    int N_CIRCLES = resolution.y();
+    int SMOOTHNESS = resolution.x();
+    float DELTA_D = state.length / (float) (N_CIRCLES - 1);
+    float STRENGTH = 0.75f;
+
+    int index_pointer = ps.size();
+    float radius = state.in_thickness;
+    std::vector<float> current_distortions;
+
+    auto c1 = circle(current_center, current_normal, radius, SMOOTHNESS);
+    distortCircle(c1, current_distortions,current_center, 0, STRENGTH, h_start, h_end, hmap);
+    push_circle(c1, current_center, ps, is, ts, false);
+
+    for(int i = 1; i < N_CIRCLES; i++) {
+
+        current_normal = tilt(current_normal, end_normal, i / (float) (N_CIRCLES-1));
+        current_center = current_center + current_normal * DELTA_D;
+        radius = in_thick + i / (float) (N_CIRCLES-1) * (out_thick - in_thick);
+
+        auto c2 = circle(current_center, current_normal, radius, SMOOTHNESS);
+
+        distortCircle(c2, current_distortions, current_center, i / (float) N_CIRCLES, STRENGTH,
+                      h_start, h_end,hmap);
+
+        push_circle(c2, current_center, ps, is, ts, false);
+
+        connectCircles(c1.size() + 1, index_pointer, is);
+
+        c1 = c2;
+        index_pointer += c1.size() + 1;
+    }
+
+    state.p = current_center;
+    state.p_n = current_normal;
+    state.in_thickness = radius;
+
+    Vector3f s = Vector3f(-end_normal.y(), end_normal.x(), 0).normalized();
+    Vector3f t = end_normal.cross(s).normalized();
+    state.frame = Frame(s, t, end_normal);
+    state.resetOrientation();
+
+}
+
 void drawCylinder(const Point3f& a, const Point3f& b, const Vector3f& a_n, const Vector3f& b_n, float in_thick, float out_thick,
                   PosVec ps, IndVec is, TexVec ts, TurtleState &state) {
 
@@ -123,7 +204,7 @@ void drawStraightCylinder(const Point3f& a, const Point3f& b, float in_thick, fl
 
 void connect(const Point3f &a, const Point3f &b, const Vector3f &a_n, float in_thick, float out_thick,
                     int smoothness, PosVec ps, IndVec is,
-                    std::vector<Vector2f> &ts) {
+                    std::vector<Vector2f> &ts, bool end_connected) {
 
     Vector3f b_n = (b-a).normalized(); // normal of b must be according to the cylinder's direction
 
@@ -132,10 +213,14 @@ void connect(const Point3f &a, const Point3f &b, const Vector3f &a_n, float in_t
 
     int index_pointer = ps.size(); // save pointer before adding new vertices
     push_circle(from_circle, a, ps, is, ts, false);
-    push_circle(to_circle, b, ps, is, ts, true);
+    push_circle(to_circle, b, ps, is, ts, end_connected);
 
     int n_points = from_circle.size() + 1; // +1 due to the center point
 
+    connectCircles(n_points, index_pointer, is);
+}
+
+void connectCircles(int n_points, int index_pointer, IndVec is) {
     // goal: form two triangles to shape the rectangle of points (a0, a1, b0, b1)
     int i0 = index_pointer + 1;
     int j0 = i0 + n_points;
@@ -231,5 +316,7 @@ void push_circle(PosVec circle_ps, const Vector3f &p, PosVec ps,
         is.push_back(head);
     }
 }
+
+
 
 NORI_NAMESPACE_END

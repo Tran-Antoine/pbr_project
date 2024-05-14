@@ -1,0 +1,43 @@
+<scene>
+    <!-- Use the simple point light integrator -->
+    <integrator type="volum7"/>
+    <!-- Independent sample generator, 32 samples per pixel -->
+    <sampler type="independent">
+        <integer name="sampleCount" value="64"/>
+    </sampler>
+
+    <mesh type="lsystem">
+        <string name="premise" value="-wF"/>
+        <string name="rule0" value="F=GDwl[+F]-F"/>
+        <float name="width_factor" value="0.6"/>
+        <float name="length_factor" value="0.9"/>
+        <float name="pitch_term" value="30"/>
+        <integer name="evolutions" value="5"/>
+
+        <bsdf type="diffuse">
+            <color name="albedo" value="0.3 0.15, 0.05"/>
+        </bsdf>
+    </mesh>
+
+
+    <!-- Render the scene viewed by a perspective camera -->
+    <camera type="perspective">
+        <float name="fov" value="60"/>
+        <transform name="toWorld">
+            <scale value="-1,1,1"/>
+            <lookat target="0, 1, 0" origin="0, 1, -5" up="0, 1, 0"/>
+        </transform>
+
+        <integer name="height" value="600"/>
+        <integer name="width" value="800"/>
+    </camera>
+
+    <emitter type="env">
+        <string name="half1" value="assets/env/lowcontrast_left.exr"/>
+        <string name="half2" value="assets/env/lowcontrast_right.exr"/>
+        <float name="radius" value="500.0"/>
+        <point name="center" value="0,0,0"/>
+        <float name="intensity" value="0.4"/>
+    </emitter>
+
+</scene>

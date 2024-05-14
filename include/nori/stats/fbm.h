@@ -5,6 +5,12 @@
 
 NORI_NAMESPACE_BEGIN
 
+using Generator = const std::function<PerlinGenerator*(int, int, uint64_t, uint64_t)>;
+
+inline PerlinGenerator* defaultGenerator(int res_x, int res_z, uint64_t initstate, uint64_t initseq) {
+    return new PerlinGenerator(res_x, res_z, initstate, initseq);
+}
+
 class FBM {
 public:
 
@@ -18,10 +24,12 @@ public:
             delete p;
         }
     }
-    void init_generators();
+    void init_generators(const Generator& gen=defaultGenerator);
     float get(float x, float z) const;
 
 protected:
+
+
 
     int base_freq_x, base_freq_z;
     uint64_t initstate, initseq;

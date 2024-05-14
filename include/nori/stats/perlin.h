@@ -17,10 +17,10 @@ public:
     }
 
     float get(float x, float z) const;
-    void init_gradients();
+    virtual void init_gradients();
     Vector2f random_gradient(int x, int z) const { return gradients[x + res_x * z]; }
 
-    void get_seeds(float& state, float& seq) {
+    void get_seeds(float& state, float& seq) const {
         state = initstate;
         seq = initseq;
     }

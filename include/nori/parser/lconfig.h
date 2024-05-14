@@ -8,6 +8,7 @@
 #include <bsdf/multidiffusemap.h>
 #include <Eigen/Geometry>
 #include <core/bbox.h>
+#include <stats/stripeperlin.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -323,6 +324,51 @@ public:
 protected:
     pcg32 random;
     MultiDiffuseMap* map = nullptr;
+};
+
+class OneTrunkConfig : public LGrammarConfig {
+
+public:
+    OneTrunkConfig(pcg32& random, MultiDiffuseMap* map, float width_factor, float length_factor, float pitch_term, float yaw_term,
+                        const Transform& trafo)
+                : map(map),
+                  random(random),
+                  trafo(trafo),
+                  LGrammarConfig(0.8f, 2.0f, width_factor, length_factor, pitch_term, yaw_term){}
+
+    int colorCount() override {
+        return 1;
+    }
+
+    static PerlinGenerator* noiseGen(int res_x, int res_z, uint64_t initstate, uint64_t initseq) {
+        return new PerlinGenerator(res_x, res_z, initstate, initseq);
+    }
+
+    void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
+
+        float max_depth = 5;
+
+        if(state.depth >= max_depth) {
+            drawCylinder(state, positions, indices, texcoords);
+            return;
+        }
+
+        int BASE_RES_X  = 8;
+        int BASE_RES_Z  = 8;
+        uint64_t SEED_STATE = 3227124;
+        uint64_t SEED_SEQ = 10951913;
+        FBM fbm(BASE_RES_X, BASE_RES_Z, 5, 0.35, 2.0, SEED_STATE, SEED_SEQ);
+        fbm.init_generators();
+
+
+        drawCylinder(state, fbm, state.depth / max_depth, state.depth / max_depth + 1 / max_depth,Vector2i(128, 128), positions, indices, texcoords);
+    }
+
+protected:
+    Transform trafo;
+    pcg32 random;
+    MultiDiffuseMap* map = nullptr;
+
 };
 
 NORI_NAMESPACE_END

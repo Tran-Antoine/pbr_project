@@ -4,6 +4,7 @@
 #include <core/vector.h>
 #include <core/frame.h>
 #include <core/transform.h>
+#include <stats/fbm.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -59,6 +60,8 @@ void drawPopulatedCylinder(TurtleState &state, PosVec ps, IndVec is, TexVec ts);
 
 void drawCylinder(TurtleState &state, PosVec ps, IndVec is, TexVec ts);
 
+void drawCylinder(TurtleState& state, FBM& hmap, float h_start, float h_end, const Vector2i& resolution, PosVec ps, IndVec is, TexVec ts);
+
 void drawCylinder(const Point3f& a, const Point3f& b, const Vector3f& a_n, const Vector3f& b_n, float in_thickness, float out_thickness,
                   PosVec ps, IndVec is, TexVec ts, TurtleState &state);
 
@@ -69,7 +72,10 @@ void drawStraightCylinder(const Point3f& a, const Point3f& b, float in_thickness
                           PosVec ps, IndVec is, TexVec ts, TurtleState &state);
 
 void connect(const Point3f &a, const Point3f &b, const Vector3f &a_n, float in_thickness, float out_thickness, int smoothness,
-             PosVec ps, IndVec is, TexVec ts);
+             PosVec ps, IndVec is, TexVec ts, bool end_connected=true);
+
+/// Index pointers corresponds to the index of the first point of the first circle
+void connectCircles(int n_points, int index_pointer, IndVec is);
 
 std::vector<Vector3f> circle(const Vector3f& p, const Vector3f& p_n, float radius, int smoothness);
 
