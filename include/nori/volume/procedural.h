@@ -19,5 +19,7 @@ void write_vdb(const std::vector<Point3f>& positions, const ProceduralMetadata& 
 
 void write_vdb(const std::vector<Point3f>& main_positions, const std::vector<Point3f>& bg_positions, const ProceduralMetadata& metadata);
 
+void write_spiral(const Vector3i& res, const std::string& output_path);
+
 
 NORI_NAMESPACE_END

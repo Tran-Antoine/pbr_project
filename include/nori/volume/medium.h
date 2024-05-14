@@ -38,6 +38,13 @@ public:
     virtual BoundingBox3f bounds() const { return BoundingBox3f(); }
     virtual float majorant(const Ray3f& ray) const { return absorption->maj(ray) + scattering->maj(ray);}
     /// Register a child object (e.g. a BSDF) with the mesh
+
+    void activate() override {
+        if(!phase) {
+            phase = new HenyeyGreensteinPhase(0.877);
+        }
+    }
+
     void addChild(NoriObject *obj) override {
         switch (obj->getClassType()) {
             case NoriObject::EPhaseFunction:

@@ -10,12 +10,11 @@ static void compute_bounds(float x0, float x1, float y0, float y1, float z0, flo
     max = Point3f(std::max(x0, x1), std::max(y0, y1), std::max(z0, z1));
 }
 
-VoxelReader::VoxelReader(const std::string &path, Transform trafo, float d_factor, const Color3f& albedo)
+VoxelReader::VoxelReader(const std::string &path, Transform trafo, Color3f omega)
     : transform(std::move(trafo)),
       voxel_data(from_file(path, trafo)),
       sampler(VSampler(*voxel_data)),
-      d_factor(d_factor),
-      albedo(albedo) {
+      omega(std::move(omega)) {
 
     auto min = voxel_data->metaValue<openvdb::Vec3i>("file_bbox_min");
     auto max = voxel_data->metaValue<openvdb::Vec3i>("file_bbox_max");
@@ -40,15 +39,14 @@ VoxelReader::VoxelReader(const std::string &path, Transform trafo, float d_facto
     //std::cout << "After: " << vstr(bounds_w.min) << "->" << vstr(bounds_w.max) << "\n";
 
     auto minmax = openvdb::tools::minMax(voxel_data->tree());
-    majorant = d_factor * minmax.max();
+    majorant = omega.maxCoeff() * minmax.max();
 
     inv_transform = transform.inverse();
 }
 
 Color3f VoxelReader::eval(const nori::Point3f &p, const nori::Vector3f &v) const {
     // TODO: use cache version to optimize this
-    Vector3f ip = p;
-    return albedo * d_factor * sampler.wsSample(openvdb::Vec3R(ip.x(), ip.y(), ip.z()));
+    return omega * sampler.wsSample(openvdb::Vec3R(p.x(), p.y(), p.z()));
 }
 
 BinaryVoxelReader::BinaryVoxelReader(Color3f value, const VoxelReader* child)

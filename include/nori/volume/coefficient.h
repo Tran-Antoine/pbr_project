@@ -36,7 +36,7 @@ using VSampler = openvdb::tools::GridSampler<VGrid, openvdb::tools::BoxSampler>;
 
 class VoxelReader : public MediumCoefficient {
 public:
-    VoxelReader(const std::string &path, Transform transform, float d_factor, const Color3f& albedo=Color3f(1));
+    VoxelReader(const std::string &path, Transform transform, Color3f omega);
     Color3f eval(const Point3f& p, const Vector3f& v) const override;
 
     BoundingBox3i index_bounds() const { return bounds_i; }
@@ -48,11 +48,10 @@ protected:
     VSampler sampler;
     Transform transform;
     Transform inv_transform;
-    float d_factor;
+    Color3f omega;
     float majorant;
     BoundingBox3i bounds_i;
     BoundingBox3f bounds_w;
-    Color3f albedo;
 };
 
 class MultiMediumCoefficient : public MediumCoefficient {
