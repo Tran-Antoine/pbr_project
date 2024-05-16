@@ -141,37 +141,37 @@ void write_vdb(const std::vector<Point3f>& main_positions, const std::vector<Poi
     file.close();
 }
 
-void write_spiral(const Vector3i& res, const std::string& output_path) {
+void write_spiral(const Vector3i& res, const Transform& curve_transform, const std::string& output_path) {
 
 
     BoundingBox3f bounds;
     std::vector<PointData> points;
 
-    int N_SPHERES = 5000;
-    float STARTING_RADIUS = 5.f;
-    float RADIUS_INCR = 4.0f;
+    int N_SPHERES = 8000;
+    float STARTING_RADIUS = 20.f;
+    float RADIUS_INCR = 9.0f;
     int N_REVOLUTIONS = 4;
-    float SPHERE_RADIUS = 1.0f;
-    float RADIUS_STD = 0.2f;
-    float DISPLACEMENT_STD = 0.3f;
+    float SPHERE_RADIUS = 0.8f;
+    float RADIUS_STD = 0.7f;
+    float DISPLACEMENT_STD = 0.5f;
 
     pcg32 random;
 
     auto curve = [&](float t) {
         float radius = STARTING_RADIUS + RADIUS_INCR * t;
-        float x = radius * cos(2 * M_PI * t);
-        float y = radius * sin(2 * M_PI * t);
-        return Point2f(x, y);
+        float x = (radius + random.nextFloat()) * cos(2 * M_PI * t);
+        float y = (radius + random.nextFloat()) * sin(2 * M_PI * t);
+        return curve_transform * Point3f(x, 0, y);
     };
 
 
     for (int i = 0; i < N_SPHERES; i++) {
-        Point2f p = curve(N_REVOLUTIONS * i / (float)N_SPHERES);
+        Point3f p = curve(N_REVOLUTIONS * i / (float)N_SPHERES);
         float rad = (1 + Warp::lineToLogistic(random.nextFloat(), RADIUS_STD)) * SPHERE_RADIUS;
         float dx = Warp::lineToLogistic(random.nextFloat(), DISPLACEMENT_STD);
         float dy = Warp::lineToLogistic(random.nextFloat(), DISPLACEMENT_STD);
         float dz = Warp::lineToLogistic(random.nextFloat(), DISPLACEMENT_STD);
-        Point3f point = Point3f (p.x() + dx, dy, p.y() + dz);
+        Point3f point = Point3f (p.x() + dx, p.y() + dy, p.z() + dz);
 
         points.emplace_back(point, rad);
         bounds.expandBy(1.1 * point);

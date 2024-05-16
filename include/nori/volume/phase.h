@@ -20,10 +20,13 @@ public:
 
 class UniformPhase : public PhaseFunction {
 public:
+    UniformPhase() = default;
+    explicit UniformPhase(const PropertyList &props) {}
     float pdf(const Vector3f &in, const Vector3f &out) const override;
     void sample(Sampler *sampler, const Vector3f &in, Vector3f &out, float &pdf) const override;
     Color3f eval(const Vector3f &in, const Vector3f &out) const override;
     std::string toString() const override;
+
 };
 
 class HenyeyGreensteinPhase : public PhaseFunction {

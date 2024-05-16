@@ -30,6 +30,7 @@
 #include <tbb/task_scheduler_init.h>
 #include <filesystem/resolver.h>
 #include <thread>
+#include <volume/procedural.h>
 
 #include <core/adaptive.h>
 
@@ -254,6 +255,8 @@ int main(int argc, char **argv) {
             threadCount = tbb::task_scheduler_init::automatic;
         }
         try {
+            std::string PATH = "assets/voxel/procedural/spiraltest.vdb";
+            //write_spiral(Vector3i(120, 40, 120), PATH);
             std::unique_ptr<NoriObject> root(loadFromXML(sceneName));
             /* When the XML root object is a scene, start rendering it .. */
             if (root->getClassType() == NoriObject::EScene)

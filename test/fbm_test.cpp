@@ -5,12 +5,12 @@
 
 using namespace nori;
 
-static uint64_t SEED_STATE = 32211714;
-static uint64_t SEED_SEQ = 109519213;
+static uint64_t SEED_STATE = 372212178149;
+static uint64_t SEED_SEQ = 102822176429;
 
-static int IMAGE_SIZE = 256;
-static int BASE_RES_X  = 8;
-static int BASE_RES_Z = 8;
+static int IMAGE_SIZE = 1024;
+static int BASE_RES_X  = 4;
+static int BASE_RES_Z = 4;
 
 static PerlinGenerator* genFun(int res_x, int res_z, uint64_t initstate, uint64_t initseq) {
     return new StripePerlinGenerator(1, res_x, res_z, initstate, initseq);
@@ -18,8 +18,8 @@ static PerlinGenerator* genFun(int res_x, int res_z, uint64_t initstate, uint64_
 
 int main(int argc, char **argv) {
 
-    FBM gen(BASE_RES_X, BASE_RES_Z, 1, 0.3, 2.0f, SEED_STATE, SEED_SEQ);
-    gen.init_generators(genFun);
+    FBM gen(BASE_RES_X, BASE_RES_Z, 3, 0.3, 2.0f, SEED_STATE, SEED_SEQ);
+    gen.init_generators();
 
     Bitmap out(Vector2i(IMAGE_SIZE, IMAGE_SIZE));
 
@@ -47,13 +47,12 @@ int main(int argc, char **argv) {
         for(int x = 0; x < IMAGE_SIZE; ++x) {
 
             float y_mapped = ((out.coeffRef(z, x) - min_y) / (max_y - min_y)).x();
-
             out.coeffRef(z, x) = y_mapped;
         }
     }
 
     std::cout << "Bitmap ready to be written\n";
-    out.savePNG("assets/terrain/stripe");
+    out.savePNG("assets/terrain/terrain5");
 
     return 0;
 }

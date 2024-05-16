@@ -2,6 +2,7 @@
 #include <volume/medium.h>
 #include <volume/coefficient.h>
 #include <core/color.h>
+#include <volume/procedural.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -13,8 +14,10 @@ public:
         trafo = props.getTransform("toWorld", Transform());
         auto path = props.getString("voxel_path");
 
-        absorption = new VoxelReader(path, trafo, props.getColor("absorption"));
-        scattering = new VoxelReader(path, trafo, props.getColor("scattering"));
+        write_spiral(Vector3i(120, 40, 120), trafo, path);
+
+        absorption = new VoxelReader(path, Transform(), props.getColor("absorption"));
+        scattering = new VoxelReader(path, Transform(), props.getColor("scattering"));
     }
 
     std::string toString() const override {

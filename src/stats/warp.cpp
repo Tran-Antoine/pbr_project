@@ -334,7 +334,7 @@ float Warp::sampleHeterogeneousDistance(Sampler *sampler, const Point3f &x, cons
         // TODO
         Color3f current_omega_t = medium.attenuation(x + t * d, d);
 
-        if(current_omega_t.maxCoeff() > 10e-4) {
+        if(current_omega_t.maxCoeff() > 10e-7) {
             omega_t = current_omega_t;
         }
 

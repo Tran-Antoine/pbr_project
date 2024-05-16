@@ -3,7 +3,7 @@
     </integrator>
 
     <sampler type="independent">
-        <integer name="sampleCount" value="128"/>
+        <integer name="sampleCount" value="32"/>
     </sampler>
 
     <camera type="perspective">
@@ -27,12 +27,12 @@
     <mesh type="medium_mesh">
         <medium type="mvoxel">
             <medium type="voxel">
-                <string name="voxel_path" value="assets/voxel/procedural/spiral.vdb"/>
+                <string name="voxel_path" value="assets/voxel/procedural/spiraltest.vdb"/>
                 <color name="scattering" value="0.15 0.15 0.15"/>
                 <color name="absorption" value="0.05 0.05 0.05"/>
                 <transform name="toWorld">
                     <rotate axis="0, 0, 1" angle="20"/>
-                    <scale value="1 1 1"/>
+                    <scale value="0.3 0.3 0.3"/>
                     <translate value="0 10 0"/>
                 </transform>
             </medium>

@@ -41,7 +41,7 @@ public:
 
     void activate() override {
         if(!phase) {
-            phase = new HenyeyGreensteinPhase(0.877);
+            phase = new UniformPhase();
         }
     }
 
