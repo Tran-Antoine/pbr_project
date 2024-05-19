@@ -14,10 +14,8 @@ public:
         trafo = props.getTransform("toWorld", Transform());
         auto path = props.getString("voxel_path");
 
-        write_spiral(Vector3i(120, 40, 120), trafo, path);
-
-        absorption = new VoxelReader(path, Transform(), props.getColor("absorption"));
-        scattering = new VoxelReader(path, Transform(), props.getColor("scattering"));
+        absorption = new VoxelReader(path, trafo, props.getColor("absorption"));
+        scattering = new VoxelReader(path, trafo, props.getColor("scattering"));
     }
 
     std::string toString() const override {

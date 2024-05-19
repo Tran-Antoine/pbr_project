@@ -36,6 +36,7 @@ public:
     Color3f evalPhase(const Vector3f& in, const Vector3f& out) const { return phase->eval(in, out); }
     float phasePdf(const Vector3f& in, const Vector3f& out) const { return phase->pdf(in, out); }
     virtual BoundingBox3f bounds() const { return BoundingBox3f(); }
+    virtual std::vector<BoundingBox3f> n_bounds() const { return {bounds()};}
     virtual float majorant(const Ray3f& ray) const { return absorption->maj(ray) + scattering->maj(ray);}
     /// Register a child object (e.g. a BSDF) with the mesh
 
@@ -54,8 +55,7 @@ public:
                 phase = static_cast<PhaseFunction *>(obj);
                 break;
             default:
-                throw NoriException("Medium::addChild(<%s>) is not supported!",
-                                    classTypeName(obj->getClassType()));
+                NoriObject::addChild(obj);
         }
     }
 

@@ -29,9 +29,9 @@ Color3f MultiMediumCoefficient::eval(const nori::Point3f &p, const nori::Vector3
         auto bounds = children_bounds[i];
         if(bounds.contains(p)) {
             Color3f current = child->eval(p, v);
-            if(current.maxCoeff() > out.maxCoeff()) {
-                out = current;
-            }
+            out.r() = std::max(out.r(), current.r());
+            out.g() = std::max(out.g(), current.g());
+            out.b() = std::max(out.b(), current.b());
         }
     }
     return out;

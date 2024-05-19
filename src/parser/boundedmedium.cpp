@@ -26,57 +26,77 @@ public:
 
     BoundedMedium(const PropertyList &propList) {}
 
-    void build_box() {
+    void activate() override {
 
-        BoundingBox3f box = medium->bounds();
+        Mesh::activate();
 
-        Vector3f min = box.min, max = box.max;
-        float xm = min.x(), ym = min.y(), zm = min.z(),
-              xM = max.x(), yM = max.y(), zM = max.z();
-
-        if(box.getVolume() < Epsilon) {
-            std::string message = "Invalid bounding box (too small): " + std::to_string(box.getVolume());
-            throw NoriException(message.c_str());
+        if(!medium) {
+            throw NoriException("No medium defined");
         }
 
-        std::cout << xm << ", " << xM << "\n";
-        std::cout << ym << ", " << yM << "\n";
-        std::cout << zm << ", " << zM << "\n";
+        std::vector<BoundingBox3f> boxes = medium->n_bounds();
 
-        Point3f
-            c000 = min,
-            c001 = Point3f(xm, ym, zM),
-            c010 = Point3f (xm, yM, zm),
-            c011 = Point3f(xm, yM, zM),
-            c100 = Point3f(xM, ym, zm),
-            c101 = Point3f(xM, ym, zM),
-            c110 = Point3f (xM, yM, zm),
-            c111 = max;
+        std::vector<Vector3f> positions;
+        std::vector<uint32_t> indices;
 
-        uint32_t
-            i000 = 0,i001 = 1,i010 = 2,i011 = 3,
-            i100 = 4,i101 = 5,i110 = 6,i111 = 7;
+        for(const auto& box : boxes) {
 
-        std::vector<Vector3f> positions = {c000, c001, c010, c011, c100, c101, c110, c111};
-        std::vector<uint32_t> indices = {
-                i000, i001, i011,
-                i000, i011, i010,
+            int index_start = positions.size();
 
-                i000, i001, i101,
-                i000, i101, i100,
+            Vector3f min = box.min, max = box.max;
+            float xm = min.x(), ym = min.y(), zm = min.z(),
+                xM = max.x(), yM = max.y(), zM = max.z();
 
-                i001, i011, i111,
-                i001, i111, i101,
+            if(box.getVolume() < Epsilon) {
+                std::string message = "Invalid bounding box (too small): " + std::to_string(box.getVolume());
+                throw NoriException(message.c_str());
+            }
 
-                i000, i010, i110,
-                i000, i110, i100,
+            std::cout << xm << ", " << xM << "\n";
+            std::cout << ym << ", " << yM << "\n";
+            std::cout << zm << ", " << zM << "\n";
 
-                i010, i011, i111,
-                i010, i111, i110,
+            Point3f
+                c000 = min,
+                c001 = Point3f(xm, ym, zM),
+                c010 = Point3f (xm, yM, zm),
+                c011 = Point3f(xm, yM, zM),
+                c100 = Point3f(xM, ym, zm),
+                c101 = Point3f(xM, ym, zM),
+                c110 = Point3f (xM, yM, zm),
+                c111 = max;
 
-                i100, i101, i111,
-                i100, i111, i110
-        };
+            uint32_t
+                i000 = 0,i001 = 1,i010 = 2,i011 = 3,
+                i100 = 4,i101 = 5,i110 = 6,i111 = 7;
+
+            std::vector<Vector3f> box_positions = {c000, c001, c010, c011, c100, c101, c110, c111};
+            std::vector<uint32_t> box_indices = {
+                    i000, i001, i011,
+                    i000, i011, i010,
+
+                    i000, i001, i101,
+                    i000, i101, i100,
+
+                    i001, i011, i111,
+                    i001, i111, i101,
+
+                    i000, i010, i110,
+                    i000, i110, i100,
+
+                    i010, i011, i111,
+                    i010, i111, i110,
+
+                    i100, i101, i111,
+                    i100, i111, i110
+            };
+            for(unsigned int & box_index : box_indices) {
+                box_index += index_start;
+            }
+
+            positions.insert(positions.end(), box_positions.begin(), box_positions.end());
+            indices.insert(indices.end(), box_indices.begin(), box_indices.end());
+        }
 
         m_F.resize(3, indices.size()/3);
 
@@ -99,8 +119,6 @@ public:
                     throw NoriException("Cannot add multiple medium");
                 }
                 medium = static_cast<Medium*>(obj);
-                build_box();
-                //medium = nullptr;
                 break;
             default:
                 Mesh::addChild(obj);

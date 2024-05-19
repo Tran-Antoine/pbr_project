@@ -14,25 +14,20 @@ public:
 
     void activate() override {
 
-        if(!phase) {
-            phase = new HenyeyGreensteinPhase(0.877);
-        }
+        Medium::activate();
 
         std::vector<MediumCoefficient*> coeffsAbs(children.size());
         std::vector<MediumCoefficient*> coeffsSca(children.size());
-        std::vector<BoundingBox3f> boundsAbs(children.size());
-        std::vector<BoundingBox3f> boundsSca(children.size());
 
         for (int i = 0; i < children.size(); i++) {
             coeffsAbs[i] = children[i]->getAbsorption();
             coeffsSca[i] = children[i]->getScattering();
-            boundsAbs[i] = children[i]->bounds();
-            boundsSca[i] = children[i]->bounds();
+            children_bounds.push_back(children[i]->bounds());
             w_bounds.expandBy(children[i]->bounds());
         }
 
-        absorption = new MultiMediumCoefficient(coeffsAbs, boundsAbs);
-        scattering = new MultiMediumCoefficient(coeffsSca, boundsSca);
+        absorption = new MultiMediumCoefficient(coeffsAbs, children_bounds);
+        scattering = new MultiMediumCoefficient(coeffsSca, children_bounds);
     }
 
     void addChild(NoriObject *obj) override {
@@ -65,9 +60,14 @@ public:
         return w_bounds;
     }
 
+    std::vector<BoundingBox3f> n_bounds() const override {
+        return children_bounds;
+    }
+
 protected:
     Transform trafo;
     std::vector<Medium*> children;
+    std::vector<BoundingBox3f> children_bounds;
     BoundingBox3f w_bounds;
 };
 

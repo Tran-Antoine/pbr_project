@@ -10,9 +10,10 @@ using PointData = std::pair<Point3f, float>;
 
 static int count(const std::vector<Point3f>& positions, const openvdb::math::Vec3<double>& v, float radius) {
     int c = 0;
+    float x = v.x(), y = v.y(), z = v.z();
     for(auto p : positions) {
         float x0 = p.x(), y0 = p.y(), z0 = p.z();
-        float x = v.x(), y = v.y(), z = v.z();
+
         if((x0 - x) * (x0 - x) + (y0 - y) * (y0 - y) + (z0 - z) * (z0 - z) < radius * radius) {
             c++;
         }
@@ -129,7 +130,6 @@ void write_vdb(const std::vector<Point3f>& main_positions, const std::vector<Poi
 
 
     grid->setGridClass(openvdb::GRID_LEVEL_SET);
-    // Name the grid "LevelSetSphere".
     grid->setName("density");
     // Create a VDB file object.
     openvdb::io::File file(metadata.out_path);
@@ -228,5 +228,99 @@ void write_spiral(const Vector3i& res, const Transform& curve_transform, const s
 
 }
 
+void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const BoundingBox3f& bounds, const Point3f& hole,
+               float hole_radius, const std::string& output_path) {
+
+    // Add a few initial big spheres that make the main shape (instead of just square)
+    pcg32 random;
+
+    std::vector<Point3f> points;
+
+    float min_x = bounds.min.x();
+    float min_y = bounds.min.y();
+    float min_z = bounds.min.z();
+    float max_x = bounds.max.x();
+    float max_y = bounds.max.y();
+    float max_z = bounds.max.z();
+
+    float size_x = (max_x - min_x) / n_clouds.x();
+    float size_y = (max_y - min_y) / n_clouds.y();
+    float size_z = (max_z - min_z) / n_clouds.z();
+
+    float OFFSET_DAMPING = 0.2;
+    int N_SPHERES_PER_CLOUD = 2000;
+    float SPHERE_RADIUS = 3;
+
+    for(int rx = 0; rx < n_clouds.x(); rx++) {
+        for(int ry = 0; ry < n_clouds.y(); ry++) {
+            for(int rz = 0; rz < n_clouds.z(); rz++) {
+
+                float cx = min_x + (rx + 0.5) * size_x;
+                float cy = min_y + (ry + 0.5) * size_y;
+                float cz = min_z + (rz + 0.5) * size_z;
+
+                if((cx - hole.x()) * (cx - hole.x()) + (cy - hole.y()) * (cy - hole.y()) + (cz - hole.z()) * (cz - hole.z()) < hole_radius * hole_radius) {
+                    continue;
+                }
+
+                float offset_x = OFFSET_DAMPING * random.nextFloat() * size_x;
+                float offset_y = OFFSET_DAMPING * random.nextFloat() * size_y;
+                float offset_z = OFFSET_DAMPING * random.nextFloat() * size_z;
+
+                for(int i = 0; i < N_SPHERES_PER_CLOUD; i++) {
+                    float r1 = 2 * random.nextFloat() - 1, r2 = 2 * random.nextFloat() - 1, r3 = 2 * random.nextFloat() - 1;
+                    float x = cx + ((size_x - offset_x) / 2.0) * r1;
+                    float y = cy + ((size_y - offset_y) / 2.0) * r2;
+                    float z = cz + ((size_z - offset_z) / 2.0) * r3;
+                    points.emplace_back(x, y, z);
+                }
+            }
+        }
+    }
+
+    float scale_x = (max_x - min_x) / voxel_res.x();
+    float scale_y = (max_y - min_y) / voxel_res.y();
+    float scale_z = (max_z - min_z) / voxel_res.z();
+
+    float translate_x = (max_x - min_x) * (0.5 + min_x / (max_x - min_x));
+    float translate_y = (max_y - min_y) * (0.5 + min_y / (max_y - min_y));
+    float translate_z = (max_z - min_z) * (0.5 + min_z / (max_z - min_z));
+
+    openvdb::math::Mat4d mat = openvdb::math::Mat4d::identity();
+    mat.setToScale(openvdb::math::Vec3(scale_x, scale_y, scale_z));
+    mat.setTranslation(openvdb::math::Vec3(translate_x, translate_y, translate_z));
+
+    openvdb::initialize();
+    openvdb::FloatGrid::Ptr grid = openvdb::FloatGrid::create();
+    openvdb::math::Transform::Ptr trafo = openvdb::math::Transform::createLinearTransform(mat);
+    grid->setTransform(trafo);
+
+    openvdb::FloatGrid::Accessor accessor = grid->getAccessor();
+
+    for(int x = -voxel_res.x() / 2; x <= voxel_res.x() / 2; x++) {
+        for (int y = -voxel_res.y() / 2; y <= voxel_res.y() / 2; y++) {
+            for (int z = -voxel_res.z() / 2; z <= voxel_res.z() / 2; z++) {
+                openvdb::Coord xyz(x, y, z);
+                openvdb::math::Vec3 pos = trafo->indexToWorld(xyz);
+
+                int main_occurrences = count(points, pos, SPHERE_RADIUS);
+
+                accessor.setValue(xyz, main_occurrences);
+            }
+        }
+    }
+
+
+    grid->setGridClass(openvdb::GRID_LEVEL_SET);
+    grid->setName("density");
+    // Create a VDB file object.
+    openvdb::io::File file(output_path);
+    // Add the grid pointer to a container.
+    openvdb::GridPtrVec grids;
+    grids.push_back(grid);
+    // Write out the contents of the container.
+    file.write(grids);
+    file.close();
+}
 
 NORI_NAMESPACE_END

@@ -19,11 +19,16 @@ VoxelReader::VoxelReader(const std::string &path, Transform trafo, Color3f omega
     auto min = voxel_data->metaValue<openvdb::Vec3i>("file_bbox_min");
     auto max = voxel_data->metaValue<openvdb::Vec3i>("file_bbox_max");
 
+    auto bbox = voxel_data->evalActiveVoxelBoundingBox();
+
+
     Vector3i min_i(min.x(), min.y(), min.z());
     Vector3i max_i(min.x(), min.y(), min.z());
 
-    auto min_f = voxel_data->indexToWorld(openvdb::Coord(min));
-    auto max_f = voxel_data->indexToWorld(openvdb::Coord(max));
+    //auto min_f = voxel_data->indexToWorld(openvdb::Coord(min));
+    //auto max_f = voxel_data->indexToWorld(openvdb::Coord(max));
+    auto min_f = voxel_data->indexToWorld(bbox.min());
+    auto max_f = voxel_data->indexToWorld(bbox.max());
 
     Point3f min_w;
     Point3f max_w;
@@ -33,6 +38,7 @@ VoxelReader::VoxelReader(const std::string &path, Transform trafo, Color3f omega
                    min_w, max_w);
 
     bounds_i = BoundingBox3i(min_i, max_i);
+
     bounds_w = BoundingBox3f(min_w, max_w);
 
     //std::cout << "Before: " << vstr(min_w) << "->" << vstr(max_w) << "\n";
