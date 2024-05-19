@@ -52,18 +52,18 @@ public:
                 throw NoriException(message.c_str());
             }
 
-            std::cout << xm << ", " << xM << "\n";
-            std::cout << ym << ", " << yM << "\n";
-            std::cout << zm << ", " << zM << "\n";
+            std::cout << "x=" << xm << ", " << xM << "\n";
+            std::cout << "y=" << ym << ", " << yM << "\n";
+            std::cout << "z=" << zm << ", " << zM << "\n";
 
             Point3f
                 c000 = min,
                 c001 = Point3f(xm, ym, zM),
-                c010 = Point3f (xm, yM, zm),
+                c010 = Point3f(xm, yM, zm),
                 c011 = Point3f(xm, yM, zM),
                 c100 = Point3f(xM, ym, zm),
                 c101 = Point3f(xM, ym, zM),
-                c110 = Point3f (xM, yM, zm),
+                c110 = Point3f(xM, yM, zm),
                 c111 = max;
 
             uint32_t

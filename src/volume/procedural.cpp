@@ -228,6 +228,30 @@ void write_spiral(const Vector3i& res, const Transform& curve_transform, const s
 
 }
 
+static bool is_within_bounds(const Point3f& p, const std::vector<Point3f>& bounds, float radius) {
+    for(const auto& c : bounds) {
+        float px = p.x(), py = p.y(), pz = p.z();
+        float cx = c.x(), cy = c.y(), cz = c.z();
+        if((px-cx)*(px-cx) + (py-cy)*(py-cy) + (pz-cz)*(pz-cz) < radius*radius) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static Vector3f random_displacement(pcg32& random, bool ultra_wide) {
+    if(ultra_wide) {
+        float dx = 2 * random.nextFloat() - 1;
+        float dy = 2 * random.nextFloat() - 1;
+        float dz = 2 * random.nextFloat() - 1;
+        return Point3f(dx, dy, dz);
+    }
+    // Biais towards low radius on purpose
+    float dphi = 2 * M_PI * random.nextFloat();
+    float dtheta = M_PI * random.nextFloat();
+    return pow(random.nextFloat(), 0.5f) * sphericalDirection(dtheta, dphi);
+}
+
 void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const BoundingBox3f& bounds, const Point3f& hole,
                float hole_radius, const std::string& output_path) {
 
@@ -247,9 +271,15 @@ void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const Boundi
     float size_y = (max_y - min_y) / n_clouds.y();
     float size_z = (max_z - min_z) / n_clouds.z();
 
-    float OFFSET_DAMPING = 0.2;
+    bool ultra_wide = (size_x + size_z) / (2.0 * size_y) > 20.0;
+
+    std::cout << "size_x=" << size_x << ", size_y=" << size_y << ", size_z=" << size_z << ", ultrawide: " << std::to_string(ultra_wide) << "\n";
+
+    float OFFSET_DAMPING = 0.3;
     int N_SPHERES_PER_CLOUD = 2000;
-    float SPHERE_RADIUS = 3;
+    float SPHERE_RADIUS = std::max({size_x, size_y, size_z}) * 0.021;
+    float BOUNDING_SPHERE_RADIUS = std::max({size_x, size_y, size_z}) * 0.25;
+    int N_BOUNDING_SPHERES_PER_CLOUD = std::max({size_x, size_y, size_z}) * 0.02;
 
     for(int rx = 0; rx < n_clouds.x(); rx++) {
         for(int ry = 0; ry < n_clouds.y(); ry++) {
@@ -259,20 +289,29 @@ void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const Boundi
                 float cy = min_y + (ry + 0.5) * size_y;
                 float cz = min_z + (rz + 0.5) * size_z;
 
-                if((cx - hole.x()) * (cx - hole.x()) + (cy - hole.y()) * (cy - hole.y()) + (cz - hole.z()) * (cz - hole.z()) < hole_radius * hole_radius) {
-                    continue;
-                }
-
                 float offset_x = OFFSET_DAMPING * random.nextFloat() * size_x;
                 float offset_y = OFFSET_DAMPING * random.nextFloat() * size_y;
                 float offset_z = OFFSET_DAMPING * random.nextFloat() * size_z;
 
+                std::vector<Point3f> cloud_bounds(N_BOUNDING_SPHERES_PER_CLOUD);
+
+                for(int i = 0; i < N_BOUNDING_SPHERES_PER_CLOUD; i++) {
+                    Vector3f displacement = random_displacement(random, ultra_wide);
+                    float x = cx + ((size_x - offset_x) / 2.0) * displacement.x();
+                    float y = cy + ((size_y - offset_y) / 2.0) * displacement.y();
+                    float z = cz + ((size_z - offset_z) / 2.0) * displacement.z();
+                    cloud_bounds[i] = Point3f(x,y,z);
+                }
+
                 for(int i = 0; i < N_SPHERES_PER_CLOUD; i++) {
-                    float r1 = 2 * random.nextFloat() - 1, r2 = 2 * random.nextFloat() - 1, r3 = 2 * random.nextFloat() - 1;
-                    float x = cx + ((size_x - offset_x) / 2.0) * r1;
-                    float y = cy + ((size_y - offset_y) / 2.0) * r2;
-                    float z = cz + ((size_z - offset_z) / 2.0) * r3;
-                    points.emplace_back(x, y, z);
+                    Vector3f displacement = random_displacement(random, ultra_wide);
+                    float x = cx + ((size_x - offset_x) / 2.0) * displacement.x();
+                    float y = cy + ((size_y - offset_y) / 2.0) * displacement.y();
+                    float z = cz + ((size_z - offset_z) / 2.0) * displacement.z();
+                    if(is_within_bounds(Point3f(x,y,z), cloud_bounds, BOUNDING_SPHERE_RADIUS)){
+
+                        points.emplace_back(x, y, z);
+                    }
                 }
             }
         }
@@ -303,8 +342,15 @@ void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const Boundi
                 openvdb::Coord xyz(x, y, z);
                 openvdb::math::Vec3 pos = trafo->indexToWorld(xyz);
 
+                float cx = pos.x(), cy = pos.y(), cz = pos.z();
+
+
                 int main_occurrences = count(points, pos, SPHERE_RADIUS);
 
+                if((cx - hole.x()) * (cx - hole.x()) + (cy - hole.y()) * (cy - hole.y()) + (cz - hole.z()) * (cz - hole.z()) < hole_radius * hole_radius &&
+                   (cx - hole.x()) * (cx - hole.x()) + (cy - hole.y()) * (cy - hole.y()) + (cz - hole.z()) * (cz - hole.z()) > -0.1 * hole_radius * hole_radius) {
+                    main_occurrences = 0;
+                }
                 accessor.setValue(xyz, main_occurrences);
             }
         }

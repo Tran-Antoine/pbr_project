@@ -2,7 +2,7 @@
 <scene>
 	<integrator type="volum7"/>
 	<sampler type="independent">
-		<integer name="sampleCount" value="32"/>
+		<integer name="sampleCount" value="8"/>
 	</sampler>
 	<camera type="perspective">
 		<float name="fov" value="69.39030966512573"/>
@@ -44,136 +44,11 @@
 			<color name="albedo" value="0.75,0.75,0.75"/>
 		</bsdf>
 	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.008.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.009.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.010.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.011.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.012.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.013.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.014.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.015.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.016.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.017.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.018.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.019.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.020.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.021.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.022.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.023.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.024.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.025.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.026.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.027.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
-	<mesh type="obj">
-		<string name="filename" value="meshes/Cube.028.obj"/>
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.75,0.75,0.75"/>
-		</bsdf>
-	</mesh>
+
 	<mesh type="medium_mesh">
 		<medium type="voxel">
-			<string name="voxel_path" value="assets/voxel/procedural/sky.vdb"/>
-			<color name="scattering" value="0.1 0.1 0.1"/>
+			<string name="voxel_path" value="assets/voxel/procedural/skyhole.vdb"/>
+			<color name="scattering" value="0 0 0"/>
 			<color name="absorption" value="0.03 0.03 0.03"/>
 		</medium>
 	</mesh>
@@ -183,6 +58,6 @@
 		<string name="half2" value="assets/env/lowcontrast_right.exr"/>
 		<float name="radius" value="5000.0"/>
 		<point name="center" value="0,0,0"/>
-		<float name="intensity" value="0.001"/>
+		<float name="intensity" value="0.5"/>
 	</emitter>
 </scene>

@@ -255,8 +255,27 @@ int main(int argc, char **argv) {
             threadCount = tbb::task_scheduler_init::automatic;
         }
         try {
-            std::string PATH = "assets/voxel/procedural/spiraltest.vdb";
-            //write_spiral(Vector3i(120, 40, 120), PATH);
+            if(false) {
+                std::string PATH0 = "assets/voxel/procedural/sky2.vdb";
+                write_sky(Vector3i(3, 1, 2), Vector3i(180, 60, 180),
+                          BoundingBox3f(Point3f(-359, 116, -258), Point3f(330, 138, 233)),
+                          Point3f(0, 0, 0), 0.0, PATH0);
+
+            }
+            if(true) {
+                std::string PATH1 = "assets/voxel/procedural/skyhole.vdb";
+                write_sky(Vector3i(1, 1, 1), Vector3i(400, 80, 400),
+                          BoundingBox3f(Point3f(-1200, 160, -1500), Point3f(250, 170, 1500)),
+                          Point3f(30, 105, 20), 70.0, PATH1);
+            }
+            if(false) {
+                std::string PATH2 = "assets/voxel/procedural/sky4.vdb";
+                write_sky(Vector3i(1, 1, 1), Vector3i(50, 5, 80), // very low res
+                          BoundingBox3f(Point3f(-10000, 160, -4000), Point3f(-1400, 190, 4000)),
+                          Point3f(0, 0, 0), 0.0, PATH2);
+            }
+
+
             std::unique_ptr<NoriObject> root(loadFromXML(sceneName));
             /* When the XML root object is a scene, start rendering it .. */
             if (root->getClassType() == NoriObject::EScene)

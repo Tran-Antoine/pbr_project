@@ -119,9 +119,9 @@ public:
                 if(emitter->is_source_visible(scene, record)) {
                     Color3f t = weight * direct_transmittance * beta * emitted * directional_cost * angular_distortion;
                     if(!t.isValid()) {
-                        std::cout << "t";
-                    }
-                    add_illumination(Li, weight * direct_transmittance * beta * emitted * directional_cost * angular_distortion);
+                        std::cout << "Invalid variance: " << t.r() << ", " << t.g() << ", " << t.b() << std::endl;
+                    } else
+                        add_illumination(Li, weight * direct_transmittance * beta * emitted * directional_cost * angular_distortion);
                 }
             }
 
@@ -338,10 +338,11 @@ public:
 
     static void add_illumination(Color3f& src, const Color3f& val) {
         if(!val.isValid()) {
-            std::cout << "Invalid radiance" << std::endl;
-            throw NoriException("Invalid radiance");
+            std::cout << "Invalid radiance: " << val.r() << ", " << val.g() << ", " << val.b() << "" << std::endl;
+            //throw NoriException("Invalid radiance");
+        } else {
+            src += val;
         }
-        src += val;
     }
 
     static bool roulette_success(Sampler* sampler, int bounces) {
