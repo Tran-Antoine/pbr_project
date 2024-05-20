@@ -60,4 +60,16 @@
 		<point name="center" value="0,0,0"/>
 		<float name="intensity" value="0.5"/>
 	</emitter>
+
+	<mesh type="obj">
+		<string name="filename" value="assets/shape/flatcube.obj"/>
+		<transform name="toWorld">
+			<translate value="0, 0, -200"/>
+			<scale value="100 100 1"/>
+		</transform>
+
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.5 0.5 0.5"/>
+		</bsdf>
+	</mesh>
 </scene>

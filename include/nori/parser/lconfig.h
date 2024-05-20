@@ -495,7 +495,7 @@ public:
 
                 if(i < 10) {
                     Point3f pos = state.forward(t) + 0.1f * Vector3f(dx, dy, dz);
-                    drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.5, pos), positions, indices, temp);
+                    drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.3, pos), positions, indices, temp);
                 }
                 flower_anchors.push_back(cloud_pos);
                 flower_bounds.expandBy(1.1 * cloud_pos);

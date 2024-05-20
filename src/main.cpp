@@ -257,8 +257,8 @@ int main(int argc, char **argv) {
         try {
             if(false) {
                 std::string PATH0 = "assets/voxel/procedural/sky2.vdb";
-                write_sky(Vector3i(3, 1, 2), Vector3i(180, 60, 180),
-                          BoundingBox3f(Point3f(-359, 116, -258), Point3f(330, 138, 233)),
+                write_sky(Vector3i(4, 1, 4), Vector3i(180, 60, 180),
+                          BoundingBox3f(Point3f(-120, 1, -300), Point3f(120, 7, 200)),
                           Point3f(0, 0, 0), 0.0, PATH0);
 
             }
@@ -266,7 +266,7 @@ int main(int argc, char **argv) {
                 std::string PATH1 = "assets/voxel/procedural/skyhole.vdb";
                 write_sky(Vector3i(1, 1, 1), Vector3i(400, 80, 400),
                           BoundingBox3f(Point3f(-1200, 160, -1500), Point3f(250, 170, 1500)),
-                          Point3f(30, 105, 20), 70.0, PATH1);
+                          Point3f(-200, 165, 0), 60.0, PATH1);
             }
             if(false) {
                 std::string PATH2 = "assets/voxel/procedural/sky4.vdb";

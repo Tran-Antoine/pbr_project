@@ -275,7 +275,7 @@ void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const Boundi
 
     std::cout << "size_x=" << size_x << ", size_y=" << size_y << ", size_z=" << size_z << ", ultrawide: " << std::to_string(ultra_wide) << "\n";
 
-    float OFFSET_DAMPING = 0.3;
+    float OFFSET_DAMPING = 0.5;
     int N_SPHERES_PER_CLOUD = 2000;
     float SPHERE_RADIUS = std::max({size_x, size_y, size_z}) * 0.0225;
     float BOUNDING_SPHERE_RADIUS = std::max({size_x, size_y, size_z}) * 0.25;
@@ -349,7 +349,7 @@ void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const Boundi
 
                 if((cx - hole.x()) * (cx - hole.x()) + (cy - hole.y()) * (cy - hole.y()) + (cz - hole.z()) * (cz - hole.z()) < hole_radius * hole_radius &&
                    (cx - hole.x()) * (cx - hole.x()) + (cy - hole.y()) * (cy - hole.y()) + (cz - hole.z()) * (cz - hole.z()) > -0.1 * hole_radius * hole_radius) {
-                    main_occurrences = 0;
+                    main_occurrences /= 3;
                 }
                 accessor.setValue(xyz, main_occurrences);
             }

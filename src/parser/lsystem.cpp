@@ -161,7 +161,7 @@ public:
 
         ProceduralMetadata data = { 0.7f, 0.f, flower_bounds, Vector3i(80, 80, 80),
                                     "assets/voxel/procedural/islandflowers.vdb"};
-        write_vdb(cloud_points, config.bg_anchors, data);
+        //write_vdb(cloud_points, config.bg_anchors, data);
 
         std::cout << "Counter : " << config.counter << std::endl;
 
