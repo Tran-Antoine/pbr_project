@@ -3,7 +3,7 @@
 	<boolean name="save" value="true"/>
 	<integrator type="volum7"/>
 	<sampler type="independent">
-		<integer name="sampleCount" value="4"/>
+		<integer name="sampleCount" value="16"/>
 	</sampler>
 	<camera type="perspective">
 		<float name="fov" value="69.39030966512573"/>
@@ -12,13 +12,18 @@
 		<integer name="width" value="960"/>
 		<integer name="height" value="540"/>
 		<transform name="toWorld">
-			<matrix value="-0.06292232125997543,0.1999848186969757,-0.9777764678001404,150.01998901367188,0.0,0.9797178506851196,0.20038188993930817,4.4599995613098145,0.9980184435844421,0.01260849367827177,-0.061646126210689545,0.0,0.0,0.0,0.0,1.0"/>
+			<matrix value="-0.06292232125997543,0.07933303713798523,-0.9948602914810181,150.01998901367188,0.0,0.9968355894088745,0.0794905573129654,4.099999904632568,0.9980184435844421,0.005001730751246214,-0.06272321194410324,0.0,0.0,0.0,0.0,1.0"/>
 		</transform>
 	</camera>
 
 	<mesh type="obj">
 		<string name="filename" value="meshes/Lake.obj"/>
-		<bsdf type="diffuse">
+		<diffusemap type="texture">
+			<string name="id" value="normal"/>
+			<string name="filename" value="assets/normal/waterhigh.exr"/>
+		</diffusemap>
+		<float name="bump_accentuate" value="0.1"/>
+		<bsdf type="mirror">
 			<color name="albedo" value="0.15,0.25,0.55"/>
 		</bsdf>
 	</mesh>
@@ -39,34 +44,44 @@
 	<mesh type="obj">
 		<string name="filename" value="meshes/LandRight.obj"/>
 		<bsdf type="diffuse">
-			<color name="albedo" value="0.2,0.4,0.1"/>
+			<diffusemap type="texture">
+				<string name="filename" value="assets/texture/greengrass.jpg"/>
+			</diffusemap>
 		</bsdf>
 	</mesh>
 	<mesh type="obj">
 		<string name="filename" value="meshes/LandNear.obj"/>
 		<bsdf type="diffuse">
-			<color name="albedo" value="0.2,0.4,0.1"/>
+			<diffusemap type="texture">
+				<string name="filename" value="assets/texture/greengrass.jpg"/>
+			</diffusemap>
 		</bsdf>
 	</mesh>
 
 	<mesh type="obj">
 		<string name="filename" value="meshes/LandLeft1.obj"/>
 		<bsdf type="diffuse">
-			<color name="albedo" value="0.2,0.4,0.1"/>
+			<diffusemap type="texture">
+				<string name="filename" value="assets/texture/greengrass.jpg"/>
+			</diffusemap>
 		</bsdf>
 	</mesh>
 	<mesh type="obj">
 		<string name="filename" value="meshes/LandLeft0.obj"/>
 		<bsdf type="diffuse">
-			<color name="albedo" value="0.2,0.4,0.1"/>
+			<diffusemap type="texture">
+				<string name="filename" value="assets/texture/greengrass.jpg"/>
+			</diffusemap>
 		</bsdf>
-	</mesh>
+	</mesh>-->
 	<mesh type="obj">
 		<string name="filename" value="meshes/TreeIsland.obj"/>
 		<bsdf type="diffuse">
-			<color name="albedo" value="0.25,0.5,0.35"/>
+			<diffusemap type="texture">
+				<string name="filename" value="assets/texture/greengrass.jpg"/>
+			</diffusemap>
 		</bsdf>
-	</mesh>-->
+	</mesh>
 
 	<mesh type="lsystem">
 
@@ -77,10 +92,10 @@
 		<float name="pitch_term" value="5"/>
 		<float name="yaw_term" value="5"/>
 
-		<float name="seed" value="222211"/>
-		<integer name="evolutions" value="8"/>
+		<float name="seed" value="222225"/>
+		<integer name="evolutions" value="13"/>
 
-		<float name="bump_accentuate" value="10"/>
+		<float name="bump_accentuate" value="3"/>
 		<diffusemap type="texture">
 			<string name="id" value="normal"/>
 			<string name="filename" value="assets/texture/trunk_normal.exr"/>
@@ -88,7 +103,7 @@
 
 		<transform name="toWorld">
 			<rotate axis="0 1 0" angle="90"/>
-			<translate value="55 1.5 0"/>
+			<translate value="-50 1.5 0"/>
 		</transform>
 
 		<bsdf type="diffuse">
@@ -97,7 +112,7 @@
 					<string name="filename" value="assets/texture/trunk_texture_bright.jpg"/>
 				</diffusemap>
 				<diffusemap type="uniform">
-					<color name="albedo" value="0.97, 0.97, 0.7"/>
+					<color name="albedo" value="5, 0.1, 2"/>
 				</diffusemap>
 			</diffusemap>
 		</bsdf>
@@ -139,8 +154,8 @@
 				<color name="scattering" value="0.0002 0.0002 0.0002"/>
 				<point name="bounds_min" value="-400, 0, -250"/>
 				<point name="bounds_max" value="145, 1, 250"/>
-			</medium>-->
-
+			</medium>
+			-->
 			<medium type="voxel">
 				<string name="voxel_path" value="assets/voxel/procedural/islandflowers.vdb"/>
 				<color name="scattering" value="0.1 1.3 0.7"/>

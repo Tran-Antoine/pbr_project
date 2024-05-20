@@ -156,10 +156,10 @@ public:
         for(const auto& fp : config.flower_anchors) {
             auto p = trafo * fp;
             cloud_points.push_back(p);
-            flower_bounds.expandBy(1.1 * p);
+            flower_bounds.expandBy(1.05 * p);
         }
 
-        ProceduralMetadata data = { 0.7f, 0.f, flower_bounds, Vector3i(150, 150, 150),
+        ProceduralMetadata data = { 0.7f, 0.f, flower_bounds, Vector3i(80, 80, 80),
                                     "assets/voxel/procedural/islandflowers.vdb"};
         write_vdb(cloud_points, config.bg_anchors, data);
 

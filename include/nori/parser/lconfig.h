@@ -427,7 +427,8 @@ public:
         state.yaw += Warp::lineToLogistic(random.nextFloat(), 0.06);
     }
 
-    void controlPitch(TurtleState &state, char c) {
+    void controlPitch(TurtleState &state, char c) override {
+        if(state.depth < 3) return;
         state.pitch += Warp::lineToLogistic(random.nextFloat(), 0.06);
     }
 
@@ -490,11 +491,11 @@ public:
                 float dy = 2 * random.nextFloat() - 1;
                 float dz = 2 * random.nextFloat() - 2;
 
-                Point3f cloud_pos = state.forward(t) + 1.0f * Vector3f(dx, dy, dz);
+                Point3f cloud_pos = state.forward(t) + 0.8f * Vector3f(dx, dy, dz);
 
                 if(i < 10) {
-                    Point3f pos = state.forward(t/1.5f) + 0.2f * Vector3f(dx, dy, dz);
-                    drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.75, pos), positions, indices, temp);
+                    Point3f pos = state.forward(t) + 0.1f * Vector3f(dx, dy, dz);
+                    drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.5, pos), positions, indices, temp);
                 }
                 flower_anchors.push_back(cloud_pos);
                 flower_bounds.expandBy(1.1 * cloud_pos);
@@ -506,7 +507,7 @@ public:
             temp.clear();
         }
 
-        if(c == 'G' || c == 'F') {
+        if(c == 'G' || c == 'F' || c == 'H') {
             float max_depth = 5;
 
             if(state.depth >= max_depth) {
