@@ -135,7 +135,7 @@ public:
     }
 
     void activate() override {
-        auto config = OneTrunkConfig(random, map, width_factor, length_factor, pitch_term, yaw_term, trafo);
+        auto config = TreeIsland(random, map, width_factor, length_factor, pitch_term, yaw_term, trafo);
         std::string mesh_string = (config_file.empty()
                 ? LSystemGrammar(premise, rules, random)
                 : LSystemGrammar::fromConfig(random, config_file))
@@ -151,12 +151,21 @@ public:
 
         drawLSystem(mesh_string, config, positions, indices, texcoords);
 
+        std::vector<Point3f> cloud_points;
+        BoundingBox3f flower_bounds;
+        for(const auto& fp : config.flower_anchors) {
+            auto p = trafo * fp;
+            cloud_points.push_back(p);
+            flower_bounds.expandBy(1.1 * p);
+        }
 
-        /*ProceduralMetadata data = { 0.7f, 0.f,config.flower_bounds, Vector3i(100, 100, 10),
-                                   "assets/voxel/procedural/flowers.vdb"};
-        write_vdb(config.flower_anchors, config.bg_anchors, data);
+        ProceduralMetadata data = { 0.7f, 0.f, flower_bounds, Vector3i(150, 150, 150),
+                                    "assets/voxel/procedural/islandflowers.vdb"};
+        write_vdb(cloud_points, config.bg_anchors, data);
 
-        std::cout << "Counter : " << config.counter << std::endl;*/
+        std::cout << "Counter : " << config.counter << std::endl;
+
+
 
 
         m_F.resize(3, indices.size()/3);
@@ -193,6 +202,10 @@ public:
         switch (obj->getClassType()) {
             case NoriObject::EDiffuseMap:
                 map = static_cast<MultiDiffuseMap *>(obj);
+                if(map->getId() == "normal") {
+                    normal_map = map;
+                    map = nullptr;
+                }
                 break;
             default:
                 Mesh::addChild(obj);

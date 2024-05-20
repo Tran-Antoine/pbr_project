@@ -371,4 +371,179 @@ protected:
 
 };
 
+class TreeIsland : public LGrammarConfig {
+
+public:
+    TreeIsland(pcg32& random, MultiDiffuseMap* map, float width_factor, float length_factor, float pitch_term, float yaw_term,
+                   const Transform& trafo)
+            : map(map),
+              random(random),
+              trafo(trafo),
+              LGrammarConfig(2.5f, 6.0f, width_factor, length_factor, pitch_term, yaw_term){}
+
+    int colorCount() override {
+        return 2;
+    }
+
+    int colorIndex(char c) override {
+        switch (c) {
+            case 'F':
+            case 'G':
+                return 0;
+            case 'H':
+                return 1;
+            default:
+                throw NoriException("Unhandled color index");
+        }
+    }
+
+    static int pick(float sample, float pa, float pb, float pc=0.f, float pd=0.f, float pe=0.f, float pf=0.f) {
+        if(sample < pa) return 0;
+        if(sample < pa + pb) return 1;
+        if(sample < pa + pb + pc) return 2;
+        if(sample < pa + pb + pc + pd) return 3;
+        if(sample < pa + pb + pc + pd + pe) return 4;
+        return 3;
+    }
+
+    Eigen::Matrix4f create_affine_matrix(float yaw, float pitch, const Vector3f& scale, const Vector3f& p) {
+
+        Eigen::Affine3f transform;
+        transform.setIdentity();
+        transform = Eigen::DiagonalMatrix<float, 3>(scale) * transform;
+        transform = Eigen::Translation<float, 3>(p.x(), p.y(), p.z()) * transform;
+        /*transform = Eigen::AngleAxis<float>(angle, axis) * transform;
+        t = Eigen::Translation<float, 3>(trans);*/
+        return transform.matrix();
+    }
+
+    void controlFrame(TurtleState& state, char c) override {
+
+        // do nothing
+    }
+
+    void controlYaw(TurtleState &state, char c) override {
+        if(state.depth < 4) return;
+        state.yaw += Warp::lineToLogistic(random.nextFloat(), 0.06);
+    }
+
+    void controlPitch(TurtleState &state, char c) {
+        state.pitch += Warp::lineToLogistic(random.nextFloat(), 0.06);
+    }
+
+    void controlLength(TurtleState &state, char c) override {
+        if(state.depth < 4) return;
+        if(state.depth > 7) {
+            state.length *= 0.9;
+        }
+        state.length *= 1 + Warp::lineToLogistic(random.nextFloat(), 0.06);
+    }
+
+    void controlThickness(TurtleState &state, char c) override {
+        if(state.depth < 3) return;
+
+        state.out_thickness *= 0.85;
+        state.out_thickness *= (1 + Warp::lineToLogistic(random.nextFloat(), 0.01));
+        state.out_thickness = std::max(state.out_thickness, 0.01f);
+    }
+
+    int pickRule(char c, float thickness, float length, int depth) override {
+        float sample = random.nextFloat();
+
+        //Node =s FlowerBranch
+        //Node =s Change direction
+        //Node =s Split in two
+        //Node =s Split in two, terminates one branch
+        //Node =s Split in three
+
+        if(c == 'K') {
+            if(depth <= 4)  return pick(sample, 0.0, 0.0, 0.8, 0.0, 0.2, 0.0);
+            if(depth <= 6)  return pick(sample, 0.0, 0.4, 0.3, 0.2, 0.0, 0.0);
+            if(depth <= 8)  return pick(sample, 0.0, 0.1, 0.4, 0.4, 0.1, 0.0);
+            //if(depth <= 8)  return pick(sample, 0.1, 0.0, 0.0, 0.3, 0.2, 0.5);
+            if(depth <= 12) return pick(sample, 0.8, 0.0, 0.0, 0.2, 0.0, 0.0);
+            return 0;
+        }
+
+        throw NoriException("Unhandled stochastic rule");
+    }
+
+    void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
+
+        controlFrame(state, c);
+
+        // try reducing width much more after few depth
+
+        if(state.random) {
+            controlLength(state, c);
+            controlPitch(state, c);
+            controlYaw(state, c);
+            controlThickness(state, c);
+        }
+
+        std::vector<Vector2f> temp;
+
+        if (state.depth >= 3) {
+            for(int i = 0; i < 15; i++) {
+                float t = random.nextFloat() * state.length;
+                float dx = 2 * random.nextFloat() - 1;
+                float dy = 2 * random.nextFloat() - 1;
+                float dz = 2 * random.nextFloat() - 2;
+
+                Point3f cloud_pos = state.forward(t) + 1.0f * Vector3f(dx, dy, dz);
+
+                if(i < 10) {
+                    Point3f pos = state.forward(t/1.5f) + 0.2f * Vector3f(dx, dy, dz);
+                    drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.75, pos), positions, indices, temp);
+                }
+                flower_anchors.push_back(cloud_pos);
+                flower_bounds.expandBy(1.1 * cloud_pos);
+            }
+            for(auto t : temp) {
+                float x_mapped = map->map(t.x(), 1 + (int) (1 * random.nextFloat()));
+                texcoords.push_back(Vector2f(x_mapped, t.y()));
+            }
+            temp.clear();
+        }
+
+        if(c == 'G' || c == 'F') {
+            float max_depth = 5;
+
+            if(state.depth >= max_depth) {
+                drawCylinder(state, positions, indices, temp);
+            } else {
+                int BASE_RES_X  = 6;
+                int BASE_RES_Z  = 6;
+                uint64_t SEED_STATE = 3227124;
+                uint64_t SEED_SEQ = 10951913;
+                FBM fbm(BASE_RES_X, BASE_RES_Z, 5, 0.35, 2.0, SEED_STATE, SEED_SEQ);
+                fbm.init_generators();
+
+
+                drawCylinder(state, fbm, state.depth / max_depth, state.depth / max_depth + 1 / max_depth,Vector2i(128, 128), positions, indices, temp);
+            }
+
+            int index = 0;
+            for(auto t : temp) {
+                float x_mapped = map->map(t.x(), index);
+                texcoords.push_back(Vector2f(x_mapped, t.y()));
+            }
+        }
+
+
+    }
+
+    std::vector<Point3f> flower_anchors;
+    std::vector<Point3f> bg_anchors;
+    BoundingBox3f flower_bounds;
+    int counter = 0;
+
+protected:
+    Transform trafo;
+    pcg32 random;
+    MultiDiffuseMap* map = nullptr;
+
+};
+
+
 NORI_NAMESPACE_END

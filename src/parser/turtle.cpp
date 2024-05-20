@@ -99,7 +99,7 @@ void drawCylinder(TurtleState &state, FBM &hmap, float h_start, float h_end, con
     int N_CIRCLES = resolution.y();
     int SMOOTHNESS = resolution.x();
     float DELTA_D = state.length / (float) (N_CIRCLES - 1);
-    float STRENGTH = 0.75f;
+    float STRENGTH = 0.5f;
 
     int index_pointer = ps.size();
     float radius = state.in_thickness;

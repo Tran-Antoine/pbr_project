@@ -277,7 +277,7 @@ void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const Boundi
 
     float OFFSET_DAMPING = 0.3;
     int N_SPHERES_PER_CLOUD = 2000;
-    float SPHERE_RADIUS = std::max({size_x, size_y, size_z}) * 0.021;
+    float SPHERE_RADIUS = std::max({size_x, size_y, size_z}) * 0.0225;
     float BOUNDING_SPHERE_RADIUS = std::max({size_x, size_y, size_z}) * 0.25;
     int N_BOUNDING_SPHERES_PER_CLOUD = std::max({size_x, size_y, size_z}) * 0.02;
 

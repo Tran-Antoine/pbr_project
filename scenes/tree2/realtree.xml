@@ -29,7 +29,7 @@
         <float name="yaw_term" value="5"/>
 
         <float name="seed" value="221211"/>
-        <integer name="evolutions" value="13"/>
+        <integer name="evolutions" value="11"/>
 
         <bsdf type="diffuse">
             <diffusemap type="mtexture">
@@ -62,15 +62,14 @@
     </mesh>
 
 
-
+    <!--
     <mesh type="medium_mesh">
         <medium type="voxel">
             <string name="voxel_path" value="assets/voxel/procedural/flowers.vdb"/>
-            <float name="s_factor" value="1.5"/>
-            <float name="a_factor" value="0.1"/>
-            <color name="albedo" value="0.1 1 0.1"/>
+            <color name="scattering" value="0.15 1.5 0.15"/>
+            <color name="absorption" value="0.01 0.1 0.01"/>
         </medium>
-    </mesh>
+    </mesh>-->
 
 
     <emitter type="env">

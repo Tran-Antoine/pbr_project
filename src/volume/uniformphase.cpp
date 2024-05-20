@@ -23,5 +23,5 @@ float UniformPhase::pdf(const Vector3f &in, const Vector3f &out) const {
     return 1.0f / (4*M_PI);
 }
 
-NORI_REGISTER_CLASS(UniformPhase, "uniform");
+NORI_REGISTER_CLASS(UniformPhase, "uniform-phase");
 NORI_NAMESPACE_END
