@@ -102,7 +102,7 @@
         <float name="yaw_term" value="5"/>
 
         <float name="seed" value="222225"/>
-        <integer name="evolutions" value="2"/>
+        <integer name="evolutions" value="1"/>
 
         <float name="bump_accentuate" value="3"/>
         <diffusemap type="texture">
@@ -150,8 +150,8 @@
 
             <medium type="voxel">
                 <string name="voxel_path" value="assets/voxel/procedural/skyhole.vdb"/>
-                <color name="scattering" value="0.002 0.002 0.002"/>
-                <color name="absorption" value="0.001 0.001 0.001"/>
+                <color name="scattering" value="0.015 0.015 0.015"/>
+                <color name="absorption" value="0.008 0.008 0.008"/>
             </medium>
 
 
@@ -161,51 +161,42 @@
                 <color name="absorption" value="0.003 0.01 0.01"/>
             </medium>
 
+            <!--
             <medium type="voxel">
                 <string name="voxel_path" value="assets/voxel/procedural/sky2.vdb"/>
                 <color name="scattering" value="0.005 0.005 0.005"/>
                 <color name="absorption" value="0.001 0.001 0.001"/>
-            </medium>
+            </medium>-->
 
             <medium type="homogeneous">
                 <color name="absorption" value="0.0001 0.0001 0.0001"/>
-                <color name="scattering" value="0.0006 0.0006 0.0006"/>
-                <point name="bounds_min" value="-700, 10, -250"/>
+                <color name="scattering" value="0.0019 0.0019 0.0019"/>
+                <point name="bounds_min" value="-700, 0, -250"/>
                 <point name="bounds_max" value="145, 160, 250"/>
             </medium>
         </medium>
     </mesh>
 
-    <mesh type="obj">
-        <string name="filename" value="assets/shape/sphere.obj"/>
-        <transform name="toWorld">
-            <scale value="70 20 70"/>
-            <translate value="-50, 600, -30"/>
-        </transform>
-
-        <emitter type="area">
-            <color name="radiance" value="130 130 130"/>
-        </emitter>
-
-        <bsdf type="diffuse">
-            <color name="albedo" value="0.1 0.1 0.1"/>
-        </bsdf>
-    </mesh>
-
+    <!--
     <mesh type="obj">
         <string name="filename" value="assets/shape/sphere.obj"/>
         <transform name="toWorld">
             <scale value="20 20 20"/>
-            <translate value="-230, 210, 0"/>
+            <translate value="-50, 610, 0"/>
         </transform>
 
         <emitter type="area">
-            <color name="radiance" value="20 20 14"/>
+            <color name="radiance" value="420 420 220"/>
         </emitter>
 
         <bsdf type="diffuse">
             <color name="albedo" value="0.1 0.1 0.1"/>
         </bsdf>
-    </mesh>
+    </mesh>-->
+
+    <emitter type="directional">
+        <color name="radiance" value="20 20 15"/>
+        <vector name="direction" value="0.32 -1 0.38"/>
+    </emitter>
 
 </scene>

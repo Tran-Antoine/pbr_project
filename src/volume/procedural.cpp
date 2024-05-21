@@ -349,7 +349,7 @@ void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const Boundi
 
                 if((cx - hole.x()) * (cx - hole.x()) + (cy - hole.y()) * (cy - hole.y()) + (cz - hole.z()) * (cz - hole.z()) < hole_radius * hole_radius &&
                    (cx - hole.x()) * (cx - hole.x()) + (cy - hole.y()) * (cy - hole.y()) + (cz - hole.z()) * (cz - hole.z()) > -0.1 * hole_radius * hole_radius) {
-                    main_occurrences /= 3;
+                    main_occurrences /= 10;
                 }
                 accessor.setValue(xyz, main_occurrences);
             }
