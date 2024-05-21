@@ -137,9 +137,11 @@ public:
     void activate() override {
 
         LGrammarConfig* config = nullptr;
+        TreeIsland* tc = nullptr;
 
         if(controller == "TreeIsland") {
-            config = new TreeIsland(random, map, width_factor, length_factor, pitch_term, yaw_term, trafo);
+            tc = new TreeIsland(random, map, width_factor, length_factor, pitch_term, yaw_term, trafo);
+            config = tc;
         } else if(controller == "BGTree") {
             config = new BGTree(random, map, width_factor, length_factor, pitch_term, yaw_term, trafo);
         } else if(controller == "BGTree2") {
@@ -163,21 +165,20 @@ public:
 
         drawLSystem(mesh_string, *config, positions, indices, texcoords);
 
-        /*std::vector<Point3f> cloud_points;
-        BoundingBox3f flower_bounds;
-        for(const auto& fp : config->flower_anchors) {
-            auto p = trafo * fp;
-            cloud_points.push_back(p);
-            flower_bounds.expandBy(1.05 * p);
-        }
+        /*if(tc) {
+            std::vector<Point3f> cloud_points;
+            BoundingBox3f flower_bounds;
+            for(const auto& fp : tc->flower_anchors) {
+                auto p = trafo * fp;
+                cloud_points.push_back(p);
+                flower_bounds.expandBy(1.05 * p);
+            }
 
-        ProceduralMetadata data = { 0.7f, 0.f, flower_bounds, Vector3i(80, 80, 80),
-                                    "assets/voxel/procedural/islandflowers.vdb"};
-        //write_vdb(cloud_points, config.bg_anchors, data);
+            ProceduralMetadata data = { 0.7f, 0.f, flower_bounds, Vector3i(80, 80, 80),
+                                        "assets/voxel/procedural/islandflowers.vdb"};
+            write_vdb(cloud_points, tc->bg_anchors, data);
 
-        std::cout << "Counter : " << config.counter << std::endl;*/
-
-
+        }*/
 
 
         m_F.resize(3, indices.size()/3);

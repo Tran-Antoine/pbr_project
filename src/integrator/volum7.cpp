@@ -15,8 +15,8 @@ class Volum7Integrator : public Integrator {
 public:
     explicit Volum7Integrator(const PropertyList &props) {}
 
-    constexpr static float Q = 0.1f;
-    constexpr static int MAX_BOUNCES = 10;
+    constexpr static float Q = 0.05f;
+    constexpr static int MAX_BOUNCES = 4;
 
     Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const {
 
@@ -31,6 +31,9 @@ public:
         found = scene->rayIntersect(current_ray, its);
 
         while(roulette_success(sampler, bounces)) {
+
+            // TODO: investigate
+            beta = Color3f(std::min(beta.r(), 1.f), std::min(beta.g(), 1.f), std::min(beta.b(), 1.f));
 
             beta /= (1-Q);
 

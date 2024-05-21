@@ -508,7 +508,7 @@ public:
         }
 
         if(c == 'G' || c == 'F' || c == 'H') {
-            float max_depth = 5;
+            float max_depth = 3;
 
             if(state.depth >= max_depth) {
                 drawCylinder(state, positions, indices, temp);
@@ -521,7 +521,7 @@ public:
                 fbm.init_generators();
 
 
-                drawCylinder(state, fbm, state.depth / max_depth, state.depth / max_depth + 1 / max_depth,Vector2i(128, 128), positions, indices, temp);
+                drawCylinder(state, fbm, state.depth / max_depth, state.depth / max_depth + 1 / max_depth,Vector2i(48, 48), positions, indices, temp);
             }
 
             int index = 0;
@@ -813,7 +813,7 @@ public:
                 float dz = 2 * random.nextFloat() - 2;
 
                 Point3f pos = state.forward(t) + 0.1f * Vector3f(dx, dy, dz);
-                drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.2, pos), positions, indices, temp);
+                drawMesh("assets/shape/cube.obj", create_affine_matrix(0, 0, 0.5 * 0.2, pos), positions, indices, temp);
 
             }
             for(auto t : temp) {
@@ -834,7 +834,7 @@ public:
             }
             temp.clear();
         } else if(c == 'H') {
-            drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.3, state.p), positions, indices, temp);
+            drawMesh("assets/shape/cube.obj", create_affine_matrix(0, 0, 0.5 * 0.3, state.p), positions, indices, temp);
             int index = 1;
             for(auto t : temp) {
                 float x_mapped = map->map(t.x(), index);
