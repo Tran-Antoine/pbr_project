@@ -546,5 +546,310 @@ protected:
 
 };
 
+class BGTree : public LGrammarConfig {
+
+public:
+    BGTree(pcg32& random, MultiDiffuseMap* map, float width_factor, float length_factor, float pitch_term, float yaw_term,
+                   const Transform& trafo)
+                : map(map),
+                  random(random),
+                  trafo(trafo),
+                  LGrammarConfig(0.3f, 2.0f, width_factor, length_factor, pitch_term, yaw_term){}
+
+    int colorCount() override {
+        return 2;
+    }
+
+    int colorIndex(char c) override {
+        switch (c) {
+            case 'F':
+            case 'G':
+                return 0;
+            case 'H':
+                return 1;
+            default:
+                throw NoriException("Unhandled color index");
+        }
+    }
+
+    static int pick(float sample, float pa, float pb, float pc=0.f, float pd=0.f, float pe=0.f, float pf=0.f) {
+        if(sample < pa) return 0;
+        if(sample < pa + pb) return 1;
+        if(sample < pa + pb + pc) return 2;
+        if(sample < pa + pb + pc + pd) return 3;
+        if(sample < pa + pb + pc + pd + pe) return 4;
+        return 3;
+    }
+
+    Eigen::Matrix4f create_affine_matrix(float yaw, float pitch, const Vector3f& scale, const Vector3f& p) {
+
+        Eigen::Affine3f transform;
+        transform.setIdentity();
+        transform = Eigen::DiagonalMatrix<float, 3>(scale) * transform;
+        transform = Eigen::Translation<float, 3>(p.x(), p.y(), p.z()) * transform;
+        /*transform = Eigen::AngleAxis<float>(angle, axis) * transform;
+        t = Eigen::Translation<float, 3>(trans);*/
+        return transform.matrix();
+    }
+
+    void controlFrame(TurtleState& state, char c) override {
+
+        // do nothing
+    }
+
+    void controlYaw(TurtleState &state, char c) override {
+        state.yaw += Warp::lineToLogistic(random.nextFloat(), 0.02);
+    }
+
+    void controlPitch(TurtleState &state, char c) override {
+        state.pitch += Warp::lineToLogistic(random.nextFloat(), 0.02);
+    }
+
+    void controlLength(TurtleState &state, char c) override {
+        state.length *= 1 + Warp::lineToLogistic(random.nextFloat(), 0.02);
+        state.length = std::max(state.length, 0.1f);
+    }
+
+    void controlThickness(TurtleState &state, char c) override {
+        state.out_thickness *= (1 + Warp::lineToLogistic(random.nextFloat(), 0.01));
+        state.out_thickness = std::max(state.out_thickness, 0.02f);
+    }
+
+    int pickRule(char c, float thickness, float length, int depth) override {
+        float sample = random.nextFloat();
+
+        //Node =s Flower
+        //Node =s Branch Depth [wl 30+ Node][wl 30- Node]; Branch Depth [wl 30+ 90> Node][wl 30- 90> Node]
+        //Node =s Branch Depth [wl 30+ Node][wl 30- >>>> Node][wl 30- Node]
+
+        if(c == 'F') {
+            if(depth <= 3)  return pick(sample, 0.0, 0.1, 0.9); // always continue the trunk at low depth
+            if(depth <= 5)  return pick(sample, 0.6, 0.0, 0.4);
+            return                 pick(sample, 0.8, 0.0, 0.2);
+        }
+
+        if(c == 'K') {
+            if(depth <= 4)  return pick(sample, 0.0,  0.4, 0.6);
+            if(depth <= 6)  return pick(sample, 0.5,  0.1, 0.4);
+            if(depth <= 8)  return pick(sample, 0.7,  0.1, 0.2);
+            if(depth <= 12) return pick(sample, 0.9,  0.0, 0.1);
+            return 0;
+        }
+
+        throw NoriException("Unhandled stochastic rule");
+    }
+
+    void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
+
+        controlFrame(state, c);
+
+        // try reducing width much more after few depth
+
+        if(state.random) {
+            controlLength(state, c);
+            controlPitch(state, c);
+            controlYaw(state, c);
+            controlThickness(state, c);
+        }
+
+        std::vector<Vector2f> temp;
+
+        if (state.depth >= 3) {
+            for(int i = 0; i < 3; i++) {
+                float t = random.nextFloat() * state.length;
+                float dx = 2 * random.nextFloat() - 1;
+                float dy = 2 * random.nextFloat() - 1;
+                float dz = 2 * random.nextFloat() - 2;
+
+                Point3f pos = state.forward(t) + 0.0f * Vector3f(dx, dy, dz);
+                drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.2, pos), positions, indices, temp);
+            }
+            for(auto t : temp) {
+                float x_mapped = map->map(t.x(), 1);
+                texcoords.push_back(Vector2f(x_mapped, t.y()));
+            }
+            temp.clear();
+        }
+
+        if(c == 'G' || c == 'F') {
+
+            drawCylinder(state, positions, indices, temp);
+
+            int index = 0;
+            for(auto t : temp) {
+                float x_mapped = map->map(t.x(), index);
+                texcoords.push_back(Vector2f(x_mapped, t.y()));
+            }
+            temp.clear();
+        } else if(c == 'H') {
+            drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.3, state.p), positions, indices, temp);
+            int index = 1;
+            for(auto t : temp) {
+                float x_mapped = map->map(t.x(), index);
+                texcoords.push_back(Vector2f(x_mapped, t.y()));
+            }
+            temp.clear();
+        }
+
+
+    }
+
+protected:
+    Transform trafo;
+    pcg32 random;
+    MultiDiffuseMap* map = nullptr;
+
+};
+
+class BGTree2 : public LGrammarConfig {
+
+public:
+    BGTree2(pcg32& random, MultiDiffuseMap* map, float width_factor, float length_factor, float pitch_term, float yaw_term,
+           const Transform& trafo)
+            : map(map),
+              random(random),
+              trafo(trafo),
+              LGrammarConfig(0.3f, 2.0f, width_factor, length_factor, pitch_term, yaw_term){}
+
+    int colorCount() override {
+        return 2;
+    }
+
+    int colorIndex(char c) override {
+        switch (c) {
+            case 'F':
+            case 'G':
+                return 0;
+            case 'H':
+                return 1;
+            default:
+                throw NoriException("Unhandled color index");
+        }
+    }
+
+    static int pick(float sample, float pa, float pb, float pc=0.f, float pd=0.f, float pe=0.f, float pf=0.f) {
+        if(sample < pa) return 0;
+        if(sample < pa + pb) return 1;
+        if(sample < pa + pb + pc) return 2;
+        if(sample < pa + pb + pc + pd) return 3;
+        if(sample < pa + pb + pc + pd + pe) return 4;
+        return 3;
+    }
+
+    Eigen::Matrix4f create_affine_matrix(float yaw, float pitch, const Vector3f& scale, const Vector3f& p) {
+
+        Eigen::Affine3f transform;
+        transform.setIdentity();
+        transform = Eigen::DiagonalMatrix<float, 3>(scale) * transform;
+        transform = Eigen::Translation<float, 3>(p.x(), p.y(), p.z()) * transform;
+        /*transform = Eigen::AngleAxis<float>(angle, axis) * transform;
+        t = Eigen::Translation<float, 3>(trans);*/
+        return transform.matrix();
+    }
+
+    void controlFrame(TurtleState& state, char c) override {
+
+        // do nothing
+    }
+
+    void controlYaw(TurtleState &state, char c) override {
+        state.yaw += Warp::lineToLogistic(random.nextFloat(), 0.02);
+    }
+
+    void controlPitch(TurtleState &state, char c) override {
+        state.pitch += Warp::lineToLogistic(random.nextFloat(), 0.02);
+    }
+
+    void controlLength(TurtleState &state, char c) override {
+        state.length *= 1 + Warp::lineToLogistic(random.nextFloat(), 0.02);
+        state.length = std::max(state.length, 0.1f);
+    }
+
+    void controlThickness(TurtleState &state, char c) override {
+        state.out_thickness *= (1 + Warp::lineToLogistic(random.nextFloat(), 0.01));
+        state.out_thickness = std::max(state.out_thickness, 0.02f);
+    }
+
+    int pickRule(char c, float thickness, float length, int depth) override {
+        float sample = random.nextFloat();
+
+        //Node =s FlowerBranch
+        //Node =s Change direction
+        //Node =s Split in two
+        //Node =s Split in two, terminates one branch
+        //Node =s Split in three
+
+        if(c == 'K') {
+            if(depth <= 4)  return pick(sample, 0.0, 0.0, 0.8, 0.0, 0.2, 0.0);
+            if(depth <= 6)  return pick(sample, 0.0, 0.4, 0.3, 0.2, 0.0, 0.0);
+            if(depth <= 8)  return pick(sample, 0.0, 0.1, 0.4, 0.4, 0.1, 0.0);
+            if(depth <= 12) return pick(sample, 0.8, 0.0, 0.0, 0.2, 0.0, 0.0);
+            return 0;
+        }
+
+        throw NoriException("Unhandled stochastic rule");
+    }
+
+    void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
+
+        controlFrame(state, c);
+
+        // try reducing width much more after few depth
+
+        if(state.random) {
+            controlLength(state, c);
+            controlPitch(state, c);
+            controlYaw(state, c);
+            controlThickness(state, c);
+        }
+
+        std::vector<Vector2f> temp;
+
+        if (state.depth >= 3) {
+            for(int i = 0; i < 3; i++) {
+                float t = random.nextFloat() * state.length;
+                float dx = 2 * random.nextFloat() - 1;
+                float dy = 2 * random.nextFloat() - 1;
+                float dz = 2 * random.nextFloat() - 2;
+
+                Point3f pos = state.forward(t) + 0.1f * Vector3f(dx, dy, dz);
+                drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.2, pos), positions, indices, temp);
+
+            }
+            for(auto t : temp) {
+                float x_mapped = map->map(t.x(), 1 + (int) (1 * random.nextFloat()));
+                texcoords.push_back(Vector2f(x_mapped, t.y()));
+            }
+            temp.clear();
+        }
+
+        if(c == 'G' || c == 'F') {
+
+            drawCylinder(state, positions, indices, temp);
+
+            int index = 0;
+            for(auto t : temp) {
+                float x_mapped = map->map(t.x(), index);
+                texcoords.push_back(Vector2f(x_mapped, t.y()));
+            }
+            temp.clear();
+        } else if(c == 'H') {
+            drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.3, state.p), positions, indices, temp);
+            int index = 1;
+            for(auto t : temp) {
+                float x_mapped = map->map(t.x(), index);
+                texcoords.push_back(Vector2f(x_mapped, t.y()));
+            }
+            temp.clear();
+        }
+
+    }
+
+protected:
+    Transform trafo;
+    pcg32 random;
+    MultiDiffuseMap* map = nullptr;
+
+};
 
 NORI_NAMESPACE_END

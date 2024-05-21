@@ -40,7 +40,7 @@ float MultiDiffuseMap::map(float s, int index) const {
 void MultiDiffuseMap::unmap(float m, float& s, int& index) const {
     float range = 1.f / children.size();
 
-    index = ((int) (m / range));
+    index = clamp(((int) (m / range)), 0, children.size() - 1);
     s = m/range - index; //  (m - index * range) / range
 }
 

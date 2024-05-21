@@ -3,7 +3,7 @@
     <boolean name="save" value="true"/>
     <integrator type="volum7"/>
     <sampler type="independent">
-        <integer name="sampleCount" value="8"/>
+        <integer name="sampleCount" value="12"/>
     </sampler>
     <camera type="perspective">
         <float name="fov" value="69.39030966512573"/>
@@ -22,9 +22,11 @@
             <string name="id" value="normal"/>
             <string name="filename" value="assets/normal/waterhigh.exr"/>
         </diffusemap>
-        <float name="bump_accentuate" value="0.1"/>
-        <bsdf type="mirror">
-            <color name="albedo" value="0.15,0.25,0.55"/>
+        <float name="bump_accentuate" value="0.001"/>
+        <bsdf type="microfacet">
+            <float name="intIOR" value="1.7"/>
+            <color name="kd" value="0.000002 0.000002 0.000004"/>
+            <float name="alpha" value="0.2"/>
         </bsdf>
     </mesh>
 
@@ -47,6 +49,7 @@
             </diffusemap>
         </bsdf>
     </mesh>
+
 
     <mesh type="obj">
         <string name="filename" value="meshes/LandRight.obj"/>
@@ -80,8 +83,9 @@
                 <string name="filename" value="assets/texture/graymountain.jpg"/>
             </diffusemap>
         </bsdf>
-    </mesh>-->
+    </mesh>
 
+    -->
     <mesh type="obj">
         <string name="filename" value="meshes/TreeIsland.obj"/>
         <bsdf type="diffuse">
@@ -141,7 +145,7 @@
         <string name="half2" value="assets/env/lowcontrast_right.exr"/>
         <float name="radius" value="5000.0"/>
         <point name="center" value="0,0,0"/>
-        <float name="intensity" value="0.15"/>
+        <float name="intensity" value="0.5"/>
     </emitter>
 
 
@@ -150,8 +154,8 @@
 
             <medium type="voxel">
                 <string name="voxel_path" value="assets/voxel/procedural/skyhole.vdb"/>
-                <color name="scattering" value="0.015 0.015 0.015"/>
-                <color name="absorption" value="0.008 0.008 0.008"/>
+                <color name="scattering" value="0.24 0.24 0.24"/>
+                <color name="absorption" value="0.12 0.12 0.12"/>
             </medium>
 
 

@@ -131,15 +131,27 @@ public:
         yaw_term = degToRad(propList.getFloat("yaw_term", 45.f));
         bump_increase_factor = propList.getFloat("bump_accentuate", 1.f);
         trafo = propList.getTransform("toWorld", Transform());
-
+        controller = propList.getString("controller");
     }
 
     void activate() override {
-        auto config = TreeIsland(random, map, width_factor, length_factor, pitch_term, yaw_term, trafo);
+
+        LGrammarConfig* config = nullptr;
+
+        if(controller == "TreeIsland") {
+            config = new TreeIsland(random, map, width_factor, length_factor, pitch_term, yaw_term, trafo);
+        } else if(controller == "BGTree") {
+            config = new BGTree(random, map, width_factor, length_factor, pitch_term, yaw_term, trafo);
+        } else if(controller == "BGTree2") {
+            config = new BGTree2(random, map, width_factor, length_factor, pitch_term, yaw_term, trafo);
+        } else {
+            std::cout << "Warning: no config file found" << std::endl;
+        }
+
         std::string mesh_string = (config_file.empty()
                 ? LSystemGrammar(premise, rules, random)
                 : LSystemGrammar::fromConfig(random, config_file))
-                    .evolve(n, config);
+                    .evolve(n, *config);
 
         Timer timer;
         std::vector<Vector3f>   positions;
@@ -149,11 +161,11 @@ public:
         std::cout << "LSystem successfully generated:\n";
         std::cout << mesh_string.substr(0, 100) << "..." << std::endl;
 
-        drawLSystem(mesh_string, config, positions, indices, texcoords);
+        drawLSystem(mesh_string, *config, positions, indices, texcoords);
 
-        std::vector<Point3f> cloud_points;
+        /*std::vector<Point3f> cloud_points;
         BoundingBox3f flower_bounds;
-        for(const auto& fp : config.flower_anchors) {
+        for(const auto& fp : config->flower_anchors) {
             auto p = trafo * fp;
             cloud_points.push_back(p);
             flower_bounds.expandBy(1.05 * p);
@@ -163,7 +175,7 @@ public:
                                     "assets/voxel/procedural/islandflowers.vdb"};
         //write_vdb(cloud_points, config.bg_anchors, data);
 
-        std::cout << "Counter : " << config.counter << std::endl;
+        std::cout << "Counter : " << config.counter << std::endl;*/
 
 
 
@@ -220,6 +232,7 @@ protected:
     Transform trafo;
     int n;
     std::string config_file;
+    std::string controller;
     std::string premise;
     std::vector<std::string> rules;
 
