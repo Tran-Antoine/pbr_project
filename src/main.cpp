@@ -262,10 +262,10 @@ int main(int argc, char **argv) {
                           Point3f(0, 0, 0), 0.0, PATH0);
 
             }
-            if(true) {
+            if(false) {
                 std::string PATH1 = "assets/voxel/procedural/skyhole.vdb";
-                write_sky(Vector3i(1, 1, 1), Vector3i(400, 60, 400),
-                          BoundingBox3f(Point3f(-1200, 160, -1500), Point3f(300, 180, 1500)),
+                write_sky(Vector3i(2, 1, 2), Vector3i(400, 80, 400),
+                          BoundingBox3f(Point3f(-1200, 160, -1500), Point3f(300, 200, 1500)),
                           Point3f(-100, 165, -60), 70.0, PATH1);
             }
             if(false) {

@@ -271,12 +271,12 @@ void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const Boundi
     float size_y = (max_y - min_y) / n_clouds.y();
     float size_z = (max_z - min_z) / n_clouds.z();
 
-    bool ultra_wide = (size_x + size_z) / (2.0 * size_y) > 20.0;
+    bool ultra_wide = (size_x + size_z) / (2.0 * size_y) > 2.0;
 
     std::cout << "size_x=" << size_x << ", size_y=" << size_y << ", size_z=" << size_z << ", ultrawide: " << std::to_string(ultra_wide) << "\n";
 
-    float OFFSET_DAMPING = 0.1;
-    int N_SPHERES_PER_CLOUD = 2000 / (n_clouds.x() * n_clouds.y() * n_clouds.z());
+    float OFFSET_DAMPING = 0.01;
+    int N_SPHERES_PER_CLOUD = 1000;
     float SPHERE_RADIUS = std::max({size_x, size_y, size_z}) * 0.0225;
     float BOUNDING_SPHERE_RADIUS = std::max({size_x, size_y, size_z}) * 0.25;
     int N_BOUNDING_SPHERES_PER_CLOUD = std::max({size_x, size_y, size_z}) * 0.02;

@@ -9,14 +9,14 @@
         <float name="fov" value="69.39030966512573"/>
         <float name="nearClip" value="0.1"/>
         <float name="farClip" value="6000.0"/>
-        <integer name="width" value="960"/>
-        <integer name="height" value="540"/>
+        <integer name="width" value="672"/>
+        <integer name="height" value="378"/>
         <transform name="toWorld">
             <matrix value="-0.06292232125997543,0.07933303713798523,-0.9948602914810181,150.01998901367188,0.0,0.9968355894088745,0.0794905573129654,4.099999904632568,0.9980184435844421,0.005001730751246214,-0.06272321194410324,0.0,0.0,0.0,0.0,1.0"/>
         </transform>
     </camera>
 
-
+    <!--
 
     <mesh type="obj">
         <string name="filename" value="meshes/Lake.obj"/>
@@ -25,14 +25,15 @@
             <string name="filename" value="assets/normal/waterhigh.exr"/>
         </diffusemap>
         <float name="bump_accentuate" value="0.05"/>
-        <bsdf type="microfacet">
-            <color name="albedo" value="0.2 0.2 0.2"/>
+        <bsdf type="diffuse">
+            <color name="albedo" value="0.1 0.1 0.1"/>
             <float name="intIOR" value="1.7"/>
             <color name="kd" value="0.000002 0.000002 0.000004"/>
             <float name="alpha" value="0.2"/>
         </bsdf>
     </mesh>
-    <!---->
+
+
 
     <mesh type="obj">
         <string name="filename" value="meshes/LeftMountains.obj"/>
@@ -98,7 +99,7 @@
         </bsdf>
     </mesh>
 
-    <!---->
+    -->
     <mesh type="lsystem">
 
         <string name="config" value="assets/grammar/middletree.l6"/>
@@ -109,7 +110,7 @@
         <float name="yaw_term" value="5"/>
 
         <float name="seed" value="222225"/>
-        <integer name="evolutions" value="6"/>
+        <integer name="evolutions" value="13"/>
 
         <float name="bump_accentuate" value="3"/>
         <diffusemap type="texture">
@@ -143,6 +144,7 @@
         </diffusemap>
     </mesh>
 
+
     <emitter type="env">
         <string name="half1" value="assets/env/lowcontrast_left.exr"/>
         <string name="half2" value="assets/env/lowcontrast_right.exr"/>
@@ -161,13 +163,13 @@
             -->
             <medium type="voxel">
                 <string name="voxel_path" value="assets/voxel/procedural/skyhole.vdb"/>
-                <color name="scattering" value="0.024 0.024 0.024"/>
-                <color name="absorption" value="0.012 0.012 0.012"/>
+                <color name="scattering" value="0.08 0.08 0.08"/>
+                <color name="absorption" value="0.02 0.02 0.02"/>
             </medium>
 
 
             <medium type="voxel">
-                <string name="voxel_path" value="assets/voxel/procedural/islandflowers_SAVE.vdb"/>
+                <string name="voxel_path" value="assets/voxel/procedural/islandflowers.vdb"/>
                 <color name="scattering" value="0.1 1.1 0.5"/>
                 <color name="absorption" value="0.003 0.01 0.01"/>
             </medium>
@@ -190,6 +192,7 @@
     </mesh>
 
     <emitter type="directional">
+        <!-- <color name="radiance" value="20 20 15"/>-->
         <color name="radiance" value="20 20 15"/>
         <vector name="direction" value="0.32 -1 0.38"/>
     </emitter>
@@ -198,409 +201,6 @@
     <!-- ALL TREES OF THE SCENE -->
     <!--_______________________ -->
 
-    <!-- TREE 1 -->
-    <mesh type="lsystem">
 
-        <transform name="toWorld">
-            <scale value="0.75 0.75 0.75"/>
-            <rotate axis="0 1 0" angle="0"/><translate value="112 0 -30"/>
-        </transform>
-
-        <string name="config" value="assets/grammar/bgtree2.l6"/><string name="controller" value="BGTree2"/>
-
-        <float name="width_factor" value="0.75"/><float name="length_factor" value="0.85"/>
-        <float name="pitch_term" value="5"/><float name="yaw_term" value="5"/>
-
-        <float name="seed" value="224671"/>
-        <integer name="evolutions" value="10"/>
-
-        <bsdf type="diffuse"><diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.97, 0.6, 0.1"/></diffusemap></diffusemap>
-        </bsdf>
-
-        <diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.93, 0.69, 0.84"/></diffusemap>
-        </diffusemap>
-    </mesh>
-
-    <!-- TREE 2 -->
-    <mesh type="lsystem">
-
-        <transform name="toWorld">
-            <scale value="1.7 1.7 1.7"/>
-            <rotate axis="0 1 0" angle="25"/><translate value="5 0.5 -54"/>
-        </transform>
-
-        <string name="config" value="assets/grammar/bgtree2.l6"/><string name="controller" value="BGTree2"/>
-
-        <float name="width_factor" value="0.75"/><float name="length_factor" value="0.85"/>
-        <float name="pitch_term" value="5"/><float name="yaw_term" value="5"/>
-
-        <float name="seed" value="224671"/>
-        <integer name="evolutions" value="10"/>
-
-        <bsdf type="diffuse"><diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.4, 0.97, 0.4"/></diffusemap></diffusemap>
-        </bsdf>
-
-        <diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.93, 0.69, 0.84"/></diffusemap>
-        </diffusemap>
-    </mesh>
-
-    <!-- TREE 3 -->
-    <mesh type="lsystem">
-
-        <transform name="toWorld">
-            <scale value="1.5 1.5 1.5"/>
-            <rotate axis="0 1 0" angle="5"/><translate value="10 0.5 -55"/>
-        </transform>
-
-        <string name="config" value="assets/grammar/bgtree2.l6"/><string name="controller" value="BGTree2"/>
-
-        <float name="width_factor" value="0.75"/><float name="length_factor" value="0.85"/>
-        <float name="pitch_term" value="5"/><float name="yaw_term" value="5"/>
-
-        <float name="seed" value="224671"/>
-        <integer name="evolutions" value="10"/>
-
-        <bsdf type="diffuse"><diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.4, 0.97, 0.4"/></diffusemap></diffusemap>
-        </bsdf>
-
-        <diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.93, 0.69, 0.84"/></diffusemap>
-        </diffusemap>
-    </mesh>
-
-    <!-- TREE 4 -->
-    <mesh type="lsystem">
-
-        <transform name="toWorld">
-            <scale value="1.5 1.5 1.5"/>
-            <rotate axis="0 1 0" angle="5"/><translate value="16 0.5 -60"/>
-        </transform>
-
-        <string name="config" value="assets/grammar/bgtree2.l6"/><string name="controller" value="BGTree2"/>
-
-        <float name="width_factor" value="0.75"/><float name="length_factor" value="0.85"/>
-        <float name="pitch_term" value="5"/><float name="yaw_term" value="5"/>
-
-        <float name="seed" value="224671"/>
-        <integer name="evolutions" value="10"/>
-
-        <bsdf type="diffuse"><diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.4, 0.97, 0.4"/></diffusemap></diffusemap>
-        </bsdf>
-
-        <diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.93, 0.69, 0.84"/></diffusemap>
-        </diffusemap>
-    </mesh>
-
-    <!-- TREE 5 -->
-    <mesh type="lsystem">
-
-        <transform name="toWorld">
-            <scale value="2.7 2.7 2.7"/>
-            <rotate axis="0 1 0" angle="5"/><translate value="-5 3 -62"/>
-        </transform>
-
-        <string name="config" value="assets/grammar/bgtree2.l6"/><string name="controller" value="BGTree2"/>
-
-        <float name="width_factor" value="0.75"/><float name="length_factor" value="0.85"/>
-        <float name="pitch_term" value="5"/><float name="yaw_term" value="5"/>
-
-        <float name="seed" value="224671"/>
-        <integer name="evolutions" value="10"/>
-
-        <bsdf type="diffuse"><diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.4, 0.97, 0.4"/></diffusemap></diffusemap>
-        </bsdf>
-
-        <diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.93, 0.69, 0.84"/></diffusemap>
-        </diffusemap>
-    </mesh>
-
-    <!-- TREE 6 -->
-    <mesh type="lsystem">
-
-        <transform name="toWorld">
-            <scale value="1.2 1.2 1.2"/>
-            <rotate axis="0 1 0" angle="10"/><translate value="35 0.5 -74"/>
-        </transform>
-
-        <string name="config" value="assets/grammar/bgtree2.l6"/><string name="controller" value="BGTree2"/>
-
-        <float name="width_factor" value="0.75"/><float name="length_factor" value="0.85"/>
-        <float name="pitch_term" value="5"/><float name="yaw_term" value="5"/>
-
-        <float name="seed" value="224671"/>
-        <integer name="evolutions" value="10"/>
-
-        <bsdf type="diffuse"><diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.4, 0.97, 0.4"/></diffusemap></diffusemap>
-        </bsdf>
-
-        <diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.93, 0.69, 0.84"/></diffusemap>
-        </diffusemap>
-    </mesh>
-
-    <!-- TREE 7 -->
-    <mesh type="lsystem">
-
-        <transform name="toWorld">
-            <scale value="1.2 1.2 1.2"/>
-            <rotate axis="0 1 0" angle="10"/><translate value="28 0.5 -71"/>
-        </transform>
-
-        <string name="config" value="assets/grammar/bgtree2.l6"/><string name="controller" value="BGTree2"/>
-
-        <float name="width_factor" value="0.75"/><float name="length_factor" value="0.85"/>
-        <float name="pitch_term" value="5"/><float name="yaw_term" value="5"/>
-
-        <float name="seed" value="224671"/>
-        <integer name="evolutions" value="10"/>
-
-        <bsdf type="diffuse"><diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.4, 0.97, 0.4"/></diffusemap></diffusemap>
-        </bsdf>
-
-        <diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.93, 0.69, 0.84"/></diffusemap>
-        </diffusemap>
-    </mesh>
-
-    <!-- TREE 8 -->
-    <mesh type="lsystem">
-
-        <transform name="toWorld">
-            <scale value="1.2 1.2 1.2"/>
-            <rotate axis="0 1 0" angle="10"/><translate value="40 0.5 -79"/>
-        </transform>
-
-        <string name="config" value="assets/grammar/bgtree2.l6"/><string name="controller" value="BGTree2"/>
-
-        <float name="width_factor" value="0.75"/><float name="length_factor" value="0.85"/>
-        <float name="pitch_term" value="5"/><float name="yaw_term" value="5"/>
-
-        <float name="seed" value="224671"/>
-        <integer name="evolutions" value="10"/>
-
-        <bsdf type="diffuse"><diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.4, 0.97, 0.4"/></diffusemap></diffusemap>
-        </bsdf>
-
-        <diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.93, 0.69, 0.84"/></diffusemap>
-        </diffusemap>
-    </mesh>
-
-    <!-- TREE 9 -->
-    <mesh type="lsystem">
-
-        <transform name="toWorld">
-            <scale value="0.7 0.7 0.7"/>
-            <rotate axis="0 1 0" angle="10"/><translate value="60 0 52"/>
-        </transform>
-
-        <string name="config" value="assets/grammar/bgtree2.l6"/><string name="controller" value="BGTree2"/>
-
-        <float name="width_factor" value="0.75"/><float name="length_factor" value="0.85"/>
-        <float name="pitch_term" value="5"/><float name="yaw_term" value="5"/>
-
-        <float name="seed" value="224671"/>
-        <integer name="evolutions" value="10"/>
-
-        <bsdf type="diffuse"><diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.77, 0.4, 0.1"/></diffusemap></diffusemap>
-        </bsdf>
-
-        <diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.77, 0.4, 0.1"/></diffusemap>
-        </diffusemap>
-    </mesh>
-
-    <!-- TREE 10 -->
-    <mesh type="lsystem">
-
-        <transform name="toWorld">
-            <scale value="0.7 0.7 0.7"/>
-            <rotate axis="0 1 0" angle="10"/><translate value="50 0 51"/>
-        </transform>
-
-        <string name="config" value="assets/grammar/bgtree2.l6"/><string name="controller" value="BGTree2"/>
-
-        <float name="width_factor" value="0.75"/><float name="length_factor" value="0.85"/>
-        <float name="pitch_term" value="5"/><float name="yaw_term" value="5"/>
-
-        <float name="seed" value="224671"/>
-        <integer name="evolutions" value="10"/>
-
-        <bsdf type="diffuse"><diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.77, 0.5, 0.1"/></diffusemap></diffusemap>
-        </bsdf>
-
-        <diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.77, 0.5, 0.1"/></diffusemap>
-        </diffusemap>
-    </mesh>
-
-    <!-- TREE 11 -->
-    <mesh type="lsystem">
-
-        <transform name="toWorld">
-            <scale value="2.4 2.4 2.4"/>
-            <rotate axis="0 1 0" angle="10"/><translate value="-21 0.5 78"/>
-        </transform>
-
-        <string name="config" value="assets/grammar/bgtree2.l6"/><string name="controller" value="BGTree2"/>
-
-        <float name="width_factor" value="0.75"/><float name="length_factor" value="0.85"/>
-        <float name="pitch_term" value="5"/><float name="yaw_term" value="5"/>
-
-        <float name="seed" value="224671"/>
-        <integer name="evolutions" value="10"/>
-
-        <bsdf type="diffuse"><diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.4, 0.97, 0.4"/></diffusemap></diffusemap>
-        </bsdf>
-
-        <diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.93, 0.69, 0.84"/></diffusemap>
-        </diffusemap>
-    </mesh>
-
-    <!-- TREE 12 -->
-    <mesh type="lsystem">
-
-        <transform name="toWorld">
-            <scale value="0.7 0.7 0.7"/>
-            <rotate axis="0 1 0" angle="10"/><translate value="21 0 60"/>
-        </transform>
-
-        <string name="config" value="assets/grammar/bgtree2.l6"/><string name="controller" value="BGTree2"/>
-
-        <float name="width_factor" value="0.75"/><float name="length_factor" value="0.85"/>
-        <float name="pitch_term" value="5"/><float name="yaw_term" value="5"/>
-
-        <float name="seed" value="224671"/>
-        <integer name="evolutions" value="10"/>
-
-        <bsdf type="diffuse"><diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.77, 0.6, 0.1"/></diffusemap></diffusemap>
-        </bsdf>
-
-        <diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.77, 0.6, 0.1"/></diffusemap>
-        </diffusemap>
-    </mesh>
-
-    <!-- TREE 13 -->
-    <mesh type="lsystem">
-
-        <transform name="toWorld">
-            <scale value="0.7 0.7 0.7"/>
-            <rotate axis="0 1 0" angle="10"/><translate value="33 0 63"/>
-        </transform>
-
-        <string name="config" value="assets/grammar/bgtree2.l6"/><string name="controller" value="BGTree2"/>
-
-        <float name="width_factor" value="0.75"/><float name="length_factor" value="0.85"/>
-        <float name="pitch_term" value="5"/><float name="yaw_term" value="5"/>
-
-        <float name="seed" value="224671"/>
-        <integer name="evolutions" value="10"/>
-
-        <bsdf type="diffuse"><diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.93, 0.69, 0.2"/></diffusemap></diffusemap>
-        </bsdf>
-
-        <diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.93, 0.69, 0.2"/></diffusemap>
-        </diffusemap>
-    </mesh>
-
-    <!-- TREE 14 -->
-    <mesh type="lsystem">
-
-        <transform name="toWorld">
-            <scale value="1.2 1.2 1.2"/>
-            <rotate axis="0 1 0" angle="10"/><translate value="38 0 56"/>
-        </transform>
-
-        <string name="config" value="assets/grammar/bgtree2.l6"/><string name="controller" value="BGTree2"/>
-
-        <float name="width_factor" value="0.75"/><float name="length_factor" value="0.85"/>
-        <float name="pitch_term" value="5"/><float name="yaw_term" value="5"/>
-
-        <float name="seed" value="224671"/>
-        <integer name="evolutions" value="10"/>
-
-        <bsdf type="diffuse"><diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.8, 0.5, 0.1"/></diffusemap></diffusemap>
-        </bsdf>
-
-        <diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.8, 0.5, 0.1"/></diffusemap>
-        </diffusemap>
-    </mesh>
-
-    <!-- TREE 15 -->
-    <mesh type="lsystem">
-
-        <transform name="toWorld">
-            <scale value="3.5 3.5 3.5"/>
-            <rotate axis="0 1 0" angle="90"/><translate value="-76 -1 78"/>
-        </transform>
-
-        <string name="config" value="assets/grammar/bgtree2.l6"/><string name="controller" value="BGTree2"/>
-
-        <float name="width_factor" value="0.75"/><float name="length_factor" value="0.85"/>
-        <float name="pitch_term" value="5"/><float name="yaw_term" value="5"/>
-
-        <float name="seed" value="224671"/>
-        <integer name="evolutions" value="10"/>
-
-        <bsdf type="diffuse"><diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.4, 0.97, 0.4"/></diffusemap></diffusemap>
-        </bsdf>
-
-        <diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.93, 0.69, 0.84"/></diffusemap>
-        </diffusemap>
-    </mesh>
 
 </scene>

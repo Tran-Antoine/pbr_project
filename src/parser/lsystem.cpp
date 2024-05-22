@@ -165,7 +165,7 @@ public:
 
         drawLSystem(mesh_string, *config, positions, indices, texcoords);
 
-        /*if(tc) {
+        if(tc) {
             std::vector<Point3f> cloud_points;
             BoundingBox3f flower_bounds;
             for(const auto& fp : tc->flower_anchors) {
@@ -178,7 +178,7 @@ public:
                                         "assets/voxel/procedural/islandflowers.vdb"};
             write_vdb(cloud_points, tc->bg_anchors, data);
 
-        }*/
+        }
 
 
         m_F.resize(3, indices.size()/3);
