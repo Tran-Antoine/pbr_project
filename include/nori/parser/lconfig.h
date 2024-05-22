@@ -486,9 +486,7 @@ public:
 
         if (state.depth >= 3) {
             for(int i = 0; i < 15; i++) {
-
-                //pcg32 random2(i);
-
+                
                 float t = random.nextFloat() * state.length;
                 float dx = 2 * random.nextFloat() - 1;
                 float dy = 2 * random.nextFloat() - 1;
@@ -496,13 +494,6 @@ public:
 
                 Point3f cloud_pos = state.forward(t) + 0.7f * Vector3f(dx, dy, dz);
 
-                /*
-                if(i < 4) {
-                    float dx2 = 2 * random.nextFloat() - 1;
-                    float dy2 = 2 * random.nextFloat() - 1;
-                    float dz2 = 2 * random.nextFloat() - 2;
-                    Point3f wide_cloud_pos = state.forward(t) + 0.7f * Vector3f(dx2, dy2, dz2);
-                }*/
 
                 if(i < 10) {
                     Point3f pos = state.forward(t) + 0.1f * Vector3f(dx, dy, dz);
