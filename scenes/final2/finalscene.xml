@@ -170,7 +170,11 @@
 
             <medium type="voxel">
                 <string name="voxel_path" value="assets/voxel/procedural/islandflowers.vdb"/>
+                <!--
                 <color name="scattering" value="0.1 1.1 0.5"/>
+                <color name="absorption" value="0.003 0.01 0.01"/>
+                 -->
+                <color name="scattering" value="0.09 0.99 0.45"/>
                 <color name="absorption" value="0.003 0.01 0.01"/>
             </medium>
 

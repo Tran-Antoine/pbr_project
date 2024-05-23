@@ -109,6 +109,8 @@ public:
     static Vector3f squareToHenyeyGreenstein(const Point2f& sample, float g);
 
     static float squareToHenyeyGreensteinPdf(float cosTheta, float g);
+
+    static Vector3f cubeToUniformSphere(const Point3f& sample);
 };
 
 NORI_NAMESPACE_END

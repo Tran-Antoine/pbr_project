@@ -401,6 +401,10 @@ float Warp::squareToHenyeyGreensteinPdf(float cosTheta, float g) {
     return 1.f / (4*M_PI) * (1 - g*g) / (float) pow(1 + g*g + 2*g*cosTheta, 1.5);
 }
 
+Vector3f Warp::cubeToUniformSphere(const Point3f& sample) {
+    throw NoriException("Not implemented yet");
+}
+
 
 
 NORI_NAMESPACE_END

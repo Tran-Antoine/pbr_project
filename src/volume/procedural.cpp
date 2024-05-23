@@ -8,20 +8,34 @@ NORI_NAMESPACE_BEGIN
 
 using PointData = std::pair<Point3f, float>;
 
-static int count(const std::vector<Point3f>& positions, const openvdb::math::Vec3<double>& v, float radius) {
+static int count(const std::vector<Point3f>& positions, const openvdb::math::Vec3<double>& v, float radius, const Vector3f& cell_size) {
     int c = 0;
     float x = v.x(), y = v.y(), z = v.z();
     for(auto p : positions) {
         float x0 = p.x(), y0 = p.y(), z0 = p.z();
 
-        if((x0 - x) * (x0 - x) + (y0 - y) * (y0 - y) + (z0 - z) * (z0 - z) < radius * radius) {
+        bool inside = false;
+        for(int i = 0; i < 2 && !inside; i++) {
+            for(int j = 0; j < 2 && !inside; j++) {
+                for (int k = 0; k < 2 && !inside; k++) {
+                    float dx = (i == 0) ? -cell_size.x() / 2.0 : cell_size.x() / 2.0;
+                    float dy = (j == 0) ? -cell_size.y() / 2.0 : cell_size.y() / 2.0;
+                    float dz = (k == 0) ? -cell_size.z() / 2.0 : cell_size.z() / 2.0;
+                    if ((x0 - x + dx) * (x0 - x + dx) + (y0 - y + dy) * (y0 - y + dy) + (z0 - z + dz) * (z0 - z + dz) < radius * radius) {
+                        inside = true;
+                    }
+                }
+            }
+        }
+
+        if(inside) {
             c++;
         }
     }
     return c;
 }
 
-static int count(const std::vector<PointData>& positions, const openvdb::math::Vec3<double>& v) {
+static int count(const std::vector<PointData>& positions, const openvdb::math::Vec3<double>& v, const Vector3f& cell_size) {
     int c = 0;
     for(auto p : positions) {
         float x0 = p.first.x(), y0 = p.first.y(), z0 = p.first.z();
@@ -61,14 +75,24 @@ void write_vdb(const std::vector<Point3f>& positions, const ProceduralMetadata& 
 
     openvdb::FloatGrid::Accessor accessor = grid->getAccessor();
 
+    int counter = 0;
+
+    openvdb::math::Vec3 cs = trafo->indexToWorld(openvdb::Coord(0, 0, 0)) - trafo->indexToWorld(openvdb::Coord(1, 1, 1));
+    Vector3f cell_size = Vector3f(cs.x(), cs.y(), cs.z());
+
     for(int x = -res.x() / 2; x <= res.x() / 2; x++) {
         for (int y = -res.y() / 2; y <= res.y() / 2; y++) {
             for (int z = -res.z() / 2; z <= res.z() / 2; z++) {
                 openvdb::Coord xyz(x, y, z);
                 openvdb::math::Vec3 pos = trafo->indexToWorld(xyz);
 
-                int occurrences = count(positions, pos, metadata.radius);
+                int occurrences = count(positions, pos, metadata.radius, cell_size);
                 accessor.setValue(xyz, std::max(0, occurrences));
+                counter++;
+
+                if(counter % 100 == 0) {
+                    std::cout << "Processed " << counter << " / " << res.x() * res.y() * res.z() << " points" << std::endl;
+                }
             }
         }
     }
@@ -87,8 +111,49 @@ void write_vdb(const std::vector<Point3f>& positions, const ProceduralMetadata& 
     file.close();
 }
 
-void write_vdb(const std::vector<Point3f>& main_positions, const std::vector<Point3f>& bg_positions, const ProceduralMetadata& metadata) {
+static void fragmentSpheres(std::vector<Point3f>& fragmented, float& new_radius, const std::vector<Point3f>& positions, const ProceduralMetadata& metadata) {
     pcg32 random;
+
+    int N_SPHERES = 30;
+
+    new_radius = metadata.radius / 60.0f;
+
+    int counter = 0;
+
+    for(const auto& p : positions) {
+
+        int n_added = 0;
+        while(n_added < N_SPHERES) {
+
+            float x = 2 * random.nextFloat() - 1;
+            float y = 2 * random.nextFloat() - 1;
+            float z = 2 * random.nextFloat() - 1;
+
+            if(x*x + y*y + z*z < 1.0) {
+                Point3f new_p = p + metadata.radius * Vector3f(x, y, z);
+                fragmented.push_back(new_p);
+                n_added++;
+            }
+        }
+
+        counter++;
+
+        if(counter % 10000 == 0) {
+            std::cout << "Spheres fragmented:  " << counter << std::endl;
+        }
+    }
+
+    std::cout << "Spheres fragmented:  " << counter << "\ndone." << std::endl;
+
+}
+
+void write_vdb(const std::vector<Point3f>& main_positions, const std::vector<Point3f>& unused, const ProceduralMetadata& metadata) {
+
+    std::cout << "Writing VDB data from " << main_positions.size() << " positions" << std::endl;
+    std::vector<Point3f> fragmented_positions;
+    float radius;
+
+    fragmentSpheres(fragmented_positions, radius, main_positions, metadata);
 
     Vector3i res = metadata.resolution;
 
@@ -114,19 +179,67 @@ void write_vdb(const std::vector<Point3f>& main_positions, const std::vector<Poi
 
     openvdb::FloatGrid::Accessor accessor = grid->getAccessor();
 
+    openvdb::math::Vec3 cs = trafo->indexToWorld(openvdb::Coord(0, 0, 0)) - trafo->indexToWorld(openvdb::Coord(1, 1, 1));
+    Vector3f cell_size = Vector3f(cs.x(), cs.y(), cs.z());
+
+    std::cout << "Sphere radius over cell size: " << radius / abs(cell_size.x()) << std::endl;
+
+    int counter = 0;
+    int n_cells_reached = 0;
+
+    for(const auto& p : fragmented_positions) {
+
+        std::set<openvdb::Coord> coords;
+
+        for(int r_ = 0; r_ < 8; r_++) {
+            for(int phi_ = 0; phi_ < std::min(3 * r_, 8); phi_++) {
+                for(int theta_ = 0; theta_ < std::min(3 * r_, 8); theta_++) {
+                    float r = radius * r_ / 3.0f;
+                    float theta = M_PI * theta_ / 3.0f;
+                    float phi = 2 * M_PI * phi_ / 3.0f;
+
+                    Vector3f sphere_point = p + r * sphericalDirection(theta, phi);
+
+                    openvdb::Coord xyz = trafo->worldToIndexCellCentered(openvdb::math::Vec3(sphere_point.x(), sphere_point.y(), sphere_point.z()));
+                    coords.insert(xyz);
+                }
+            }
+        }
+
+        n_cells_reached += coords.size();
+
+        for(const auto& coord : coords) {
+            accessor.setValue(coord, accessor.getValue(coord) + 1);
+        }
+
+        counter++;
+        if(counter % 30000 == 0) {
+            std::cout << "Processed " << 100 * counter / fragmented_positions.size() << "%" << " of the spheres" << std::endl;
+        }
+    }
+
+    std::cout << "Average cells reached per point: " << n_cells_reached / (float) fragmented_positions.size() << std::endl;
+
+    /*
     for(int x = -res.x() / 2; x <= res.x() / 2; x++) {
         for (int y = -res.y() / 2; y <= res.y() / 2; y++) {
             for (int z = -res.z() / 2; z <= res.z() / 2; z++) {
                 openvdb::Coord xyz(x, y, z);
                 openvdb::math::Vec3 pos = trafo->indexToWorld(xyz);
+                openvdb::math::Vec3 next_pos = trafo->indexToWorld(openvdb::Coord(x+1, y+1, z+1));
 
-                int main_occurrences = count(main_positions, pos, metadata.radius);
-                int bg_occurrences = count(bg_positions, pos, metadata.radius_bg);
+                int main_occurrences = count(fragmented_positions, pos, radius, cell_size);
 
-                accessor.setValue(xyz, std::max(0.f, main_occurrences + 0.05f * bg_occurrences));
+                accessor.setValue(xyz, main_occurrences);
+
+                counter++;
+
+                if(counter % 30000 == 0) {
+                    std::cout << "Processed " << 100 * counter / (res.x() * res.y() * res.z()) << "%" << " of the spheres" << std::endl;
+                }
             }
         }
-    }
+    }*/
 
 
     grid->setGridClass(openvdb::GRID_LEVEL_SET);
@@ -200,13 +313,16 @@ void write_spiral(const Vector3i& res, const Transform& curve_transform, const s
 
     openvdb::FloatGrid::Accessor accessor = grid->getAccessor();
 
+    openvdb::math::Vec3 cs = trafo->indexToWorld(openvdb::Coord(0, 0, 0)) - trafo->indexToWorld(openvdb::Coord(1, 1, 1));
+    Vector3f cell_size = Vector3f(cs.x(), cs.y(), cs.z());
+
     for(int x = -res.x() / 2; x <= res.x() / 2; x++) {
         for (int y = -res.y() / 2; y <= res.y() / 2; y++) {
             for (int z = -res.z() / 2; z <= res.z() / 2; z++) {
                 openvdb::Coord xyz(x, y, z);
                 openvdb::math::Vec3 pos = trafo->indexToWorld(xyz);
 
-                int occurrences = count(points, pos);
+                int occurrences = count(points, pos, cell_size);
                 accessor.setValue(xyz, std::max(0, occurrences));
             }
         }
@@ -336,6 +452,9 @@ void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const Boundi
 
     openvdb::FloatGrid::Accessor accessor = grid->getAccessor();
 
+    openvdb::math::Vec3 cs = trafo->indexToWorld(openvdb::Coord(0, 0, 0)) - trafo->indexToWorld(openvdb::Coord(1, 1, 1));
+    Vector3f cell_size = Vector3f(cs.x(), cs.y(), cs.z());
+
     for(int x = -voxel_res.x() / 2; x <= voxel_res.x() / 2; x++) {
         for (int y = -voxel_res.y() / 2; y <= voxel_res.y() / 2; y++) {
             for (int z = -voxel_res.z() / 2; z <= voxel_res.z() / 2; z++) {
@@ -345,7 +464,7 @@ void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const Boundi
                 float cx = pos.x(), cy = pos.y(), cz = pos.z();
 
 
-                int main_occurrences = count(points, pos, SPHERE_RADIUS);
+                int main_occurrences = count(points, pos, SPHERE_RADIUS, cell_size);
 
                 if((cx - hole.x()) * (cx - hole.x()) + (cy - hole.y()) * (cy - hole.y()) + (cz - hole.z()) * (cz - hole.z()) < hole_radius * hole_radius &&
                    (cx - hole.x()) * (cx - hole.x()) + (cy - hole.y()) * (cy - hole.y()) + (cz - hole.z()) * (cz - hole.z()) > -0.1 * hole_radius * hole_radius) {

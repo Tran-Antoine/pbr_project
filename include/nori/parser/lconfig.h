@@ -486,18 +486,18 @@ public:
 
         if (state.depth >= 3) {
             for(int i = 0; i < 15; i++) {
-                
+
                 float t = random.nextFloat() * state.length;
                 float dx = 2 * random.nextFloat() - 1;
                 float dy = 2 * random.nextFloat() - 1;
-                float dz = 2 * random.nextFloat() - 2;
+                float dz = 2 * random.nextFloat() - 1;
 
-                Point3f cloud_pos = state.forward(t) + 0.7f * Vector3f(dx, dy, dz);
+                Point3f cloud_pos = state.forward(t) + 1.75f * Vector3f(dx, dy, dz);
 
 
                 if(i < 10) {
-                    Point3f pos = state.forward(t) + 0.1f * Vector3f(dx, dy, dz);
-                    drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0,  0.3, pos), positions, indices, temp);
+                    Point3f pos = state.forward(t) + 0.6f * Vector3f(dx, dy, dz);
+                    drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0,  0.4, pos), positions, indices, temp);
                 }
                 flower_anchors.push_back(cloud_pos);
                 flower_bounds.expandBy(1.1 * cloud_pos);
