@@ -74,6 +74,8 @@ public:
             // NEE for either medium scattering or surface intersection with Emitter Importance Sampling
             for(const Emitter* emitter : scene->getEmitters()) {
 
+                if(!scatters && hit_bsdf && !hit_bsdf->isDiffuse()) break;
+
                 float light_point_pdf;
                 // Sample point on the emitter
                 EmitterQueryRecord record = recordForNEE(current_ray, its, intersection_point, scatters);
@@ -122,7 +124,8 @@ public:
                 if(emitter->is_source_visible(scene, record)) {
                     Color3f t = weight * direct_transmittance * beta * emitted * directional_cost * angular_distortion;
                     if(!t.isValid()) {
-                        std::cout << "Invalid variance: " << t.r() << ", " << t.g() << ", " << t.b() << std::endl;
+                        //std::cout << "Weight: " << weight << ", direct transmittance: " << vstr(direct_transmittance) << ", beta: " << vstr(beta) << ", emitted: " << vstr(emitted) << ", directional cost: " << directional_cost << ", angular distortion: " << angular_distortion << std::endl;
+                        std::cout << "Invalid variance A: " << t.r() << ", " << t.g() << ", " << t.b() << std::endl;
                     } else
                         add_illumination(Li, weight * direct_transmittance * beta * emitted * directional_cost * angular_distortion);
                 }
@@ -341,7 +344,7 @@ public:
 
     static void add_illumination(Color3f& src, const Color3f& val) {
         if(!val.isValid()) {
-            std::cout << "Invalid radiance: " << val.r() << ", " << val.g() << ", " << val.b() << "" << std::endl;
+            std::cout << "Invalid radiance B: " << val.r() << ", " << val.g() << ", " << val.b() << "" << std::endl;
             //throw NoriException("Invalid radiance");
         } else {
             src += val;

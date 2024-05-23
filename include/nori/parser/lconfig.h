@@ -492,7 +492,7 @@ public:
                 float dy = 2 * random.nextFloat() - 1;
                 float dz = 2 * random.nextFloat() - 1;
 
-                Point3f cloud_pos = state.forward(t) + 1.5f * Vector3f(dx, dy, dz);
+                Point3f cloud_pos = state.forward(t) + 1.3f * Vector3f(dx, dy, dz);
 
 
                 if(i < 10) {

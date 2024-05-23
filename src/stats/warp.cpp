@@ -372,8 +372,7 @@ Color3f Warp::ratio_tracking(const Point3f& a, const Point3f& b, const Medium& m
         weight *= null_amount / maj;
 
         if(weight.minCoeff() < 0) {
-            medium.majorant(ray);
-            medium.attenuation(a + d*t, d);
+            return Color3f(0);
         }
     }
 

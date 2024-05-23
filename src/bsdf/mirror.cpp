@@ -52,7 +52,7 @@ public:
         /* Relative index of refraction: no change */
         bRec.eta = 1.0f;
 
-        return Color3f(1.0f);
+        return Color3f(0.8f, 0.8f,1.0f);
     }
 
     std::string toString() const {

@@ -24,4 +24,6 @@ void write_spiral(const Vector3i& res, const Transform& trafo, const std::string
 
 void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const BoundingBox3f& bounds, const Point3f& hole, float hole_radius, const std::string& output_path);
 
+void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const BoundingBox3f& bounds, const std::vector<Point3f>& holes, const std::vector<float>& hole_radii, const std::string& output_path);
+
 NORI_NAMESPACE_END

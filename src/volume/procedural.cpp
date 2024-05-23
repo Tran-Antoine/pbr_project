@@ -14,7 +14,7 @@ static int count(const std::vector<Point3f>& positions, const openvdb::math::Vec
     for(auto p : positions) {
         float x0 = p.x(), y0 = p.y(), z0 = p.z();
 
-        bool inside = false;
+        /*bool inside = false;
         for(int i = 0; i < 2 && !inside; i++) {
             for(int j = 0; j < 2 && !inside; j++) {
                 for (int k = 0; k < 2 && !inside; k++) {
@@ -26,9 +26,9 @@ static int count(const std::vector<Point3f>& positions, const openvdb::math::Vec
                     }
                 }
             }
-        }
+        }*/
 
-        if(inside) {
+        if((x0 - x) * (x0 - x) + (y0 - y) * (y0 - y) + (z0 - z) * (z0 - z) < radius * radius) {
             c++;
         }
     }
@@ -371,7 +371,19 @@ static Vector3f random_displacement(pcg32& random, bool ultra_wide) {
 void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const BoundingBox3f& bounds, const Point3f& hole,
                float hole_radius, const std::string& output_path) {
 
-    // Add a few initial big spheres that make the main shape (instead of just square)
+    std::vector<Point3f> holes = {hole};
+    std::vector<float> hole_radii = {hole_radius};
+    write_sky(n_clouds, voxel_res, bounds, holes, hole_radii, output_path);
+}
+
+void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const BoundingBox3f& bounds,
+               const std::vector<Point3f>& holes, const std::vector<float>& hole_radii, const std::string& output_path) {
+
+    if(holes.size() != hole_radii.size()) {
+        std::cout << "holes and hole_radii must have the same length\n";
+        return;
+    }
+
     pcg32 random;
 
     std::vector<Point3f> points;
@@ -464,12 +476,17 @@ void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const Boundi
                 float cx = pos.x(), cy = pos.y(), cz = pos.z();
 
 
-                int main_occurrences = count(points, pos, SPHERE_RADIUS, cell_size);
+                float main_occurrences = (float) count(points, pos, SPHERE_RADIUS, cell_size);
 
-                if((cx - hole.x()) * (cx - hole.x()) + (cy - hole.y()) * (cy - hole.y()) + (cz - hole.z()) * (cz - hole.z()) < hole_radius * hole_radius &&
-                   (cx - hole.x()) * (cx - hole.x()) + (cy - hole.y()) * (cy - hole.y()) + (cz - hole.z()) * (cz - hole.z()) > -0.1 * hole_radius * hole_radius) {
-                    main_occurrences /= 10;
+                for(int i = 0; i < holes.size(); i++) {
+                    const Point3f& hole = holes[i];
+                    float hole_radius = hole_radii[i];
+                    if((cx - hole.x()) * (cx - hole.x()) + (cy - hole.y()) * (cy - hole.y()) + (cz - hole.z()) * (cz - hole.z()) < hole_radius * hole_radius) {
+                        main_occurrences /= 7.0;
+                        break;
+                    }
                 }
+
                 accessor.setValue(xyz, main_occurrences);
             }
         }
