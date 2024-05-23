@@ -492,13 +492,14 @@ public:
                 float dy = 2 * random.nextFloat() - 1;
                 float dz = 2 * random.nextFloat() - 1;
 
-                Point3f cloud_pos = state.forward(t) + 1.75f * Vector3f(dx, dy, dz);
+                Point3f cloud_pos = state.forward(t) + 1.5f * Vector3f(dx, dy, dz);
 
 
                 if(i < 10) {
                     Point3f pos = state.forward(t) + 0.6f * Vector3f(dx, dy, dz);
-                    drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0,  0.4, pos), positions, indices, temp);
+                    drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0,  0.01, pos), positions, indices, temp);
                 }
+
                 flower_anchors.push_back(cloud_pos);
                 flower_bounds.expandBy(1.1 * cloud_pos);
             }
@@ -513,7 +514,9 @@ public:
             float max_depth = 3;
 
             if(state.depth >= max_depth) {
-                drawCylinder(state, positions, indices, temp);
+                if(state.depth <= 11) {
+                    drawCylinder(state, positions, indices, temp);
+                }
             } else {
                 int BASE_RES_X  = 6;
                 int BASE_RES_Z  = 6;

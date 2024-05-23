@@ -3,7 +3,7 @@
     <boolean name="save" value="true"/>
     <integrator type="volum7"/>
     <sampler type="independent">
-        <integer name="sampleCount" value="128"/>
+        <integer name="sampleCount" value="40"/>
     </sampler>
     <camera type="perspective">
         <float name="fov" value="69.39030966512573"/>

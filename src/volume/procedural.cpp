@@ -213,7 +213,7 @@ void write_vdb(const std::vector<Point3f>& main_positions, const std::vector<Poi
         }
 
         counter++;
-        if(counter % 30000 == 0) {
+        if(counter % 60000 == 0) {
             std::cout << "Processed " << 100 * counter / fragmented_positions.size() << "%" << " of the spheres" << std::endl;
         }
     }
