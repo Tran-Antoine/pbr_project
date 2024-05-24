@@ -146,6 +146,8 @@ public:
             config = new BGTree(random, map, width_factor, length_factor, pitch_term, yaw_term, trafo);
         } else if(controller == "BGTree2") {
             config = new BGTree2(random, map, width_factor, length_factor, pitch_term, yaw_term, trafo);
+        } else if(controller == "Root") {
+            config = new RootConfig(random, map, width_factor, length_factor, pitch_term, yaw_term, trafo);
         } else {
             std::cout << "Warning: no config file found" << std::endl;
         }
@@ -176,7 +178,7 @@ public:
 
             ProceduralMetadata data = { 1.2f, 0.f, flower_bounds, Vector3i(300, 300, 300),
                                         "assets/voxel/procedural/islandflowers.vdb"};
-            write_vdb(cloud_points, tc->bg_anchors, data);
+            //write_vdb(cloud_points, tc->bg_anchors, data);
 
         }
 

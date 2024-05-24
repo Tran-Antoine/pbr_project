@@ -514,7 +514,7 @@ public:
             float max_depth = 3;
 
             if(state.depth >= max_depth) {
-                if(state.depth <= 11) {
+                if(state.depth <= 9) {
                     drawCylinder(state, positions, indices, temp);
                 }
             } else {
@@ -818,7 +818,7 @@ public:
                 float dz = 2 * random.nextFloat() - 2;
 
                 Point3f pos = state.forward(t) + 0.1f * Vector3f(dx, dy, dz);
-                drawMesh("assets/shape/cube.obj", create_affine_matrix(0, 0, 0.5 * 0.2, pos), positions, indices, temp);
+                drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.3, pos), positions, indices, temp);
 
             }
             for(auto t : temp) {
@@ -848,6 +848,73 @@ public:
             temp.clear();
         }
 
+    }
+
+protected:
+    Transform trafo;
+    pcg32 random;
+    MultiDiffuseMap* map = nullptr;
+
+};
+
+class RootConfig : public LGrammarConfig {
+
+public:
+    RootConfig(pcg32& random, MultiDiffuseMap* map, float width_factor, float length_factor, float pitch_term, float yaw_term,
+                        const Transform& trafo)
+                : map(map),
+                  random(random),
+                  trafo(trafo),
+                  LGrammarConfig(2.2f, 5.5f, width_factor, length_factor, pitch_term, yaw_term){}
+
+    int colorCount() override {
+        return 1;
+    }
+
+    static int pick(float sample, float pa, float pb, float pc=0.f, float pd=0.f, float pe=0.f, float pf=0.f) {
+        if(sample < pa) return 0;
+        if(sample < pa + pb) return 1;
+        if(sample < pa + pb + pc) return 2;
+        if(sample < pa + pb + pc + pd) return 3;
+        if(sample < pa + pb + pc + pd + pe) return 4;
+        return 5;
+    }
+
+    int pickRule(char c, float thickness, float length, int depth) override {
+        float sample = random.nextFloat();
+
+        //Node =s Branch
+        //Node =s Branch Depth 30- Node; Branch Depth 30+ Node; Branch Depth 30+ 90> Node; Branch Depth 30+ 90< Node
+        //Node =s Branch Depth [wl 30+ Node][wl 30- Node]; Branch Depth [wl 30+ 90> Node][wl 30- 90> Node]
+
+        if(c == 'K') {
+            if(depth <= 2)  return pick(sample, 0.0, 0.0, 1.0);
+            if(depth <= 4)  return pick(sample, 0.1, 0.1, 0.8);
+            if(depth <= 6)  return pick(sample, 0.2, 0.2, 0.6);
+            else            return pick(sample, 0.7, 0.3, 0.0);
+        }
+
+        throw NoriException("Unhandled stochastic rule");
+    }
+
+    void drawSegment(char c, TurtleState& state, std::vector<Vector3f> &positions, std::vector<uint32_t> &indices, std::vector<Vector2f> &texcoords) override {
+
+        float max_depth = 7;
+
+        if(state.depth >= max_depth) {
+            drawCylinder(state, positions, indices, texcoords);
+            return;
+        }
+
+        int BASE_RES_X  = 6;
+        int BASE_RES_Z  = 6;
+        uint64_t SEED_STATE = 3227124;
+        uint64_t SEED_SEQ = 10951913;
+        FBM fbm(BASE_RES_X, BASE_RES_Z, 5, 0.35, 2.0, SEED_STATE, SEED_SEQ);
+        fbm.init_generators();
+
+
+        drawCylinder(state, fbm, state.depth / max_depth, state.depth / max_depth + 1 / max_depth,Vector2i(64, 64), positions, indices, texcoords);
     }
 
 protected:

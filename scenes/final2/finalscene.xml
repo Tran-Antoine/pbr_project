@@ -3,7 +3,7 @@
     <boolean name="save" value="true"/>
     <integrator type="volum7"/>
     <sampler type="independent">
-        <integer name="sampleCount" value="32"/>
+        <integer name="sampleCount" value="64"/>
     </sampler>
     <camera type="perspective">
         <float name="fov" value="69.39030966512573"/>
@@ -12,9 +12,9 @@
         <integer name="width" value="672"/>
         <integer name="height" value="378"/>
         <transform name="toWorld">
-            <matrix value="-0.06292232125997543,0.07933303713798523,-0.9948602914810181,150.01998901367188,0.0,0.9968355894088745,0.0794905573129654,4.099999904632568,0.9980184435844421,0.005001730751246214,-0.06272321194410324,0.0,0.0,0.0,0.0,1.0"/>
-        </transform>
+            <matrix value="-0.06292232125997543,0.07933303713798523,-0.9948602914810181,150.01998901367188,0.0,0.9968355894088745,0.0794905573129654,4.099999904632568,0.9980184435844421,0.005001730751246214,-0.06272321194410324,0.0,0.0,0.0,0.0,1.0"/>        </transform>
     </camera>
+
 
     <mesh type="obj">
         <string name="filename" value="meshes/Lake.obj"/>
@@ -23,14 +23,14 @@
             <string name="filename" value="assets/normal/waterhigh.exr"/>
         </diffusemap>
         <float name="bump_accentuate" value="0.08"/>
-        <bsdf type="diffuse">
+        <bsdf type="mirror">
             <color name="albedo" value="0.01 0.01 0.01"/>
             <float name="intIOR" value="1.7"/>
             <color name="kd" value="0.000002 0.000002 0.000004"/>
             <float name="alpha" value="0.4"/>
         </bsdf>
     </mesh>
-
+    <!---->
     <mesh type="obj">
         <string name="filename" value="meshes/LeftMountains.obj"/>
         <bsdf type="diffuse">
@@ -131,12 +131,12 @@
                 <color name="albedo" value="0.87, 0.4, 0.7"/>
             </diffusemap>
         </diffusemap>
-    </mesh>-->
+    </mesh>
 
     <mesh type="obj">
         <string name="filename" value="meshes/TreeIsland.obj"/>
         <transform name="toWorld">
-            <scale value="3 2.15 3"/>
+            <scale value="3 1.5 3"/>
         </transform>
         <bsdf type="diffuse">
             <diffusemap type="texture">
@@ -144,7 +144,7 @@
                 <float name="repeat" value="0.1"/>
             </diffusemap>
         </bsdf>
-    </mesh>
+    </mesh>-->
     <emitter type="env">
         <string name="half1" value="assets/env/lowcontrast_left.exr"/>
         <string name="half2" value="assets/env/lowcontrast_right.exr"/>
@@ -160,9 +160,6 @@
             <!--
             <color name="scattering" value="0.24 0.24 0.24"/>
             <color name="absorption" value="0.12 0.12 0.12"/>
-            -->
-
-            <!--
 
 
             <medium type="voxel">
@@ -170,6 +167,16 @@
                 <color name="scattering" value="0.09 0.99 0.45"/>
                 <color name="absorption" value="0.003 0.01 0.01"/>
             </medium>-->
+
+            <medium type="voxel">
+                <string name="voxel_path" value="assets/voxel/wdas_cloud/wdas_cloud_quarter.vdb"/>
+                <color name="absorption" value="0.02 0.02 0.01"/>
+                <color name="scattering" value="0.1 0.1 0.04"/>
+                <transform name="toWorld">
+                    <scale value="0.6, 0.6, 0.6"/>
+                    <translate value="-600, 80, 600"/>
+                </transform>
+            </medium>
 
             <medium type="voxel">
                 <string name="voxel_path" value="assets/voxel/procedural/skyhole.vdb"/>
@@ -180,7 +187,7 @@
             <medium type="homogeneous">
                 <color name="absorption" value="0.00015 0.00015 0.00015"/>
                 <color name="scattering" value="0.0011 0.0011 0.0011"/>
-                <point name="bounds_min" value="-1200, 0, -2500"/>
+                <point name="bounds_min" value="-800, 0, -2500"/>
                 <point name="bounds_max" value="145, 160, 2500"/>
             </medium>
 
@@ -189,7 +196,7 @@
 
     <emitter type="directional">
         <!-- <color name="radiance" value="20 20 15"/>-->
-        <color name="radiance" value="105 105 65"/>
+        <color name="radiance" value="136 136 84"/>
         <vector name="direction" value="200, -165, 100"/>
     </emitter>
 
@@ -203,6 +210,31 @@
     <!-- ALL TREES OF THE SCENE -->
     <!--_______________________ -->
 
+    <!-- TREE 2 -->
+    <mesh type="lsystem">
 
+        <transform name="toWorld">
+            <scale value="1.5 1.5 1.5"/>
+            <rotate axis="0 1 0" angle="90"/><translate value="5 0.5 -54"/>
+        </transform>
+
+        <string name="config" value="assets/grammar/bgtree2.l6"/><string name="controller" value="BGTree2"/>
+
+        <float name="width_factor" value="0.75"/><float name="length_factor" value="0.85"/>
+        <float name="pitch_term" value="5"/><float name="yaw_term" value="5"/>
+
+        <float name="seed" value="224671"/>
+        <integer name="evolutions" value="10"/>
+
+        <bsdf type="diffuse"><diffusemap type="mtexture">
+            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
+            <diffusemap type="uniform"><color name="albedo" value="5.2, 0.5, 0.5"/></diffusemap></diffusemap>
+        </bsdf>
+
+        <diffusemap type="mtexture">
+            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
+            <diffusemap type="uniform"><color name="albedo" value="0.93, 0.69, 0.84"/></diffusemap>
+        </diffusemap>
+    </mesh>
 
 </scene>

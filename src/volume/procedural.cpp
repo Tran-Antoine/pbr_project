@@ -482,7 +482,11 @@ void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const Boundi
                     const Point3f& hole = holes[i];
                     float hole_radius = hole_radii[i];
                     if((cx - hole.x()) * (cx - hole.x()) + (cy - hole.y()) * (cy - hole.y()) + (cz - hole.z()) * (cz - hole.z()) < hole_radius * hole_radius) {
-                        main_occurrences /= 7.0;
+                        if (hole_radius > 125) {
+                            main_occurrences = 0;
+                        } else {
+                            main_occurrences /= 7.0;
+                        }
                         break;
                     }
                 }
