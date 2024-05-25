@@ -9,10 +9,13 @@
         <float name="fov" value="69.39030966512573"/>
         <float name="nearClip" value="0.1"/>
         <float name="farClip" value="6000.0"/>
-        <integer name="width" value="672"/>
-        <integer name="height" value="378"/>
+        <integer name="width" value="480"/>
+        <integer name="height" value="270"/>
+
+
         <transform name="toWorld">
-            <matrix value="-0.06292232125997543,0.07933303713798523,-0.9948602914810181,150.01998901367188,0.0,0.9968355894088745,0.0794905573129654,4.099999904632568,0.9980184435844421,0.005001730751246214,-0.06272321194410324,0.0,0.0,0.0,0.0,1.0"/>        </transform>
+            <matrix value="-0.06292232125997543,0.07933303713798523,-0.9948602914810181,150.01998901367188,0.0,0.9968355894088745,0.0794905573129654,4.099999904632568,0.9980184435844421,0.005001730751246214,-0.06272321194410324,0.0,0.0,0.0,0.0,1.0"/>
+        </transform>
     </camera>
 
 
@@ -30,7 +33,7 @@
             <float name="alpha" value="0.4"/>
         </bsdf>
     </mesh>
-    <!---->
+
     <mesh type="obj">
         <string name="filename" value="meshes/LeftMountains.obj"/>
         <bsdf type="diffuse">
@@ -62,6 +65,9 @@
     </mesh>
     <mesh type="obj">
         <string name="filename" value="meshes/LandNear.obj"/>
+        <transform name="toWorld">
+            <translate value="0, -2, 0"/>
+        </transform>
         <bsdf type="diffuse">
             <diffusemap type="texture">
                 <string name="filename" value="assets/texture/mud.jpg"/>
@@ -88,7 +94,7 @@
         </bsdf>
     </mesh>
 
-    <!--
+
     <mesh type="lsystem">
 
         <string name="config" value="assets/grammar/middletree.l6"/>
@@ -133,10 +139,43 @@
         </diffusemap>
     </mesh>
 
+    <mesh type="lsystem">
+        <string name="config" value="assets/grammar/roots.l6"/>
+        <string name="controller" value="Root"/>
+
+        <float name="width_factor" value="0.7"/>
+        <float name="length_factor" value="0.85"/>
+        <float name="yaw_term" value="5"/>
+        <float name="pitch_term" value="5"/>
+        <float name="seed" value="22325"/>
+
+        <integer name="evolutions" value="8"/>
+
+        <transform name="toWorld">
+            <rotate axis="1 0 0" angle="180"/>
+            <translate value="-50, 11, -4"/>
+        </transform>
+
+        <bsdf type="diffuse">
+            <diffusemap type="mtexture">
+                <diffusemap type="texture">
+                    <string name="filename" value="assets/texture/trunk_texture_bright.jpg"/>
+                </diffusemap>
+            </diffusemap>
+        </bsdf>
+
+        <diffusemap type="mtexture">
+            <diffusemap type="texture">
+                <string name="filename" value="assets/texture/trunk_texture_bright.jpg"/>
+            </diffusemap>
+        </diffusemap>
+    </mesh>
+
     <mesh type="obj">
         <string name="filename" value="meshes/TreeIsland.obj"/>
         <transform name="toWorld">
-            <scale value="3 1.5 3"/>
+            <scale value="2.3 1.5 2.3"/>
+            <translate value="85 0 -3"/>
         </transform>
         <bsdf type="diffuse">
             <diffusemap type="texture">
@@ -144,7 +183,9 @@
                 <float name="repeat" value="0.1"/>
             </diffusemap>
         </bsdf>
-    </mesh>-->
+    </mesh>
+
+
     <emitter type="env">
         <string name="half1" value="assets/env/lowcontrast_left.exr"/>
         <string name="half2" value="assets/env/lowcontrast_right.exr"/>
@@ -157,7 +198,7 @@
     <mesh type="medium_mesh">
         <medium type="mvoxel">
 
-            <!--
+
             <color name="scattering" value="0.24 0.24 0.24"/>
             <color name="absorption" value="0.12 0.12 0.12"/>
 
@@ -166,17 +207,19 @@
                 <string name="voxel_path" value="assets/voxel/procedural/islandflowers.vdb"/>
                 <color name="scattering" value="0.09 0.99 0.45"/>
                 <color name="absorption" value="0.003 0.01 0.01"/>
-            </medium>-->
+            </medium>
+
 
             <medium type="voxel">
                 <string name="voxel_path" value="assets/voxel/wdas_cloud/wdas_cloud_quarter.vdb"/>
-                <color name="absorption" value="0.02 0.02 0.01"/>
-                <color name="scattering" value="0.1 0.1 0.04"/>
+                <color name="absorption" value="0.002 0.002 0.002"/>
+                <color name="scattering" value="0.5 0.5 0.25"/>
                 <transform name="toWorld">
-                    <scale value="0.6, 0.6, 0.6"/>
-                    <translate value="-600, 80, 600"/>
+                    <scale value="0.02, 0.01, 0.02"/>
+                    <translate value="135, 2.5, 4.5"/>
                 </transform>
             </medium>
+
 
             <medium type="voxel">
                 <string name="voxel_path" value="assets/voxel/procedural/skyhole.vdb"/>
@@ -195,13 +238,12 @@
     </mesh>
 
     <emitter type="directional">
-        <!-- <color name="radiance" value="20 20 15"/>-->
+        <!-- <color name="radiance" value="136 136 84"/>-->
         <color name="radiance" value="136 136 84"/>
         <vector name="direction" value="200, -165, 100"/>
     </emitter>
 
     <emitter type="directional">
-        <!-- <color name="radiance" value="20 20 15"/>-->
         <color name="radiance" value="1 1 1"/>
         <vector name="direction" value="-1, -0.6, 0"/>
     </emitter>
@@ -214,8 +256,8 @@
     <mesh type="lsystem">
 
         <transform name="toWorld">
-            <scale value="1.5 1.5 1.5"/>
-            <rotate axis="0 1 0" angle="90"/><translate value="5 0.5 -54"/>
+            <scale value="1.2 1.2 1.2"/>
+            <rotate axis="0 1 0" angle="90"/><translate value="5 2.5 -54"/>
         </transform>
 
         <string name="config" value="assets/grammar/bgtree2.l6"/><string name="controller" value="BGTree2"/>
@@ -228,7 +270,7 @@
 
         <bsdf type="diffuse"><diffusemap type="mtexture">
             <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="5.2, 0.5, 0.5"/></diffusemap></diffusemap>
+            <diffusemap type="uniform"><color name="albedo" value="5.7, 0.5, 1.5"/></diffusemap></diffusemap>
         </bsdf>
 
         <diffusemap type="mtexture">

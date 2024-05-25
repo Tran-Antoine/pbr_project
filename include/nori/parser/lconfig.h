@@ -818,7 +818,7 @@ public:
                 float dz = 2 * random.nextFloat() - 2;
 
                 Point3f pos = state.forward(t) + 0.1f * Vector3f(dx, dy, dz);
-                drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.3, pos), positions, indices, temp);
+                drawMesh("assets/shape/sphere_low.obj", create_affine_matrix(0, 0, 0.01, pos), positions, indices, temp);
 
             }
             for(auto t : temp) {
@@ -865,7 +865,7 @@ public:
                 : map(map),
                   random(random),
                   trafo(trafo),
-                  LGrammarConfig(2.2f, 5.5f, width_factor, length_factor, pitch_term, yaw_term){}
+                  LGrammarConfig(2.0f, 3.5f, width_factor, length_factor, pitch_term, yaw_term){}
 
     int colorCount() override {
         return 1;
