@@ -262,7 +262,7 @@ int main(int argc, char **argv) {
                           Point3f(0, 0, 0), 0.0, PATH0);
 
             }
-            if(true) {
+            if(false) {
                 std::string PATH1 = "assets/voxel/procedural/skyhole.vdb";
 
                 std::vector<Point3f> holes = {Point3f(-250, 165, -100), Point3f(-150, 165, 50), Point3f(-20, 165, 250),
@@ -271,7 +271,7 @@ int main(int argc, char **argv) {
                                               Point3f(-1270, 160, 700), Point3f(-1270, 160, 1050), Point3f(-1270, 160, 1400),
                                               Point3f(-88,  165, -130)};
 
-                std::vector<float> radii = {120, 50, 50, 130, 140, 130, 145, 130, 140, 130, 150, 140, 30};
+                std::vector<float> radii = {120, 50, 50, 130, 140, 130, 145, 130, 140, 130, 150, 140, 15};
 
                 write_sky(Vector3i(2, 1, 2), Vector3i(400, 80, 400),
                           BoundingBox3f(Point3f(-1250, 160, -1500), Point3f(200, 200, 1500)),

@@ -3,14 +3,14 @@
     <boolean name="save" value="true"/>
     <integrator type="volum7"/>
     <sampler type="independent">
-        <integer name="sampleCount" value="64"/>
+        <integer name="sampleCount" value="16"/>
     </sampler>
     <camera type="perspective">
         <float name="fov" value="69.39030966512573"/>
         <float name="nearClip" value="0.1"/>
         <float name="farClip" value="6000.0"/>
-        <integer name="width" value="480"/>
-        <integer name="height" value="270"/>
+        <integer name="width" value="960"/>
+        <integer name="height" value="540"/>
 
 
         <transform name="toWorld">
@@ -18,6 +18,7 @@
         </transform>
     </camera>
 
+    <!--
 
     <mesh type="obj">
         <string name="filename" value="meshes/Lake.obj"/>
@@ -66,7 +67,7 @@
     <mesh type="obj">
         <string name="filename" value="meshes/LandNear.obj"/>
         <transform name="toWorld">
-            <translate value="0, -2, 0"/>
+            <translate value="0, -1.3, 0"/>
         </transform>
         <bsdf type="diffuse">
             <diffusemap type="texture">
@@ -92,7 +93,7 @@
                 <string name="filename" value="assets/texture/mud_darker2.jpg"/>
             </diffusemap>
         </bsdf>
-    </mesh>
+    </mesh>-->
 
 
     <mesh type="lsystem">
@@ -149,7 +150,7 @@
         <float name="pitch_term" value="5"/>
         <float name="seed" value="22325"/>
 
-        <integer name="evolutions" value="8"/>
+        <integer name="evolutions" value="13"/>
 
         <transform name="toWorld">
             <rotate axis="1 0 0" angle="180"/>
@@ -209,7 +210,7 @@
                 <color name="absorption" value="0.003 0.01 0.01"/>
             </medium>
 
-
+            <!--
             <medium type="voxel">
                 <string name="voxel_path" value="assets/voxel/wdas_cloud/wdas_cloud_quarter.vdb"/>
                 <color name="absorption" value="0.002 0.002 0.002"/>
@@ -230,53 +231,26 @@
             <medium type="homogeneous">
                 <color name="absorption" value="0.00015 0.00015 0.00015"/>
                 <color name="scattering" value="0.0011 0.0011 0.0011"/>
-                <point name="bounds_min" value="-800, 0, -2500"/>
-                <point name="bounds_max" value="145, 160, 2500"/>
-            </medium>
+                <point name="bounds_min" value="-800, 0, -4500"/>
+                <point name="bounds_max" value="145, 160, 4500"/>
+            </medium>-->
 
         </medium>
     </mesh>
 
     <emitter type="directional">
-        <!-- <color name="radiance" value="136 136 84"/>-->
-        <color name="radiance" value="136 136 84"/>
+        <!-- <color name="radiance" value="144 144 89"/>-->
+        <color name="radiance" value="14 14 8"/>
         <vector name="direction" value="200, -165, 100"/>
     </emitter>
 
     <emitter type="directional">
         <color name="radiance" value="1 1 1"/>
-        <vector name="direction" value="-1, -0.6, 0"/>
+        <vector name="direction" value="-1, -0.3, 0"/>
     </emitter>
 
     <!--_______________________ -->
     <!-- ALL TREES OF THE SCENE -->
     <!--_______________________ -->
-
-    <!-- TREE 2 -->
-    <mesh type="lsystem">
-
-        <transform name="toWorld">
-            <scale value="1.2 1.2 1.2"/>
-            <rotate axis="0 1 0" angle="90"/><translate value="5 2.5 -54"/>
-        </transform>
-
-        <string name="config" value="assets/grammar/bgtree2.l6"/><string name="controller" value="BGTree2"/>
-
-        <float name="width_factor" value="0.75"/><float name="length_factor" value="0.85"/>
-        <float name="pitch_term" value="5"/><float name="yaw_term" value="5"/>
-
-        <float name="seed" value="224671"/>
-        <integer name="evolutions" value="10"/>
-
-        <bsdf type="diffuse"><diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="5.7, 0.5, 1.5"/></diffusemap></diffusemap>
-        </bsdf>
-
-        <diffusemap type="mtexture">
-            <diffusemap type="uniform"><color name="albedo" value="0.16 0.1 0.02"/></diffusemap>
-            <diffusemap type="uniform"><color name="albedo" value="0.93, 0.69, 0.84"/></diffusemap>
-        </diffusemap>
-    </mesh>
 
 </scene>

@@ -201,6 +201,10 @@ void write_vdb(const std::vector<Point3f>& main_positions, const std::vector<Poi
                     Vector3f sphere_point = p + r * sphericalDirection(theta, phi);
 
                     openvdb::Coord xyz = trafo->worldToIndexCellCentered(openvdb::math::Vec3(sphere_point.x(), sphere_point.y(), sphere_point.z()));
+
+                    if(sphere_point.y() < 17 && sphere_point.z() < 0 && sphere_point.z() > -30) {
+                        continue;
+                    }
                     coords.insert(xyz);
                 }
             }
@@ -482,7 +486,7 @@ void write_sky(const Vector3i& n_clouds, const Vector3i& voxel_res, const Boundi
                     const Point3f& hole = holes[i];
                     float hole_radius = hole_radii[i];
                     if((cx - hole.x()) * (cx - hole.x()) + (cy - hole.y()) * (cy - hole.y()) + (cz - hole.z()) * (cz - hole.z()) < hole_radius * hole_radius) {
-                        if (hole_radius > 125) {
+                        if (hole_radius > 129) {
                             main_occurrences = 0;
                         } else {
                             main_occurrences /= 7.0;

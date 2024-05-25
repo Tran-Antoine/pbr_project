@@ -442,10 +442,9 @@ public:
 
     void controlThickness(TurtleState &state, char c) override {
         if(state.depth < 3) return;
-
+        if(state.depth > 7) state.out_thickness *= 0.8;
         state.out_thickness *= 0.85;
         state.out_thickness *= (1 + Warp::lineToLogistic(random.nextFloat(), 0.01));
-        state.out_thickness = std::max(state.out_thickness, 0.01f);
     }
 
     int pickRule(char c, float thickness, float length, int depth) override {
@@ -514,8 +513,11 @@ public:
             float max_depth = 3;
 
             if(state.depth >= max_depth) {
-                if(state.depth <= 9) {
-                    drawCylinder(state, positions, indices, temp);
+                if(state.depth <= 11) {
+                    if (state.depth <= 7 || state.forward().y() > 19 ||
+                        state.forward().x() < 0) {
+                        drawCylinder(state, positions, indices, temp);
+                    }
                 }
             } else {
                 int BASE_RES_X  = 6;
