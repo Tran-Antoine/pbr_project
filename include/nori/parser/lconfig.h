@@ -442,9 +442,11 @@ public:
 
     void controlThickness(TurtleState &state, char c) override {
         if(state.depth < 3) return;
-        if(state.depth > 7) state.out_thickness *= 0.8;
         state.out_thickness *= 0.85;
         state.out_thickness *= (1 + Warp::lineToLogistic(random.nextFloat(), 0.01));
+        if(state.depth > 4) {
+            state.out_thickness = 0.0001;
+        }
     }
 
     int pickRule(char c, float thickness, float length, int depth) override {
@@ -489,7 +491,7 @@ public:
                 float t = random.nextFloat() * state.length;
                 float dx = 2 * random.nextFloat() - 1;
                 float dy = 2 * random.nextFloat() - 1;
-                float dz = 2 * random.nextFloat() - 1;
+                float dz = 2 * random.nextFloat() - 2;
 
                 Point3f cloud_pos = state.forward(t) + 1.3f * Vector3f(dx, dy, dz);
 
