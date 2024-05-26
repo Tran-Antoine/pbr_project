@@ -3,14 +3,14 @@
     <boolean name="save" value="true"/>
     <integrator type="volum7"/>
     <sampler type="independent">
-        <integer name="sampleCount" value="64"/>
+        <integer name="sampleCount" value="256"/>
     </sampler>
     <camera type="perspective">
         <float name="fov" value="69.39030966512573"/>
         <float name="nearClip" value="0.1"/>
         <float name="farClip" value="6000.0"/>
-        <integer name="width" value="960"/>
-        <integer name="height" value="540"/>
+        <integer name="width" value="1920"/>
+        <integer name="height" value="1080"/>
 
 
         <transform name="toWorld">
@@ -60,7 +60,7 @@
         <bsdf type="diffuse">
             <diffusemap type="texture">
                 <string name="filename" value="assets/texture/mud_darker2.jpg"/>
-                <float name="repeat" value="0.3"/>
+                <float name="repeat" value="0.4"/>
             </diffusemap>
         </bsdf>
     </mesh>
@@ -228,8 +228,15 @@
             <medium type="homogeneous">
                 <color name="absorption" value="0.0002 0.0002 0.0002"/>
                 <color name="scattering" value="0.0014 0.0014 0.0014"/>
-                <point name="bounds_min" value="-600, 0, -4500"/>
+                <point name="bounds_min" value="-800, 0, -4500"/>
                 <point name="bounds_max" value="145, 160, 4500"/>
+            </medium>
+
+            <medium type="homogeneous">
+                <color name="absorption" value="0.0002 0.0002 0.0002"/>
+                <color name="scattering" value="0.0014 0.0014 0.0014"/>
+                <point name="bounds_min" value="-1200, 0, -4500"/>
+                <point name="bounds_max" value="145, 5, 4500"/>
             </medium>
 
         </medium>
