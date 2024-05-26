@@ -379,7 +379,9 @@ public:
             : map(map),
               random(random),
               trafo(trafo),
-              LGrammarConfig(2.5f, 6.0f, width_factor, length_factor, pitch_term, yaw_term){}
+              LGrammarConfig(2.5f, 6.0f, width_factor, length_factor, pitch_term, yaw_term){
+        second_random = pcg32(238927);
+    }
 
     int colorCount() override {
         return 2;
@@ -444,8 +446,9 @@ public:
         if(state.depth < 3) return;
         state.out_thickness *= 0.85;
         state.out_thickness *= (1 + Warp::lineToLogistic(random.nextFloat(), 0.01));
-        if(state.depth > 4) {
-            state.out_thickness = 0.0001;
+        if(state.depth > 5) {
+            if(second_random.nextFloat() < 0.7)
+                state.out_thickness = 0.0001;
         }
     }
 
@@ -547,6 +550,7 @@ public:
     std::vector<Point3f> bg_anchors;
     BoundingBox3f flower_bounds;
     int counter = 0;
+    pcg32 second_random;
 
 protected:
     Transform trafo;
