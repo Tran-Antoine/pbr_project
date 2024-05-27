@@ -4,6 +4,7 @@
     <integrator type="volum7"/>
     <sampler type="independent">
         <integer name="sampleCount" value="256"/>
+        <integer name="seed" value="11211"/>
     </sampler>
     <camera type="perspective">
         <float name="fov" value="69.39030966512573"/>

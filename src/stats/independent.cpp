@@ -34,6 +34,7 @@ class Independent : public Sampler {
 public:
     Independent(const PropertyList &propList) {
         m_sampleCount = (size_t) propList.getInteger("sampleCount", 1);
+        seed = propList.getInteger("seed", 0);
     }
 
     virtual ~Independent() { }
@@ -47,8 +48,8 @@ public:
 
     void prepare(const ImageBlock &block) {
         m_random.seed(
-            block.getOffset().x(),
-            block.getOffset().y()
+            block.getOffset().x() + seed,
+            block.getOffset().y() + seed
         );
     }
 
@@ -74,6 +75,7 @@ protected:
 
 private:
     pcg32 m_random;
+    int seed;
 };
 
 NORI_REGISTER_CLASS(Independent, "independent");

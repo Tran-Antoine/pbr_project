@@ -16,6 +16,7 @@
 
 	<sampler type="independent">
 		<integer name="sampleCount" value="32"/>
+		<integer name="seed" value="222222"/>
 	</sampler>
 
 	<mesh type="obj">
