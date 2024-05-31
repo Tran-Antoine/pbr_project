@@ -3,8 +3,8 @@
     <boolean name="save" value="true"/>
     <integrator type="volum7"/>
     <sampler type="independent">
-        <integer name="sampleCount" value="256"/>
-        <integer name="seed" value="11211"/>
+        <integer name="sampleCount" value="512"/>
+        <integer name="seed" value="5"/>
     </sampler>
     <camera type="perspective">
         <float name="fov" value="69.39030966512573"/>

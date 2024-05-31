@@ -199,6 +199,7 @@ add_executable(nori
   src/volume/multimedium.cpp
 
   src/main.cpp
+  #test/merge_exr.cpp
   #test/readvoxel.cpp
   #test/medium_test.cpp
   #test/perlin_test.cpp
