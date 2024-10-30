@@ -47,7 +47,7 @@ static int count(const std::vector<PointData>& positions, const openvdb::math::V
     return c;
 }
 
-void write_vdb(const std::vector<Point3f>& positions, const ProceduralMetadata& metadata) {
+void write_flowers(const std::vector<Point3f>& positions, const ProceduralMetadata& metadata) {
 
     pcg32 random;
 
@@ -147,7 +147,7 @@ static void fragmentSpheres(std::vector<Point3f>& fragmented, float& new_radius,
 
 }
 
-void write_vdb(const std::vector<Point3f>& main_positions, const std::vector<Point3f>& unused, const ProceduralMetadata& metadata) {
+void write_flowers(const std::vector<Point3f>& main_positions, const std::vector<Point3f>& unused, const ProceduralMetadata& metadata) {
 
     std::cout << "Writing VDB data from " << main_positions.size() << " positions" << std::endl;
     std::vector<Point3f> fragmented_positions;

@@ -1,0 +1,71 @@
+<?xml version="1.0" ?>
+<scene>
+	<integrator type="volum7"/>
+	<sampler type="independent">
+		<integer name="sampleCount" value="16"/>
+	</sampler>
+	<camera type="perspective">
+		<float name="fov" value="60.28277150129064"/>
+		<float name="nearClip" value="0.10000000149011612"/>
+		<float name="farClip" value="1000.0"/>
+		<integer name="width" value="960"/>
+		<integer name="height" value="540"/>
+		<transform name="toWorld">
+			<matrix value="0.06050482764840126,-0.12405241280794144,0.9904294013977051,-107.37530517578125,0.0039512538351118565,0.9922692775726318,0.12404147535562515,13.182315826416016,-0.998160183429718,-0.003591669723391533,0.06052723526954651,19.278179168701172,0.0,0.0,0.0,1.0"/>
+		</transform>
+	</camera>
+	<mesh type="obj">
+		<string name="filename" value="meshes/Grid.obj"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.75,0.75,0.75"/>
+		</bsdf>
+	</mesh>
+	<mesh type="obj">
+		<string name="filename" value="meshes/Plane.obj"/>
+		<bsdf type="mirror">
+			<color name="albedo" value="0.75,0.75,0.75"/>
+		</bsdf>
+	</mesh>
+	<mesh type="obj">
+		<string name="filename" value="meshes/Sphere.001.obj"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.75,0.75,0.75"/>
+		</bsdf>
+	</mesh>
+	<mesh type="obj">
+		<string name="filename" value="meshes/Grid.003.obj"/>
+		<bsdf type="diffuse">
+			<color name="albedo" value="0.75,0.75,0.75"/>
+		</bsdf>
+	</mesh>
+
+
+	<mesh type="medium_mesh">
+		<medium type="mvoxel">
+			<medium type="voxel">
+				<string name="voxel_path" value="assets/voxel/procedural/spiraltest.vdb"/>
+				<color name="scattering" value="0.15 0.15 0.15"/>
+				<color name="absorption" value="0.05 0.05 0.05"/>
+				<transform name="toWorld">
+					<rotate axis="1, 0, 0" angle="0"/>
+					<translate value="0, 50, 50"/>
+					<scale value="0.7 0.7 0.7"/>
+				</transform>
+			</medium>
+			<medium type="homogeneous">
+				<color name="absorption" value="0.0002 0.001 0.01"/>
+				<color name="scattering" value="0.0002 0.001 0.01"/>
+				<point name="bounds_min" value="-30, 0, 20"/>
+				<point name="bounds_max" value="30, 30, 50"/>
+			</medium>
+		</medium>
+	</mesh>
+
+	<emitter type="env">
+		<string name="half1" value="assets/env/lowcontrast_left.exr"/>
+		<string name="half2" value="assets/env/lowcontrast_right.exr"/>
+		<float name="radius" value="500.0"/>
+		<point name="center" value="0,0,0"/>
+		<float name="intensity" value="0.2"/>
+	</emitter>
+</scene>

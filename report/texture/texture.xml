@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<scene>
+    <integrator type="path_mis"/>
+
+    <camera type="perspective">
+        <float name="fov" value="27.7856"/>
+        <transform name="toWorld">
+            <scale value="-1,1,1"/>
+            <lookat target="0, 0, 0" origin="-70, 0.4, 0" up="0, 1, 0"/>
+        </transform>
+
+        <integer name="height" value="900"/>
+        <integer name="width" value="900"/>
+    </camera>
+
+    <sampler type="independent">
+        <integer name="sampleCount" value="128"/>
+    </sampler>
+
+    <mesh type="hmap">
+        <transform name="toWorld">
+            <rotate axis="0, 0, 1" angle="90"/>
+            <rotate axis="1, 0, 0" angle="-90"/>
+
+        </transform>
+
+        <string name="filename" value="flat_hmap.exr"/>
+
+        <float name="minh" value="0"/>
+        <float name="maxh" value="1"/>
+        <float name="xratio" value ="0.1"/>
+        <float name="zratio" value ="0.1"/>
+
+        <bsdf type="diffuse">
+            <diffusemap type="texture">
+                <string name="filename" value="rabbit.jpg"/>
+                <float name="repeat" value="0.5"/> <!-- HERE YOU CAN CHANGE REPEAT -->
+            </diffusemap>
+        </bsdf>
+
+    </mesh>
+
+    <mesh type="obj">
+        <transform name="toWorld">
+            <translate value="-120, 3, 3"/>
+        </transform>
+        <string name="filename" value="assets/shape/sphere.obj"/>
+
+        <emitter type="area">
+            <color name="radiance" value="4500 4500 4500"/>
+        </emitter>
+
+        <bsdf type="diffuse">
+            <color name="albedo" value="0.2 0.2 0.2"/>
+        </bsdf>
+    </mesh>
+</scene>

@@ -1,0 +1,94 @@
+<?xml version="1.0" ?>
+<scene>
+    <boolean name="save" value="true"/>
+    <integrator type="volum7"/>
+    <sampler type="independent">
+        <integer name="sampleCount" value="16"/>
+        <integer name="seed" value="5"/>
+    </sampler>
+    <camera type="perspective">
+        <float name="fov" value="69.39030966512573"/>
+        <float name="nearClip" value="0.1"/>
+        <float name="farClip" value="6000.0"/>
+        <integer name="width" value="600"/>
+        <integer name="height" value="600"/>
+
+
+        <transform name="toWorld">
+            <matrix value="-0.06292232125997543,0.07933303713798523,-0.9948602914810181,150.01998901367188,0.0,0.9968355894088745,0.0794905573129654,4.099999904632568,0.9980184435844421,0.005001730751246214,-0.06272321194410324,0.0,0.0,0.0,0.0,1.0"/>
+        </transform>
+    </camera>
+
+    <mesh type="lsystem">
+
+        <string name="config" value="assets/grammar/middletree.l6"/>
+        <string name="controller" value="TreeIsland"/>
+        <float name="width_factor" value="0.75"/>
+        <float name="length_factor" value="0.95"/>
+        <float name="pitch_term" value="5"/>
+        <float name="yaw_term" value="5"/>
+
+        <float name="seed" value="222225"/>
+        <integer name="evolutions" value="13"/>
+
+        <float name="bump_accentuate" value="3"/>
+        <diffusemap type="texture">
+            <string name="id" value="normal"/>
+            <string name="filename" value="assets/texture/trunk_normal.exr"/>
+        </diffusemap>
+
+        <transform name="toWorld">
+            <rotate axis="0 1 0" angle="90"/>
+            <translate value="20 1.5 -10"/>
+        </transform>
+
+        <bsdf type="diffuse">
+            <diffusemap type="mtexture">
+                <diffusemap type="texture">
+                    <string name="filename" value="assets/texture/trunk_texture_bright.jpg"/>
+                </diffusemap>
+                <diffusemap type="uniform">
+                    <color name="albedo" value="2.5, 0.1, 1"/>
+                </diffusemap>
+            </diffusemap>
+        </bsdf>
+
+        <diffusemap type="mtexture">
+            <diffusemap type="uniform">
+                <color name="albedo" value="0.16 0.1 0.02"/>
+            </diffusemap>
+            <diffusemap type="uniform">
+                <color name="albedo" value="0.87, 0.4, 0.7"/>
+            </diffusemap>
+        </diffusemap>
+    </mesh>
+
+    <emitter type="env">
+        <string name="half1" value="assets/env/lowcontrast_left.exr"/>
+        <string name="half2" value="assets/env/lowcontrast_right.exr"/>
+        <float name="radius" value="5000.0"/>
+        <point name="center" value="0,0,0"/>
+        <float name="intensity" value="0.5"/> <!-- 0.5 -->
+    </emitter>
+
+
+    <mesh type="medium_mesh">
+        <medium type="mvoxel">
+            <medium type="voxel">
+                <string name="voxel_path" value="assets/voxel/procedural/testflowers.vdb"/>
+                <color name="scattering" value="0.09 0.99 0.45"/>
+                <color name="absorption" value="0.003 0.01 0.01"/>
+            </medium>
+        </medium>
+    </mesh>
+
+    <emitter type="directional">
+        <!-- <color name="radiance" value="175 135 98"/>-->
+        <color name="radiance" value="17 13 9"/>
+        <vector name="direction" value="200, -165, 90"/>
+    </emitter>
+    <!--_______________________ -->
+    <!-- ALL TREES OF THE SCENE -->
+    <!--_______________________ -->
+
+</scene>

@@ -1,0 +1,38 @@
+<scene>
+    <integrator type="path_mis">
+    </integrator>
+
+    <sampler type="independent">
+        <integer name="sampleCount" value="512"/>
+    </sampler>
+
+    <camera type="perspective">
+        <!-- Camera-to-world coordinate system transformation -->
+        <transform name="toWorld">
+            <lookat origin="-0.4, 0.2, -3.2" target="0.5, 0.2, 0.5" up="0,1,0"/>
+        </transform>
+
+        <float name="fov" value="100"/>
+
+        <integer name="width" value="400"/>
+        <integer name="height" value="400"/>
+    </camera>
+
+    <emitter type="env">
+        <string name="half1" value="assets/env/bluesky_left.exr"/>
+        <string name="half2" value="assets/env/bluesky_right.exr"/>
+        <float name="radius" value="1000.0"/>
+        <point name="center" value="0,0,0"/>
+        <float name="intensity" value="1"/>
+    </emitter>
+
+    <mesh type="obj">
+        <string name="filename" value="assets/shape/sphere.obj"/>
+        <bsdf type="microfacet">
+            <color name="albedo" value="0.2 0.2 0.2"/>
+            <float name="intIOR" value="2.7"/>
+            <color name="kd" value="0.2 0.2 0.2"/>
+            <float name="alpha" value="0.2"/>
+        </bsdf>
+    </mesh>
+</scene>

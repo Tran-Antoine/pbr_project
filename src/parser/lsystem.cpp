@@ -178,7 +178,7 @@ public:
 
             ProceduralMetadata data = { 1.2f, 0.f, flower_bounds, Vector3i(300, 300, 300),
                                         "assets/voxel/procedural/islandflowers.vdb"};
-            //write_vdb(cloud_points, tc->bg_anchors, data);
+            //write_flowers(cloud_points, tc->bg_anchors, data);
 
         }
 

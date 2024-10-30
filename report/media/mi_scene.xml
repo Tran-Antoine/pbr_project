@@ -1,0 +1,77 @@
+<scene version="3.0.0">
+
+	<integrator type="volpathmis">
+        <!-- Instantiate a path tracer with a max. path length of 8 -->
+        <integer name="max_depth" value="16"/>
+    </integrator>
+
+    <sensor type="perspective">
+        <!-- Rotate the camera around the Y axis by 180 degrees -->
+        <transform name="to_world">
+			<matrix value="-0.8455273509025574,0.23096029460430145,0.4813947081565857,-0.6690858006477356,0.012723543681204319,0.9100624322891235,-0.41427579522132874,0.6885551810264587,-0.5337805151939392,-0.3441564738750458,-0.7724213004112244,1.0762686729431152,0.0,0.0,0.0,1.0"/>
+		</transform>
+        <float name="fov" value="38"/>
+		<float name="near_clip" value="0.0001"/>
+
+        <!-- Render with 32 samples per pixel using a basic
+             independent sampling strategy -->
+        <sampler type="independent">
+            <integer name="sample_count" value="16"/>
+        </sampler>
+
+        <!-- Generate an EXR image at HD resolution -->
+        <film type="hdrfilm">
+            <integer name="width" value="840"/>
+            <integer name="height" value="490"/>
+        </film>
+    </sensor>
+	
+    <shape type="obj">
+        
+		<string name="filename" value="meshes/bunny.obj"/>
+		
+		<bsdf type="dielectric">
+            <!-- Tweak the roughness parameter of the material -->
+            <float name="int_ior" value="1"/>
+			<float name="ext_ior" value="1"/>
+        </bsdf>
+		
+		
+		<medium name="interior" type="homogeneous">
+			<rgb name="albedo" value="0.8, 0.8, 0.8"/>
+			<float name="sigma_t" value="3.5"/>
+			<phase type="isotropic" />
+		</medium>
+    </shape>
+	
+	<shape type="obj">
+        
+		<string name="filename" value="meshes/Sphere.obj"/>
+		
+		<bsdf type="diffuse">
+            <!-- Tweak the roughness parameter of the material -->
+            <rgb name="reflectance" value="0.2, 0.25, 0.7"/>
+        </bsdf>
+		
+		<emitter type="area">
+            <rgb name="radiance" value="3,3,3"/>
+		</emitter>
+    </shape>
+	
+	<shape type="obj">
+        
+		<string name="filename" value="meshes/Grid.obj"/>
+		
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.05, 0.05, 0.1"/>
+		</bsdf>
+    </shape>
+	
+</scene>
+
+
+
+
+
+
+

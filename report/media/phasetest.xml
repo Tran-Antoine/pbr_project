@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<test type="chi2test_phase">
+    <phase type="uniform-phase"/>
+
+    <phase type="hg">
+        <float name="g" value="0.87"/>
+    </phase>
+</test>

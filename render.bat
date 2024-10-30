@@ -1,1 +1,0 @@
-build/Release/nori.exe %*

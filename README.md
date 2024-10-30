@@ -1,26 +1,26 @@
-Advanced Computer Graphics — Homeworks
+Advanced Computer Graphics — Final project
 ======================================
 
-Student name:
+## About this repository
 
-Sciper number:
+### Project report
 
+An extensive report of all the features implemented is in `report`. You can read it by cloning the repository and opening the `final_report.html` file in a browser (just downloading the html file won't work, as it uses images from the report folder)
 
-## Build status
+### Resource files
+- `assets` contains all resource files used to render the scenes, including models (obj), volumes (vdb), HDRIs (exr), grammars (l6) and textures (png, jpg, exr)
+- `scenes` contains all scene files used throughout the project. The main scene of interest is `scenes/final/finalscene.xml`
+- `renders` contains a bunch of images rendered from the scenes, including some at various testing stages (to keep a record of the progress)
 
-**Insert your build badge URL here**
+### Code
 
-## Homework results
-
-| Homework   |  Links
-| ---------: | ---------------------------------------------
-| 1          | [report.html](results/homework-1/report.html)
-| 2          | [report.html](results/homework-2/report.html)
-| 3          | [report.html](results/homework-3/report.html)
-| 4          | [report.html](results/homework-4/report.html)
-| 5          | [report.html](results/homework-5/report.html)
-
-
-## Featured result
-
-Feel free to show off your best render here!
+- `ext` contains all external libraries used as git submodules
+- `include` contains all headers of the project
+- `src` contains all source files of the project. To list some interesting code fragments:
+  - `integrator/volum7.cpp` is the integrator used to render the final scene
+  - `bsdf/microfacet.cpp` is an implementation of a microfacet model
+  - `collection/octree.cpp` is an octree data-structure for ray intersection
+  - `stats/warp.cpp` contains many sampling algorithms, including hierchical sampling for IBL, delta tracking for free-flight sampling, and inverse CDF mapping for various distributions
+  - `parser/lsystem.cpp` is an implementation of 3D stochastic LSystems
+  - `volume/procedural.cpp` contains the algorithm for volume generation (both the flowers and the clouds)
+- `test` contains some demo code for specific features
