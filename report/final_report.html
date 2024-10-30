@@ -11,67 +11,10 @@ Final render
 <img src="scene/finalimage.png" alt="FinalScene">
 
 
-Motivation
-==========
+About the report
+================
 
-My main motivation was trying to compile some of my favorite elements we can see in beautiful landscapes, which included giant trees, mountains, flat lakes and fog / cloud effects. The connection to the theme is that sort of "perfect" mirror reflection of the various scene elements on the lake, giving it a nice effect.
-
-
-Feature list
-============
-
-I did not have time to implement the denoising algorithm after all, but still have enough feature points to downscale volumetric path tracing to homogeneous, as it is easier to validate than heterogeneous.
-
-For procedural geometry, I did not implement erosion simulation as planned (given the "background" nature of the mountains, I don't believe the visuals would have changed significantly), however I did implement two (fairly similar) algorithms for the generation of my voxel data (both the tree and the cloudy sky).
-
-
-<table>
-    <tr>
-        <th>Feature</th>
-        <th>Identifier</th>
-        <th>Point count</th>
-        <th>Adjusted point count</th>
-    </tr>
-    <tr>
-        <td>Textures</td>
-        <td>XS-tex</td>
-        <td>10</td>
-        <td>10</td>
-    </tr>
-    <tr>
-        <td>Normal mapping</td>
-        <td>XS-mapping</td>
-        <td>10</td>
-        <td>5</td>
-    </tr>
-	<tr>
-        <td>Procedurally generated geometry</td>
-        <td>XS-procedu</td>
-        <td>10</td>
-        <td>30</td>
-    </tr>
-	<tr>
-        <td>Image Based Lighting</td>
-        <td>S-imglight</td>
-        <td>20</td>
-        <td>10</td>
-    </tr>
-	
-	<tr>
-        <td>Heterogeneous Volumetric Participating Media</td>
-        <td>B-hetemed</td>
-        <td>60</td>
-        <td>25</td>
-    </tr>
-    
-    <tr>
-        <td colspan="2"><strong>Total</strong></td>
-        <td>110</td>
-        <td>80</td>
-    </tr>
-</table>
-
-The `results/project` folder contains sub-folders for each feature, in which you can find the `.xml` files used for rendering the reference images you will see below. The procedurally generated tree is an exception, as it can't be rendered with just a `.xml` file, it also needs a "controller" class (explained in the relevant section).
+The `report/` folder contains sub-folders for each feature, in which you can find the `.xml` files used for rendering the reference images you will see below. The procedurally generated tree is an exception, as it can't be rendered with just a `.xml` file, it also needs a "controller" class (explained in the relevant section).
 Running the project requires two external libraries, OpenCV and OpenVDB. The CMakeLists file is configured for my personal setup. It is possible to run most of the code without the two libraries (especially OpenVDB, which is only useful for heterogeneous media), but might require removing them from the config file.
 
 Textures
@@ -203,7 +146,7 @@ return result;
 
 ![Heightmap with fairly low resolution. See `test/fbm_test.cpp`](terrain/terrain4.png)
 
-![A simple terrain with a few octaves of fractal noise](terrain/terrain.png)
+![A simple terrain with a few octaves of fractal noise](terrain/smallterrain.png)
 
 Procedural tree generation
 ----
@@ -373,8 +316,6 @@ Image Based Lighting
 Implementation
 ----
 
-Hierarchical sampling was done and validated for the hacker points of HW3, therefore this report will only cover the emitter part of IBL.
-
 A new implicit spherical shape was introduced for collision detection. By setting its radius to a large value (say, $> 5000$), we can treat it as a regular emitter (instead of an infinite area light). The major difference is that points on the spheres are not selected uniformly, but proportionally to their intensity (fast sampling of the discrete PDF is done with the mip map implementation). The implicit collision detection is done with the formula taken from the [PBRT book](https://pbr-book.org/4ed/Shapes/Spheres#IntersectionTests) (in `shape/sphere.cpp`).
 
 The `environment` emitter stores two square maps, each representing half of a rectangular HDRI, and picks one of the two when sampling a point (with a 2-element PDF containing their normalized total weights). Once the sample is correctly mapped to $s \in [0, 1[^2$, the projection to a sphere point is the regular spherical coordinate projection (which is not uniform and that's fine, as the HDRI already accounts for the distortion).
@@ -397,8 +338,6 @@ Equivalence with point light
 
 Heterogeneous Volumetric Participating Media
 ========
-
-As stated above, while heterogeneous media was fully implemented with delta tracking, ratio tracking and multi majorant methods, only homogeneous media related techniques will be validated in this report, as the points for the feature were downgraded to 25.
 
 This feature was implemented incrementally, that is, seven different integrators were written, the first one being very basic and the last one being able to handle multiple heterogeneous mediums. This incremental aspect was inspired by [this assignment](https://cseweb.ucsd.edu/~tzli/cse272/wi2023/homework2.pdf) from the University of California San Diego. Note that the idea of decomposing the task into 7 steps is the only thing that was taken from the homework, all pieces of code were written fully autonomously.
 
@@ -463,21 +402,6 @@ The probability of sampling beyond the ray is a discrete PDF which perfectly can
 Once the type of intersection is determined, next event estimation samples a point on an emitter, calculates the transmittance if a media lies between the two points and adds the direct contribution. We then sample a next direction by importance sampling either the phase function or the BSDF, depending on the type of interaction. As for non-volumetric path tracing, we avoid double counting by only adding direct contributions of emitters if the last bound was specular or if it's the first one.
 
 ![A bunny rendered as a media in a simple scene](media/nori_scene.png)
-
-![The same scene rendered with Mitsuba 3. The effects of the media on the floor are the same, however the bunny is slightly brighter. It is hard to determine whether this is an implementation problem, or an issue with converting a nori scene to mitsuba correctly.](media/mi_result.png)
-
-Feedback
-========
-
-For students willing to put in (a lot of) effort, this course is incredibly well crafted. I really like the contrast between the relatively high-level and relaxed lectures and the homeworks, where you really need to figure things out for yourself. There are a few cons that I'd like to point out:
-
-* Students not willing to consider this a 12 credit course should still have their place in it. It should be possible to have more optional material, so that students who don't want to spend their semester working on Nori don't have to, but can still take the course (and pass it). Typically, I believe it is a bit unreasonable to require 80 feature points with only a bit over a month to implement the features. You could either consider reducing that number, or have the homeworks finish earlier by making part of them optional. I think that homework 5 in particular has a workload a bit high compared to the previous ones.
-
-* There is a bit of a lack of TA resources in my opinion. Again, given the difficult nature of the course and its low credit value, I think it should be compensated by more availability from the teaching team in general. It would be worth adding a second project session, or to have "answering on Ed" be an officially included task to the TA's workload, instead of being on a "best-effort" basis.
-
-* The "Safety Goggles" files, especially `warptest`, should be a bit easier to read and understand. There is several cases where we actually have to read it (contrary to the "You are most certainly not expected to read or understand any of it" disclaimer), and it's not a particularly interesting piece of code to be having to study thoroughly to understand.
-
-I gave more room for negative points because they're the ones useful to improve the course, but please keep in mind that I overall really love this course, easily my favorite of my Master's. Thanks for teaching it!
 
 <!-- Slider -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
