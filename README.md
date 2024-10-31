@@ -5,7 +5,7 @@ Advanced Computer Graphics — Final project
 
 ### Project report
 
-An extensive report of all the features implemented can be found in `report/`. To read it, clone the repository and open the `final_report.html` file in a browser (just downloading the html file won't work, as it uses images from the report folder)
+An extensive report of all the features implemented can be found in `report/`. To read it, clone the repository (or download it as a zip) and open the `final_report.html` file in a browser (downloading just the html file won't work, as it uses images from the report folder)
 
 ### Resource files
 - `assets` contains all resource files used to render the scenes, including models (.obj), volumes (.vdb), HDRIs (.exr), grammars (.l6) and textures (.png, .jpg, .exr)
