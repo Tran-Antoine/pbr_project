@@ -33,7 +33,6 @@ x64
 ext/opencv
 /scenes/ibl/**/*.exr
 /scenes/ptextures/**/*.exr
-assets
 /scenes/final/**/*.obj
 /scenes/final2/meshes
 results
